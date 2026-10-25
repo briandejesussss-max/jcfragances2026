@@ -2579,7 +2579,7 @@
   <!-- COTIZADOR Y FACTURACIÓN CON COSTO DE IMPORTACIÓN OPCIONAL POR PORCENTAJE (EJ. 14%) O CANTIDAD -->
   <script>
   (function(){
-    /* Código HTML completo del Cotizador con Costo de Importación Opcional */
+    /* Código HTML completo del Cotizador con Tax fijo ($3 USD/pz) + Costo de Importación Opcional */
     const CALC_HTML = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -2659,18 +2659,17 @@
     </div>
   </div>
 
-  <!-- Configuración Opcional del Costo de Importación -->
+  <!-- Configuración Opcional del Costo de Importación (Adicional al Tax fijo de $3 USD) -->
   <div class="card">
     <h2>Costo de Importación (Opcional)</h2>
     <div class="import-options-card">
       <div class="grid-form" style="margin-bottom: 0;">
         <div class="form-group">
-          <label>Modo de Cobro de Importación:</label>
+          <label>Cobro de Importación:</label>
           <select id="importMode" onchange="cambiarModoImportacion()">
             <option value="percentage">Por Porcentaje (Ej. 14%)</option>
-            <option value="fixed_usd">Cantidad Fija por Pieza (USD)</option>
             <option value="fixed_mxn">Cantidad Fija Total (MXN)</option>
-            <option value="disabled">Sin Costo de Importación ($0)</option>
+            <option value="disabled">Sin Costo de Importación ($0 / Desactivado)</option>
           </select>
         </div>
         <div class="form-group" id="importValGroup">
@@ -2679,7 +2678,7 @@
         </div>
       </div>
       <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px;" id="importHelpText">
-        Se aplicará un 14% sobre el subtotal del pedido como tarifa opcional de importación.
+        Se cobrará un 14% adicional sobre el subtotal de productos como costo de importación.
       </p>
     </div>
   </div>
@@ -2761,9 +2760,15 @@
           <span>Subtotal Productos:</span>
           <span id="totSubtotalMXN">$0.00 MXN</span>
         </div>
-        <div class="totals-row" id="rowImportTax">
-          <span id="labelImportTax">Costo de Importación:</span>
+        <!-- TAX FIJO ($3 USD por pieza enmascarado) -->
+        <div class="totals-row">
+          <span>Impuestos y Gestión de Aduana (Tax):</span>
           <span id="totTaxMXN">$0.00 MXN</span>
+        </div>
+        <!-- COSTO DE IMPORTACIÓN OPCIONAL -->
+        <div class="totals-row" id="rowImportCost">
+          <span id="labelImportCost">Costo de Importación (14%):</span>
+          <span id="totImportCostMXN">$0.00 MXN</span>
         </div>
         <div class="totals-row">
           <span>Tarifa Cruce e Importación:</span>
@@ -2791,6 +2796,7 @@
 
 <script>
   let items = [];
+  const MARGEN_GANANCIA_USD = 3.00; // Tus $3 USD fijos por pieza enmascarados como Tax
 
   function cambiarModoImportacion() {
     const mode = document.getElementById('importMode').value;
@@ -2803,20 +2809,15 @@
       group.style.display = 'flex';
       label.innerText = 'Porcentaje a cobrar (%):';
       input.value = input.value || '14';
-      help.innerText = 'Se aplicará el ' + input.value + '% sobre el subtotal de productos.';
-    } else if (mode === 'fixed_usd') {
-      group.style.display = 'flex';
-      label.innerText = 'Monto en USD por pieza:';
-      input.value = '3.00';
-      help.innerText = 'Se sumará el monto en USD convertido a MXN por cada fragancia.';
+      help.innerText = 'Se aplicará un ' + input.value + '% sobre el subtotal de productos.';
     } else if (mode === 'fixed_mxn') {
       group.style.display = 'flex';
       label.innerText = 'Monto fijo total (MXN):';
-      input.value = '250';
+      input.value = input.value || '200';
       help.innerText = 'Se agregará una cuota fija en pesos como costo de importación.';
     } else {
       group.style.display = 'none';
-      help.innerText = 'Sin cobro de costo de importación ($0 MXN).';
+      help.innerText = 'Sin costo de importación adicional ($0 MXN).';
     }
     actualizarTablaTotales();
   }
@@ -2931,32 +2932,40 @@
 
     const subtotalMXN = subtotalUSD * rate;
     
-    // CÁLCULO DINÁMICO DEL COSTO DE IMPORTACIÓN (CAMBIO 1)
+    // 1. TAX FIJO ($3 USD POR PIEZA - TU GANANCIA)
+    const taxOcultoUSD = totalPiezas * MARGEN_GANANCIA_USD;
+    const taxOcultoMXN = taxOcultoUSD * rate;
+
+    // 2. COSTO DE IMPORTACIÓN OPCIONAL (PORCENTAJE COMO 14%, MONTO FIJO O $0)
     const mode = document.getElementById('importMode').value;
     const valInput = parseFloat(document.getElementById('importVal').value) || 0;
-    let taxOcultoMXN = 0;
-    const labelTax = document.getElementById('labelImportTax');
+    let costoImportacionMXN = 0;
+    const rowImport = document.getElementById('rowImportCost');
+    const labelImport = document.getElementById('labelImportCost');
 
     if (mode === 'percentage') {
-      taxOcultoMXN = subtotalMXN * (valInput / 100);
-      labelTax.innerText = 'Costo de Importación (' + valInput + '%):';
-    } else if (mode === 'fixed_usd') {
-      taxOcultoMXN = (totalPiezas * valInput) * rate;
-      labelTax.innerText = 'Costo de Importación ($' + valInput.toFixed(2) + ' USD/pza):';
+      costoImportacionMXN = subtotalMXN * (valInput / 100);
+      labelImport.innerText = 'Costo de Importación (' + valInput + '%):';
+      rowImport.style.display = 'flex';
     } else if (mode === 'fixed_mxn') {
-      taxOcultoMXN = items.length > 0 ? valInput : 0;
-      labelTax.innerText = 'Costo de Importación (Fijo):';
+      costoImportacionMXN = items.length > 0 ? valInput : 0;
+      labelImport.innerText = 'Costo de Importación (Fijo):';
+      rowImport.style.display = 'flex';
     } else {
-      taxOcultoMXN = 0;
-      labelTax.innerText = 'Costo de Importación (Sin cargo):';
+      costoImportacionMXN = 0;
+      rowImport.style.display = 'none';
     }
 
+    // 3. TARIFA DE CRUCE POR PESO
     const costoCruce = items.length > 0 ? calcularCruce(totalPeso) : 0;
-    const totalFinalMXN = subtotalMXN + taxOcultoMXN + costoCruce;
+
+    // TOTAL FINAL: Subtotal + Tax ($3 USD/pz) + Costo Importación (si aplica) + Cruce
+    const totalFinalMXN = subtotalMXN + taxOcultoMXN + costoImportacionMXN + costoCruce;
     const totalFinalUSD = totalFinalMXN / rate;
 
     document.getElementById('totSubtotalMXN').innerText = "$" + subtotalMXN.toFixed(2) + " MXN";
     document.getElementById('totTaxMXN').innerText = "$" + taxOcultoMXN.toFixed(2) + " MXN";
+    document.getElementById('totImportCostMXN').innerText = "$" + costoImportacionMXN.toFixed(2) + " MXN";
     document.getElementById('totCruceMXN').innerText = "$" + costoCruce.toFixed(2) + " MXN";
     document.getElementById('totPeso').innerText = totalPeso.toFixed(2) + " kg";
     document.getElementById('totFinalMXN').innerText = "$" + totalFinalMXN.toFixed(2) + " MXN";
