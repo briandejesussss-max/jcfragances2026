@@ -120,7 +120,7 @@
       box-shadow: 0 16px 30px -10px rgba(45, 30, 15, 0.12), 0 0 16px rgba(212, 130, 43, 0.15);
     }
     html:not(.dark) .stage-bottle {
-      background: radial-gradient(circle at 50% 60%, rgba(225, 205, 175, 0.45) 0%, rgba(240, 234, 224, 0.95) 75%);
+      background: radial-gradient(circle at 50% 65%, #F7F3EB 0%, #E8E2D6 65%, #DDD6C8 100%) !important;
       isolation: isolate;
     }
     html:not(.dark) .themed-modal-bg {
@@ -163,23 +163,19 @@
       box-shadow: 10px 0 45px rgba(0, 0, 0, 0.55);
     }
 
-    /* TRATAMIENTO Y ADAPTACIÓN DE IMÁGENES PNG (ELIMINACIÓN DE FONDO NEGRO) */
+    /* TRATAMIENTO DE IMÁGENES NÍTIDAS (CERO FONDOS NEGROS NI BOTELLAS FANTASMAS) */
     .perfume-img-adapt {
-      mix-blend-mode: normal;
-      transition: filter 0.3s ease, transform 0.3s ease;
+      mix-blend-mode: normal !important;
+      opacity: 1 !important;
+      filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.18));
+      transition: transform 0.3s ease, filter 0.3s ease;
+      will-change: transform;
     }
-    /* En modo oscuro, si la imagen tiene fondo negro de compresión, screen lo transparenta completamente */
     html.dark .perfume-img-adapt {
-      mix-blend-mode: screen;
-      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8));
-    }
-    /* En modo claro, para imágenes que traen fondo negro rectangular, se integra fluidamente con blend mode multiply suave o máscara */
-    html:not(.dark) .stage-bottle {
-      background-color: #F0EAE1;
+      filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 12px rgba(255, 138, 0, 0.12));
     }
     html:not(.dark) .perfume-img-adapt {
-      mix-blend-mode: multiply;
-      filter: contrast(1.08) brightness(1.03);
+      filter: drop-shadow(0 12px 18px rgba(50, 40, 30, 0.16));
     }
 
     /* Partículas Halloween sutiles */
@@ -2339,56 +2335,91 @@
       setTimeout(() => toast.remove(), duration);
     }
 
-    /* CAMBIO 2: PROCESAMIENTO AUTOMÁTICO DE PNGs PARA ELIMINAR FONDOS NEGROS */
+    /* =========================================================================
+       REMOVEDOR Y ADAPTADOR NÍTIDO DE FONDOS OSCUROS / NEGROS EN IMÁGENES
+       (Limpia los bordes y fondos negros manteniendo la botella 100% sólida y nítida)
+       ========================================================================= */
+    const _processedImgCache = new Map();
+
     function adaptTransparentPngs() {
-      const isDark = document.documentElement.classList.contains('dark');
-      document.querySelectorAll('.stage-bottle img, #pv-img').forEach(img => {
-        if (!img.complete) {
-          img.onload = () => processSingleImage(img, isDark);
+      const images = document.querySelectorAll('.stage-bottle img, #pv-img');
+      images.forEach(img => {
+        if (!img.src || img.src.includes('placehold.co')) return;
+        if (img.complete && img.naturalWidth > 0) {
+          cleanDarkBackgroundFromImage(img);
         } else {
-          processSingleImage(img, isDark);
+          img.onload = () => cleanDarkBackgroundFromImage(img);
         }
       });
     }
 
-    function processSingleImage(img, isDark) {
-      if (img.dataset.processed === 'true' || img.src.includes('placehold.co')) return;
-      try {
-        const c = document.createElement('canvas');
-        const w = img.naturalWidth || img.width;
-        const h = img.naturalHeight || img.height;
-        if (!w || !h) return;
-        c.width = w;
-        c.height = h;
-        const ctx = c.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(img, 0, 0);
-        
-        const imgData = ctx.getImageData(0, 0, w, h);
-        const d = imgData.data;
-        let modified = false;
+    function cleanDarkBackgroundFromImage(img) {
+      if (img.dataset.bgCleaned === 'true') return;
+      const originalSrc = img.currentSrc || img.src;
 
-        // Inspecciona los píxeles: si detecta fondo negro puro o casi negro (<24), lo vuelve transparente
-        for (let i = 0; i < d.length; i += 4) {
-          const r = d[i], g = d[i+1], b = d[i+2];
-          if (r < 24 && g < 24 && b < 24) {
-            d[i+3] = 0; // Transparencia total para el negro
-            modified = true;
-          }
-        }
-
-        if (modified) {
-          ctx.putImageData(imgData, 0, 0);
-          img.src = c.toDataURL('image/png');
-          img.dataset.processed = 'true';
-        }
-      } catch (err) {
-        // En caso de CORS por imágenes externas de otro dominio, el CSS fallback mix-blend-mode se encarga
-        if (isDark) {
-          img.style.mixBlendMode = 'screen';
-        } else {
-          img.style.mixBlendMode = 'multiply';
-        }
+      if (_processedImgCache.has(originalSrc)) {
+        img.src = _processedImgCache.get(originalSrc);
+        img.dataset.bgCleaned = 'true';
+        return;
       }
+
+      const tempImg = new Image();
+      tempImg.crossOrigin = "anonymous";
+      tempImg.onload = function() {
+        try {
+          const canvas = document.createElement('canvas');
+          const w = tempImg.naturalWidth || tempImg.width;
+          const h = tempImg.naturalHeight || tempImg.height;
+          if (w === 0 || h === 0) return;
+
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(tempImg, 0, 0);
+
+          const imgData = ctx.getImageData(0, 0, w, h);
+          const data = imgData.data;
+          let hasDarkBg = false;
+
+          // Muestreo de las cuatro esquinas para comprobar si tiene marco o fondo negro
+          const cornerIndices = [0, (w - 1) * 4, ((h - 1) * w) * 4, ((h - 1) * w + (w - 1)) * 4];
+          for (let idx of cornerIndices) {
+            const r = data[idx], g = data[idx + 1], b = data[idx + 2], a = data[idx + 3];
+            if (a > 180 && r < 40 && g < 40 && b < 40) {
+              hasDarkBg = true;
+              break;
+            }
+          }
+
+          if (hasDarkBg) {
+            // Algoritmo de transparencia suave para fondos negros sin alterar los colores de la botella
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              const maxC = Math.max(r, g, b);
+
+              if (maxC < 30) {
+                // Negro puro o casi puro -> Transparente total
+                data[i + 3] = 0;
+              } else if (maxC < 65) {
+                // Transición suave (feathering) para que los bordes del frasco no queden pixelados
+                const alphaFactor = (maxC - 30) / (65 - 30);
+                data[i + 3] = Math.round(data[i + 3] * alphaFactor);
+              }
+            }
+            ctx.putImageData(imgData, 0, 0);
+            const cleanedUrl = canvas.toDataURL('image/png');
+            _processedImgCache.set(originalSrc, cleanedUrl);
+            img.src = cleanedUrl;
+          }
+          img.dataset.bgCleaned = 'true';
+        } catch (e) {
+          // Si hay restricción externa por CORS, no rompemos la imagen y la dejamos nítida
+          img.dataset.bgCleaned = 'true';
+        }
+      };
+      tempImg.src = originalSrc;
     }
 
     window.addEventListener('DOMContentLoaded', initApp);
