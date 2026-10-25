@@ -78,6 +78,7 @@
     }
     html.dark .stage-bottle {
       background: radial-gradient(circle at 50% 60%, rgba(255, 117, 24, 0.14) 0%, rgba(147, 51, 234, 0.08) 45%, rgba(12, 10, 18, 0.98) 78%);
+      isolation: isolate;
     }
     html.dark .themed-modal-bg {
       background-color: #100C16 !important;
@@ -120,6 +121,7 @@
     }
     html:not(.dark) .stage-bottle {
       background: radial-gradient(circle at 50% 60%, rgba(225, 205, 175, 0.45) 0%, rgba(240, 234, 224, 0.95) 75%);
+      isolation: isolate;
     }
     html:not(.dark) .themed-modal-bg {
       background-color: #F7F3EC !important;
@@ -161,6 +163,25 @@
       box-shadow: 10px 0 45px rgba(0, 0, 0, 0.55);
     }
 
+    /* TRATAMIENTO Y ADAPTACIÓN DE IMÁGENES PNG (ELIMINACIÓN DE FONDO NEGRO) */
+    .perfume-img-adapt {
+      mix-blend-mode: normal;
+      transition: filter 0.3s ease, transform 0.3s ease;
+    }
+    /* En modo oscuro, si la imagen tiene fondo negro de compresión, screen lo transparenta completamente */
+    html.dark .perfume-img-adapt {
+      mix-blend-mode: screen;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8));
+    }
+    /* En modo claro, para imágenes que traen fondo negro rectangular, se integra fluidamente con blend mode multiply suave o máscara */
+    html:not(.dark) .stage-bottle {
+      background-color: #F0EAE1;
+    }
+    html:not(.dark) .perfume-img-adapt {
+      mix-blend-mode: multiply;
+      filter: contrast(1.08) brightness(1.03);
+    }
+
     /* Partículas Halloween sutiles */
     .spooky-stars { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
     .spooky-stars span { position: absolute; top: -30px; font-size: 16px; opacity: .4; animation: fallSpooky 14s linear infinite; }
@@ -176,7 +197,7 @@
       100% { transform: translateY(440px) rotate(360deg); opacity: 0; }
     }
 
-    /* ===== MEJORAS VISUALES E INTERACTIVAS (se suman al diseño original) ===== */
+    /* ===== MEJORAS VISUALES E INTERACTIVAS ===== */
     #scroll-progress{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#FF8A00,#D4AF37);z-index:70;pointer-events:none}
     .hero{position:relative;overflow:hidden;padding:clamp(2rem,6vw,4.5rem) 1rem}
     .hero-glow{position:absolute;top:-20%;right:-10%;width:60vw;height:60vw;max-width:640px;max-height:640px;background:radial-gradient(circle,rgba(255,138,0,.22),transparent 65%);animation:glowDrift 14s ease-in-out infinite alternate;pointer-events:none}
@@ -306,7 +327,7 @@
     .faq details .hero-btn{margin:0 1.1rem 1rem}
     @media(prefers-reduced-motion:reduce){.hw-bat{display:none}.marquee-track,.bubble,.pot-brew,.pot.brewing,.cauldron-card{animation:none}}
 
-    /* ===== HALLOWEEN EXTRA: más murciélagos, fantasma interactivo y lluvia de dulces ===== */
+    /* ===== HALLOWEEN EXTRA ===== */
     .hw-bat.rev{animation-name:batFlyRev}
     @keyframes batFlyRev{0%{transform:translate(108vw,0) scaleX(-1)}30%{transform:translate(70vw,14px) scaleX(-1)}60%{transform:translate(35vw,-12px) scaleX(-1)}100%{transform:translate(-8vw,8px) scaleX(-1)}}
     #spooky-rain{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden}
@@ -328,7 +349,7 @@
     <span>JS FRAGANCES &bull; SILLAGE ARCHIVE 🎃 &bull; DECANTS AUTÉNTICOS &bull; GUÍAS EXPRESS</span>
   </div>
 
-  <!-- NAVBAR LIMPIO Y ADAPTABLE (CERO DESBORDES EN MÓVIL, TABLET O PC) -->
+  <!-- NAVBAR LIMPIO Y ADAPTABLE -->
   <header id="top-navbar" class="no-print sticky top-0 z-40 bg-[#08070C]/90 dark:bg-[#08070C]/90 bg-[#ECE7DE]/90 backdrop-blur-xl border-b border-white/10 dark:border-white/10 border-zinc-300 px-3 sm:px-6 py-2.5 transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
       
@@ -362,7 +383,7 @@
         </div>
       </div>
 
-      <!-- BUSCADOR CÁPSULA CENTRAL (Visible en pantallas medianas y grandes) -->
+      <!-- BUSCADOR CÁPSULA CENTRAL -->
       <div class="hidden lg:flex flex-1 max-w-sm mx-2">
         <div class="relative w-full">
           <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3.5 top-2.5"></i>
@@ -378,19 +399,16 @@
 
       <!-- ACCIONES DERECHA: COTIZAR GUÍA, MODO DÍA/NOCHE, BOLSA -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <!-- Botón rápido cotizar guía -->
         <button onclick="openShippingModal()" class="px-2.5 sm:px-3.5 py-1.5 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-gold dark:hover:bg-gold dark:hover:text-black font-semibold text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1 border border-white/20 transition active:scale-95">
           <i data-lucide="truck" class="w-3.5 h-3.5"></i>
           <span>Guías 📦</span>
         </button>
 
-        <!-- Botón Modo Noche/Día compacto -->
         <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-full border border-zinc-700/60 dark:border-zinc-700/60 border-zinc-400 text-xs hover:border-gold transition flex items-center gap-1" title="Cambiar Apariencia">
           <span id="theme-icon"><i data-lucide="moon" class="w-3.5 h-3.5 text-gold"></i></span>
           <span id="theme-text" class="text-[10px] uppercase tracking-wider hidden md:inline">Noche</span>
         </button>
 
-        <!-- Bolsa de compras -->
         <button onclick="toggleCartDrawer()" class="px-3 sm:px-3.5 py-1.5 rounded-full bg-gold text-black font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:brightness-110 transition shadow-sm active:scale-95">
           <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
           <span>Bolsa (<span id="cart-count">0</span>)</span>
@@ -449,14 +467,11 @@
     </div>
   </section>
 
-  <!-- ========================================================================= -->
-  <!-- SIDEBAR / PESTAÑA LATERAL IZQUIERDA (DRAWER INTERACTIVO CON MOVIMIENTO) -->
-  <!-- ========================================================================= -->
+  <!-- SIDEBAR LATERAL IZQUIERDA -->
   <div id="sidebar-backdrop" onclick="toggleSidebarDrawer()" class="no-print fixed inset-0 bg-black/70 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
   <aside id="sidebar-drawer" class="no-print fixed inset-y-0 left-0 z-50 w-[88vw] max-w-sm themed-modal-bg drawer-shadow -translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between overflow-y-auto p-5 text-xs">
     
-    <!-- Encabezado del Drawer -->
     <div class="space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-white/10 dark:border-white/10 border-zinc-300">
         <div class="flex items-center gap-2">
@@ -476,7 +491,7 @@
           </span>
           <span class="text-[9px] text-zinc-400 font-mono">1-2 kg $170/$180</span>
         </div>
-        <p class="text-[11px] text-zinc-400">DHL Express, FedEx, Estafeta, Punto Post (CDMX/Edomex y zonas) y Paquetexpress.</p>
+        <p class="text-[11px] text-zinc-400">DHL Express, FedEx, Estafeta, Punto Post y Paquetexpress.</p>
         <button onclick="toggleSidebarDrawer(); openShippingModal()" class="w-full py-2 rounded-xl bg-gold text-black font-bold uppercase tracking-wider text-[11px] flex items-center justify-center gap-1.5 hover:brightness-105 transition shadow-sm">
           <i data-lucide="box" class="w-3.5 h-3.5"></i>
           <span>Abrir Cotizador con Medidas</span>
@@ -514,7 +529,7 @@
         </div>
       </div>
 
-      <!-- Sección 4: Ajustes Rápidos (Tema & Moneda) -->
+      <!-- Sección 4: Ajustes Rápidos -->
       <div class="p-3 rounded-2xl themed-subbox border space-y-2">
         <span class="text-[10px] uppercase tracking-luxury text-zinc-400 font-bold block">Preferencias de Visualización</span>
         <div class="flex items-center justify-between gap-2">
@@ -550,16 +565,13 @@
       </div>
     </div>
 
-    <!-- Pie del Drawer -->
     <div class="pt-4 border-t border-white/10 text-center text-zinc-500 text-[10px] space-y-1">
       <p class="text-zinc-400 font-medium">JS FRAGANCES &bull; Saltillo, Coahuila</p>
       <p>Decants sellados &bull; Envíos a todo México</p>
     </div>
   </aside>
 
-  <!-- ========================================================================= -->
-  <!-- ESTANTE RÁPIDO "COMBINA CON TU ARMARIO" (SELECCIONADO PARA TI) -->
-  <!-- ========================================================================= -->
+  <!-- ESTANTE RÁPIDO -->
   <div class="marquee no-print" aria-hidden="true"><div class="marquee-track">
     <span>🎃 Decants auténticos</span><span>🦇 Envíos a todo México</span><span>👻 100% originales</span><span>🕸️ Guías express</span><span>🕯️ Desde Saltillo, Coahuila</span>
     <span>🎃 Decants auténticos</span><span>🦇 Envíos a todo México</span><span>👻 100% originales</span><span>🕸️ Guías express</span><span>🕯️ Desde Saltillo, Coahuila</span>
@@ -587,13 +599,10 @@
         <a href="#catalogo" class="text-[11px] text-gold uppercase tracking-wider font-semibold hover:underline">Ver todo &rarr;</a>
       </div>
     </div>
-    <!-- Carrusel adaptable: 2 columnas en móvil, 4 en desktop -->
     <div id="curated-shelf" class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5"></div>
   </section>
 
-  <!-- ========================================================================= -->
-  <!-- CATÁLOGO PRINCIPAL SIEMPRE AL FRENTE (100% RESPONSIVO) -->
-  <!-- ========================================================================= -->
+  <!-- CATÁLOGO PRINCIPAL -->
   <main id="catalogo" class="scroll-mt-16 flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 md:px-8 py-5 flex flex-col gap-4 relative z-10">
     
     <div class="text-center space-y-0.5">
@@ -604,9 +613,8 @@
       <div class="w-10 h-[1px] bg-gold/50 mx-auto mt-1.5"></div>
     </div>
 
-    <!-- BUSCADOR & FILTROS TOTALMENTE RESPONSIVOS -->
+    <!-- BUSCADOR & FILTROS -->
     <section id="search-section" class="no-print themed-subbox border rounded-2xl p-2.5 sm:p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 shadow-sm">
-      <!-- Input de búsqueda -->
       <div class="relative flex-1">
         <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3.5 top-2.5"></i>
         <input 
@@ -618,7 +626,6 @@
         >
       </div>
 
-      <!-- Selectores en fila fluida sin desborde -->
       <div class="flex items-center flex-wrap gap-2 text-xs justify-between sm:justify-end">
         <div class="flex items-center gap-1">
           <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-semibold hidden md:inline">Orden:</span>
@@ -651,7 +658,7 @@
       <button class="cat-chip" data-g="Femenino">Femenino</button>
     </div>
 
-    <!-- CUADRÍCULA ADAPTABLE: 1 COLUMNA EN MÓVIL PEQUEÑO, 2 EN MÓVIL/TABLET, 3 EN PC/IPAD -->
+    <!-- CUADRÍCULA -->
     <div class="w-full flex justify-center">
       <div id="catalog-sheet" class="w-full max-w-6xl"></div>
     </div>
@@ -671,9 +678,7 @@
     </div>
   </main>
 
-  <!-- ========================================================================= -->
-  <!-- MODAL FICHA TÉCNICA DETALLADA SILLORIA (RESPONSIVA) -->
-  <!-- ========================================================================= -->
+  <!-- MODAL FICHA TÉCNICA DETALLADA -->
   <div id="product-page-view" class="no-print fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-start justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
     <div class="themed-modal-bg rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative my-auto border border-gold/40 text-xs">
       
@@ -681,11 +686,10 @@
         <i data-lucide="x" class="w-4 h-4"></i>
       </button>
 
-      <!-- HERO PERFUME SILLORIA -->
       <div class="stage-bottle p-5 sm:p-8 relative overflow-hidden border-b border-white/10">
         <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-6 relative z-10">
           <div class="w-36 h-48 sm:w-44 sm:h-56 flex items-center justify-center shrink-0">
-            <img id="pv-img" src="" alt="Perfume" class="max-h-full max-w-full object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.7)]">
+            <img id="pv-img" src="" alt="Perfume" class="perfume-img-adapt max-h-full max-w-full object-contain">
           </div>
           <div class="space-y-2.5 flex-1 text-center sm:text-left">
             <span id="pv-brand" class="text-[9px] uppercase tracking-luxury text-gold font-bold block">CASA OLFATIVA</span>
@@ -708,7 +712,6 @@
         </div>
       </div>
 
-      <!-- PESTAÑAS SILLORIA -->
       <div class="px-4 sm:px-6 border-b border-white/10 flex items-center gap-4 sm:gap-6 overflow-x-auto text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold py-2.5 bg-black/20 text-zinc-400">
         <span class="text-gold border-b-2 border-gold pb-1 cursor-pointer">El Aroma &amp; Notas</span>
         <span class="hover:text-white cursor-pointer" onclick="scrollToSection('pv-veredicto')">Veredicto Comunitario</span>
@@ -716,7 +719,6 @@
       </div>
 
       <div class="p-4 sm:p-6 space-y-5">
-        <!-- Pirámide de notas -->
         <div class="space-y-3">
           <span class="text-[9px] uppercase tracking-luxury text-gold font-bold block">Pirámide Olfativa Detallada</span>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
@@ -742,7 +744,6 @@
           <p id="pv-notes-full" class="text-zinc-400 leading-relaxed text-[11px]"></p>
         </div>
 
-        <!-- Radiografía comunitaria -->
         <div id="pv-veredicto" class="p-3.5 sm:p-4 rounded-2xl themed-subbox border space-y-3">
           <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
             <span class="text-[9px] uppercase tracking-luxury text-gold font-bold">Radiografía Olfativa &bull; Comunidad</span>
@@ -768,7 +769,6 @@
           </div>
         </div>
 
-        <!-- Precios y compra -->
         <div id="pv-precios" class="space-y-2.5 pt-1">
           <div class="flex items-center justify-between">
             <span class="text-[9px] uppercase tracking-luxury text-gold font-bold">Formatos en Decants &amp; Botella</span>
@@ -792,9 +792,7 @@
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- MODAL COTIZADOR DE GUÍAS CON CALCULADORA VOLUMÉTRICA Y PUNTO POST -->
-  <!-- ========================================================================= -->
+  <!-- MODAL COTIZADOR DE GUÍAS -->
   <div id="shipping-modal" class="no-print fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-2.5 sm:p-4 text-xs overflow-y-auto">
     <div class="themed-modal-bg rounded-2xl w-full max-w-lg p-4 sm:p-6 relative my-4 max-h-[92vh] overflow-y-auto shadow-2xl">
       <button onclick="closeShippingModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
@@ -809,7 +807,6 @@
         <p class="text-[11px] text-zinc-400">Completa origen, destino y medidas para calcular el peso volumétrico y solicitar la guía por WhatsApp.</p>
       </div>
 
-      <!-- TARIFAS BASE -->
       <div class="mb-3 p-3 rounded-xl themed-subbox border border-gold/30">
         <span class="text-[9px] font-bold text-gold uppercase tracking-wider block mb-1">Precios Base Vigentes</span>
         <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
@@ -820,7 +817,6 @@
       </div>
 
       <form id="shipping-form" onsubmit="handleShippingSubmit(event)" class="space-y-3.5">
-        
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
             <label class="block font-semibold mb-1">Paquetería *</label>
@@ -850,7 +846,6 @@
           Tarifa estimada: <span id="ship-price-val">$0</span>
         </div>
 
-        <!-- AVISO PUNTO POST -->
         <div id="puntopost-notice" class="hidden p-3 rounded-xl bg-zinc-900 border border-gold/50 shadow-md">
           <div class="flex items-start gap-2">
             <span class="text-sm text-gold">📍</span>
@@ -875,7 +870,6 @@
           </div>
         </div>
 
-        <!-- ORIGEN -->
         <div class="p-3 rounded-xl themed-subbox space-y-1.5">
           <span class="text-[10px] font-bold text-gold block uppercase tracking-wider flex items-center gap-1">
             <i data-lucide="map-pin" class="w-3 h-3 text-gold"></i> Origen (Remitente)
@@ -894,7 +888,6 @@
           </div>
         </div>
 
-        <!-- DESTINO -->
         <div class="p-3 rounded-xl themed-subbox space-y-1.5">
           <span class="text-[10px] font-bold text-gold block uppercase tracking-wider flex items-center gap-1">
             <i data-lucide="flag" class="w-3 h-3 text-gold"></i> Destino (Destinatario)
@@ -913,7 +906,6 @@
           </div>
         </div>
 
-        <!-- CALCULADORA VOLUMÉTRICA -->
         <div class="p-3 rounded-xl themed-subbox border border-gold/30 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-bold text-gold uppercase tracking-wider flex items-center gap-1">
@@ -949,9 +941,7 @@
     </div>
   </div>
 
-  <!-- ========================================================================= -->
   <!-- MODAL CARRITO / BOLSA DE PEDIDO -->
-  <!-- ========================================================================= -->
   <div id="cart-drawer" class="no-print fixed inset-y-0 right-0 z-50 w-full max-w-md themed-modal-bg border-l border-white/10 shadow-2xl p-5 flex flex-col justify-between hidden text-xs overflow-y-auto">
     <div>
       <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
@@ -1003,7 +993,7 @@
     </div>
   </div>
 
-  <!-- MODAL EDITAR / AGREGAR FRAGANCIA (CON BOTELLA BAJO PEDIDO) -->
+  <!-- MODAL EDITAR / AGREGAR FRAGANCIA -->
   <div id="fragrance-modal" class="no-print fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
     <div class="themed-modal-bg rounded-2xl w-full max-w-lg p-5 relative text-xs">
       <button onclick="closeFragranceModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
@@ -1038,7 +1028,7 @@
             </label>
           </div>
           <div class="w-12 h-14 rounded bg-zinc-900 border border-zinc-700 flex items-center justify-center overflow-hidden">
-            <img id="frag-preview-img" src="" class="w-full h-full object-contain hidden">
+            <img id="frag-preview-img" src="" class="w-full h-full object-contain hidden perfume-img-adapt">
             <span id="frag-preview-placeholder" class="text-zinc-600 text-[8px]">Sin Foto</span>
           </div>
         </div>
@@ -1051,7 +1041,6 @@
             <div class="p-1.5 rounded-lg themed-input border"><span class="font-bold text-[9px] block">10 ml</span><input type="number" id="frag-price-10ml" placeholder="$ 0" class="w-full themed-input rounded px-2 py-0.5 text-xs"><label class="text-[9px] text-zinc-400 mt-1 block"><input type="checkbox" id="frag-10ml-avail" checked> Stock</label></div>
           </div>
 
-          <!-- Botella completa y bajo pedido -->
           <div class="p-2.5 rounded-xl border border-gold/50 bg-gold/10 space-y-1.5">
             <div class="flex items-center justify-between">
               <strong class="text-xs text-gold font-bold uppercase">🍾 Botella Completa</strong>
@@ -1105,7 +1094,7 @@
     </div>
   </div>
 
-  <!-- MODAL COTIZADOR Y FACTURACIÓN (calculadora.html integrada en un iframe aislado) -->
+  <!-- MODAL COTIZADOR Y FACTURACIÓN -->
   <div id="calc-modal" class="no-print fixed inset-0 z-50 bg-black/85 hidden flex items-center justify-center p-2 sm:p-4 text-xs">
     <div class="themed-modal-bg rounded-2xl w-full max-w-6xl relative border border-gold/40 flex flex-col" style="height:92vh;height:92dvh">
       <div class="flex items-center justify-between px-4 py-2.5 border-b border-white/10">
@@ -1212,9 +1201,7 @@
   <div id="print-sheet" class="hidden"></div>
   <div id="toast-container" class="no-print fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- ========================================================================= -->
-  <!-- JAVASCRIPT: LÓGICA COMPLETA E INTEGRADA -->
-  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: LÓGICA PRINCIPAL -->
   <script>
     const ADMIN_USER = "DIEGO";
     const ADMIN_PASS = "123456789";
@@ -1244,7 +1231,6 @@
       return (words[0][0] + words[1][0]).toUpperCase();
     }
 
-    // CONTROL DEL DRAWER LATERAL IZQUIERDO INTERACTIVO
     function toggleSidebarDrawer() {
       const drawer = document.getElementById('sidebar-drawer');
       const backdrop = document.getElementById('sidebar-backdrop');
@@ -1262,7 +1248,6 @@
       lucide.createIcons();
     }
 
-    // TEMA DÍA / NOCHE SUAVE
     function initTheme() {
       const savedTheme = localStorage.getItem('jf26_theme') || 'dark';
       setTheme(savedTheme);
@@ -1291,6 +1276,7 @@
       }
       localStorage.setItem('jf26_theme', theme);
       lucide.createIcons();
+      adaptTransparentPngs();
     }
 
     async function initApp() {
@@ -1333,6 +1319,7 @@
 
       await refreshFromRemote();
       openFragFromUrl();
+      adaptTransparentPngs();
     }
 
     let remoteReady = false;
@@ -1346,6 +1333,7 @@
         if (Array.isArray(data.fragrances)) fragrances = data.fragrances;
         remoteReady = true;
         saveLocalData(); updateStoreBrandHeader(); populateBrandFilter(); renderCatalog(); renderCuratedShelf(); updateCartUI();
+        adaptTransparentPngs();
       } catch (e) { console.warn('R9.json en espera de sincronización.'); }
     }
 
@@ -1359,7 +1347,6 @@
       } catch(e) {}
     }
 
-    // ARMARIO OLFATIVO & SILLORIA INTERACTION
     function toggleShelfItem(fragId) {
       const idx = shelf.indexOf(fragId);
       if (idx > -1) {
@@ -1420,7 +1407,7 @@
               </button>
             </div>
             <div class="h-28 sm:h-32 flex items-center justify-center p-2 stage-bottle rounded-xl">
-              <img src="${imgOf(f)}" class="max-h-full max-w-full object-contain filter drop-shadow">
+              <img src="${imgOf(f)}" class="perfume-img-adapt max-h-full max-w-full object-contain filter drop-shadow">
             </div>
             <div class="pt-1.5 text-center">
               <span class="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-luxury block truncate">${esc(f.brand)}</span>
@@ -1431,9 +1418,9 @@
         `;
       }).join('');
       lucide.createIcons();
+      adaptTransparentPngs();
     }
 
-    // ================= GUIAS Y CALCULADORA VOLUMÉTRICA =================
     function openShippingModal() {
       document.getElementById('shipping-modal').classList.remove('hidden');
       lucide.createIcons();
@@ -1558,7 +1545,6 @@
       showToast('Solicitud enviada a WhatsApp');
     }
 
-    // ================= CATÁLOGO & FORMATOS =================
     function getCurrencySymbol() { return document.getElementById('currency-symbol')?.value || '$'; }
     function formatPrice(val) {
       const num = parseFloat(val);
@@ -1632,14 +1618,13 @@
         <div class="card-silloria rounded-2xl overflow-hidden flex flex-col justify-between">
           <div>
             <div onclick="openProductView('${f.id}')" class="stage-bottle relative w-full h-48 sm:h-52 p-3 sm:p-4 flex items-center justify-center border-b border-white/5 cursor-pointer">
-              <img src="${imgOf(f)}" alt="${esc(f.name)}" loading="lazy" class="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]">
+              <img src="${imgOf(f)}" alt="${esc(f.name)}" loading="lazy" class="perfume-img-adapt max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]">
               
               <div class="absolute top-2.5 left-2.5 flex flex-wrap gap-1">
                 <span class="themed-subbox border text-zinc-300 font-semibold text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full">${esc(f.concentration || 'EDP')}</span>
                 ${f.gender ? `<span class="border border-gold/40 text-gold font-semibold text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full">${esc(f.gender)}</span>` : ''}
               </div>
 
-              <!-- Botón corazón -->
               <button onclick="event.stopPropagation(); toggleShelfItem('${f.id}')" title="Guardar en armario de botellas" class="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/60 text-zinc-300 hover:text-red-400 transition">
                 <i data-lucide="heart" class="w-3.5 h-3.5 ${inShelf ? 'fill-red-500 text-red-500' : ''}"></i>
               </button>
@@ -1712,12 +1697,12 @@
 
       emptyState.classList.add('hidden');
       const shown = filtered.slice(0, visibleCount);
-      // Grid responsivo sin desborde: 1 columna en móviles pequeños, 2 en medianos, 3 en pantallas grandes
       container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">${shown.map(cardHtml).join('')}</div>`;
       wrap.classList.remove('hidden');
       document.getElementById('catalog-count').textContent = `Mostrando ${shown.length} de ${filtered.length} fragancias`;
       document.getElementById('load-more-btn').classList.toggle('hidden', shown.length >= filtered.length);
       lucide.createIcons();
+      adaptTransparentPngs();
     }
 
     function loadMorePerfumes() { visibleCount += 12; renderCatalog(); }
@@ -1758,13 +1743,10 @@
         try { history.pushState({ perfume: frag.id }, '', fragShareUrl(frag)); } catch (e) {}
       }
       lucide.createIcons();
+      adaptTransparentPngs();
     }
 
-    // ================= LINK PROPIO POR PERFUME =================
-    // Cada ficha tiene su URL: tusitio.github.io/?perfume=marca-nombre
     const BASE_TITLE = document.title;
-    // Si la página se abre como archivo local (content:// o file://) no se toca la barra de direcciones;
-    // el link compartido siempre apunta al sitio publicado.
     const SITE_URL = 'https://briandejesussss-max.github.io/';
     const IS_WEB = /^https?:$/.test(window.location.protocol);
     let pvFromPop = false;
@@ -1996,7 +1978,6 @@
       });
     }
 
-    // ================= FUNCIONES ADMIN =================
     function toggleAuthModal() {
       if (isAdminLoggedIn) {
         isAdminLoggedIn = false;
@@ -2281,11 +2262,11 @@
       if (brands.includes(currentVal)) select.value = currentVal;
     }
 
-    // ================= INVENTARIO ADMIN =================
     function openInventoryModal() {
       if (!isAdminLoggedIn) return toggleAuthModal();
       populateInvSelect(); invChanged(); renderInventoryList();
-      document.getElementById('inv-threshold').value = getLow();
+      const thresh = document.getElementById('inv-threshold');
+      if (thresh) thresh.value = getLow();
       document.getElementById('inventory-modal').classList.remove('hidden');
     }
     function closeInventoryModal() { document.getElementById('inventory-modal').classList.add('hidden'); }
@@ -2323,7 +2304,7 @@
         const name = g('inv-name').value.trim(), brand = g('inv-brand').value.trim();
         if (!name || !brand) return showToast('Escribe nombre y casa de la fragancia', 3000);
         const pr = k => parseFloat(g('inv-price-' + k).value) || 0;
-        f = { id: 'frag-' + Date.now(), name, brand, concentration: g('inv-conc').value.trim() || 'Eau de Parfum', gender: g('inv-gender').value, image: '', notes: '', prices: {} };
+        f = { id: 'frag-' + Date.now(), name, brand, concentration: g('inv-conc')?.value.trim() || 'Eau de Parfum', gender: g('inv-gender')?.value || 'Unisex', image: '', notes: '', prices: {} };
         ['3ml', '5ml', '10ml', 'bottle'].forEach(k => { f.prices[k] = { price: pr(k), inStock: pr(k) > 0 }; });
         fragrances.unshift(f);
         g('inv-new-block').querySelectorAll('input').forEach(i => { i.value = ''; });
@@ -2336,12 +2317,6 @@
       populateInvSelect(f.id); invChanged(); renderInventoryList();
       g('inv-qty').value = '';
       showToast('Inventario actualizado');
-      await syncToGitHub();
-    }
-
-    async function saveLowThreshold(v) {
-      storeConfig.lowMlThreshold = Math.max(0, parseFloat(v) || 0);
-      saveLocalData(); renderCatalog(); renderInventoryList();
       await syncToGitHub();
     }
 
@@ -2364,11 +2339,62 @@
       setTimeout(() => toast.remove(), duration);
     }
 
+    /* CAMBIO 2: PROCESAMIENTO AUTOMÁTICO DE PNGs PARA ELIMINAR FONDOS NEGROS */
+    function adaptTransparentPngs() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.stage-bottle img, #pv-img').forEach(img => {
+        if (!img.complete) {
+          img.onload = () => processSingleImage(img, isDark);
+        } else {
+          processSingleImage(img, isDark);
+        }
+      });
+    }
+
+    function processSingleImage(img, isDark) {
+      if (img.dataset.processed === 'true' || img.src.includes('placehold.co')) return;
+      try {
+        const c = document.createElement('canvas');
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        if (!w || !h) return;
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const d = imgData.data;
+        let modified = false;
+
+        // Inspecciona los píxeles: si detecta fondo negro puro o casi negro (<24), lo vuelve transparente
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i], g = d[i+1], b = d[i+2];
+          if (r < 24 && g < 24 && b < 24) {
+            d[i+3] = 0; // Transparencia total para el negro
+            modified = true;
+          }
+        }
+
+        if (modified) {
+          ctx.putImageData(imgData, 0, 0);
+          img.src = c.toDataURL('image/png');
+          img.dataset.processed = 'true';
+        }
+      } catch (err) {
+        // En caso de CORS por imágenes externas de otro dominio, el CSS fallback mix-blend-mode se encarga
+        if (isDark) {
+          img.style.mixBlendMode = 'screen';
+        } else {
+          img.style.mixBlendMode = 'multiply';
+        }
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', initApp);
   </script>
 
   <script>
-  /* Mejoras: se montan encima de la lógica original sin modificarla */
   (function(){
     const $ = id => document.getElementById(id);
     const SIZES = {'3ml':['Para probar sin compromiso',28],'5ml':['Para usarlo varias semanas',46],'10ml':['Para llevarlo en tu día a día',68],'bottle':['Botella completa, pieza original',92]};
@@ -2462,8 +2488,9 @@
       setTimeout(() => {
         let f; do { f = list[Math.floor(Math.random() * list.length)]; } while (list.length > 1 && f.id === last);
         last = f.id;
-        out.innerHTML = '<div class="cauldron-card themed-input"><img src="' + esc(imgOf(f)) + '" alt="' + esc(f.name) + '"><div><span class="cc-brand">' + esc(f.brand) + '</span><strong class="cc-name">' + esc(f.name) + '</strong><p class="cc-notes">' + esc(f.notes || '') + '</p><button class="hero-btn hero-btn-primary" onclick="openProductView(\'' + f.id + '\')">Ver detalles</button></div></div>';
+        out.innerHTML = '<div class="cauldron-card themed-input"><img src="' + esc(imgOf(f)) + '" alt="' + esc(f.name) + '" class="perfume-img-adapt"><div><span class="cc-brand">' + esc(f.brand) + '</span><strong class="cc-name">' + esc(f.name) + '</strong><p class="cc-notes">' + esc(f.notes || '') + '</p><button class="hero-btn hero-btn-primary" onclick="openProductView(\'' + f.id + '\')">Ver detalles</button></div></div>';
         pot.classList.remove('brewing'); btn.disabled = false; btn.textContent = 'Invocar otro';
+        adaptTransparentPngs();
       }, wait);
     };
   })();
@@ -2491,7 +2518,6 @@
     };
   })();
 
-  /* Guardado automático en GitHub (la función no existía en el archivo original) */
   let _syncChain = Promise.resolve();
   function syncToGitHub(){ _syncChain = _syncChain.then(doGitHubSync, doGitHubSync); return _syncChain; }
   async function doGitHubSync(){
@@ -2519,15 +2545,517 @@
   }
   </script>
 
+  <!-- COTIZADOR Y FACTURACIÓN CON COSTO DE IMPORTACIÓN OPCIONAL POR PORCENTAJE (EJ. 14%) O CANTIDAD -->
   <script>
-  /* Cotizador y Facturación: se carga en un iframe aparte, así sus estilos y scripts no afectan a la tienda */
   (function(){
-    const CALC_B64 = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVzIj4KPGhlYWQ+CiAgPG1ldGEgY2hhcnNldD0iVVRGLTgiPgogIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wIj4KICA8dGl0bGU+Q290aXphZG9yIHkgRmFjdHVyYWNpw7NuIGRlIEZyYWdhbmNpYXM8L3RpdGxlPgogIAogIDwhLS0gTGlicmVyw61hcyBleHRlcm5hcyBwYXJhIGV4cG9ydGFyIGEgRXhjZWwsIFBERiBlIEltYWdlbiAtLT4KICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L25wbS94bHN4QDAuMTguNS9kaXN0L3hsc3guZnVsbC5taW4uanMiPjwvc2NyaXB0PgogIDxzY3JpcHQgc3JjPSJodHRwczovL2NkbmpzLmNsb3VkZmxhcmUuY29tL2FqYXgvbGlicy9qc3BkZi8yLjUuMS9qc3BkZi51bWQubWluLmpzIj48L3NjcmlwdD4KICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9jZG5qcy5jbG91ZGZsYXJlLmNvbS9hamF4L2xpYnMvaHRtbDJjYW52YXMvMS40LjEvaHRtbDJjYW52YXMubWluLmpzIj48L3NjcmlwdD4KCiAgPHN0eWxlPgogICAgOnJvb3QgewogICAgICAtLXByaW1hcnk6ICMxZTI5M2I7CiAgICAgIC0tYWNjZW50OiAjMjU2M2ViOwogICAgICAtLWFjY2VudC1ob3ZlcjogIzFkNGVkODsKICAgICAgLS1iZzogI2Y4ZmFmYzsKICAgICAgLS1jYXJkLWJnOiAjZmZmZmZmOwogICAgICAtLXRleHQ6ICMwZjE3MmE7CiAgICAgIC0tYm9yZGVyOiAjZTJlOGYwOwogICAgICAtLXN1Y2Nlc3M6ICMxNmEzNGE7CiAgICB9CgogICAgKiB7IGJveC1zaXppbmc6IGJvcmRlci1ib3g7IG1hcmdpbjogMDsgcGFkZGluZzogMDsgZm9udC1mYW1pbHk6IC1hcHBsZS1zeXN0ZW0sIEJsaW5rTWFjU3lzdGVtRm9udCwgIlNlZ29lIFVJIiwgUm9ib3RvLCBzYW5zLXNlcmlmOyB9CiAgICBib2R5IHsgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tYmcpOyBjb2xvcjogdmFyKC0tdGV4dCk7IHBhZGRpbmc6IDI0cHggMTZweDsgfQogICAgLmNvbnRhaW5lciB7IG1heC13aWR0aDogMTEwMHB4OyBtYXJnaW46IDAgYXV0bzsgZGlzcGxheTogZ3JpZDsgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnI7IGdhcDogMjRweDsgfQoKICAgIC5jYXJkIHsgYmFja2dyb3VuZDogdmFyKC0tY2FyZC1iZyk7IGJvcmRlci1yYWRpdXM6IDEycHg7IHBhZGRpbmc6IDI0cHg7IGJveC1zaGFkb3c6IDAgNHB4IDEycHggcmdiYSgwLDAsMCwwLjA1KTsgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsgfQogICAgaDIsIGgzIHsgY29sb3I6IHZhcigtLXByaW1hcnkpOyBtYXJnaW4tYm90dG9tOiAxNnB4OyBmb250LXdlaWdodDogNzAwOyB9CiAgICAKICAgIC5ncmlkLWZvcm0geyBkaXNwbGF5OiBncmlkOyBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdChhdXRvLWZpdCwgbWlubWF4KDIwMHB4LCAxZnIpKTsgZ2FwOiAxNHB4OyBtYXJnaW4tYm90dG9tOiAxNnB4OyB9CiAgICAuZm9ybS1ncm91cCB7IGRpc3BsYXk6IGZsZXg7IGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47IGdhcDogNnB4OyB9CiAgICBsYWJlbCB7IGZvbnQtc2l6ZTogMC44NXJlbTsgZm9udC13ZWlnaHQ6IDYwMDsgY29sb3I6ICM0NzU1Njk7IH0KICAgIGlucHV0LCBzZWxlY3QgeyBwYWRkaW5nOiAxMHB4IDEycHg7IGJvcmRlcjogMS41cHggc29saWQgIzk0YTNiODsgYm9yZGVyLXJhZGl1czogOHB4OyBmb250LXNpemU6IDFyZW07IG91dGxpbmU6IG5vbmU7IGJhY2tncm91bmQ6ICNmOGZhZmM7IGNvbG9yOiAjMGYxNzJhOyAtd2Via2l0LXRleHQtZmlsbC1jb2xvcjogIzBmMTcyYTsgY29sb3Itc2NoZW1lOiBsaWdodDsgfQogICAgaW5wdXQ6OnBsYWNlaG9sZGVyIHsgY29sb3I6ICM2NDc0OGI7IC13ZWJraXQtdGV4dC1maWxsLWNvbG9yOiAjNjQ3NDhiOyBvcGFjaXR5OiAxOyB9CiAgICBpbnB1dDpmb2N1cywgc2VsZWN0OmZvY3VzIHsgYm9yZGVyLWNvbG9yOiB2YXIoLS1hY2NlbnQpOyBiYWNrZ3JvdW5kOiAjZmZmZmZmOyBib3gtc2hhZG93OiAwIDAgMCAzcHggcmdiYSgzNyw5OSwyMzUsLjIpOyB9CgogICAgLmJ0bi1yb3cgeyBkaXNwbGF5OiBmbGV4OyBnYXA6IDEwcHg7IGZsZXgtd3JhcDogd3JhcDsgbWFyZ2luLXRvcDogMTBweDsgfQogICAgYnV0dG9uIHsgY3Vyc29yOiBwb2ludGVyOyBwYWRkaW5nOiAxMHB4IDE2cHg7IGJvcmRlci1yYWRpdXM6IDhweDsgYm9yZGVyOiBub25lOyBmb250LXdlaWdodDogNjAwOyB0cmFuc2l0aW9uOiBhbGwgMC4yczsgZm9udC1zaXplOiAwLjlyZW07IH0KICAgIC5idG4tcHJpbWFyeSB7IGJhY2tncm91bmQ6IHZhcigtLWFjY2VudCk7IGNvbG9yOiB3aGl0ZTsgfQogICAgLmJ0bi1wcmltYXJ5OmhvdmVyIHsgYmFja2dyb3VuZDogdmFyKC0tYWNjZW50LWhvdmVyKTsgfQogICAgLmJ0bi1leGNlbCB7IGJhY2tncm91bmQ6ICMxMDdjNDE7IGNvbG9yOiB3aGl0ZTsgfQogICAgLmJ0bi1wZGYgeyBiYWNrZ3JvdW5kOiAjZGMyNjI2OyBjb2xvcjogd2hpdGU7IH0KICAgIC5idG4taW1nIHsgYmFja2dyb3VuZDogIzZiMjFhODsgY29sb3I6IHdoaXRlOyB9CiAgICAuYnRuLWNsZWFyIHsgYmFja2dyb3VuZDogIzY0NzQ4YjsgY29sb3I6IHdoaXRlOyB9CgogICAgLyogQ29udGVuZWRvciBkZSBsYSBGYWN0dXJhIC8gQ290aXphY2nDs24gKi8KICAgICNpbnZvaWNlLWFyZWEgewogICAgICBiYWNrZ3JvdW5kOiAjZmZmZmZmOwogICAgICBwYWRkaW5nOiAzMHB4OwogICAgICBib3JkZXItcmFkaXVzOiAxMHB4OwogICAgICBib3JkZXI6IDFweCBzb2xpZCAjY2JkNWUxOwogICAgfQogICAgLmludm9pY2UtaGVhZGVyIHsgZGlzcGxheTogZmxleDsganVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuOyBib3JkZXItYm90dG9tOiAycHggc29saWQgI2UyZThmMDsgcGFkZGluZy1ib3R0b206IDE2cHg7IG1hcmdpbi1ib3R0b206IDIwcHg7IH0KICAgIC5pbnZvaWNlLXRpdGxlIHsgZm9udC1zaXplOiAxLjVyZW07IGZvbnQtd2VpZ2h0OiBib2xkOyBjb2xvcjogdmFyKC0tcHJpbWFyeSk7IH0KICAgIC5pbnZvaWNlLW1ldGEgeyBmb250LXNpemU6IDAuODVyZW07IGNvbG9yOiAjNjQ3NDhiOyB0ZXh0LWFsaWduOiByaWdodDsgfQoKICAgIHRhYmxlIHsgd2lkdGg6IDEwMCU7IGJvcmRlci1jb2xsYXBzZTogY29sbGFwc2U7IG1hcmdpbi1ib3R0b206IDIwcHg7IGZvbnQtc2l6ZTogMC45cmVtOyB9CiAgICB0aCB7IGJhY2tncm91bmQ6ICNmMWY1Zjk7IHRleHQtYWxpZ246IGxlZnQ7IHBhZGRpbmc6IDEwcHg7IGNvbG9yOiAjMzM0MTU1OyB9CiAgICB0ZCB7IHBhZGRpbmc6IDEwcHg7IGJvcmRlci1ib3R0b206IDFweCBzb2xpZCAjZTJlOGYwOyB9CiAgICAudGV4dC1yaWdodCB7IHRleHQtYWxpZ246IHJpZ2h0OyB9CiAgICAudGV4dC1jZW50ZXIgeyB0ZXh0LWFsaWduOiBjZW50ZXI7IH0KCiAgICAudG90YWxzLWJveCB7IG1hcmdpbi1sZWZ0OiBhdXRvOyB3aWR0aDogMzIwcHg7IGRpc3BsYXk6IGZsZXg7IGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47IGdhcDogOHB4OyBmb250LXNpemU6IDAuOTVyZW07IH0KICAgIC50b3RhbHMtcm93IHsgZGlzcGxheTogZmxleDsganVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuOyB9CiAgICAudG90YWxzLXJvdy5maW5hbCB7IGZvbnQtd2VpZ2h0OiBib2xkOyBmb250LXNpemU6IDEuMTVyZW07IGJvcmRlci10b3A6IDJweCBzb2xpZCAjY2JkNWUxOyBwYWRkaW5nLXRvcDogOHB4OyBjb2xvcjogdmFyKC0tcHJpbWFyeSk7IH0KICAgIC5iYWRnZSB7IHBhZGRpbmc6IDRweCA4cHg7IGJvcmRlci1yYWRpdXM6IDZweDsgZm9udC1zaXplOiAwLjc1cmVtOyBmb250LXdlaWdodDogYm9sZDsgfQogICAgLmJhZGdlLWF1dG8geyBiYWNrZ3JvdW5kOiAjZTBmMmZlOyBjb2xvcjogIzAyODRjNzsgfQoKICAgIC50YWctYWxlcnQgeyBjb2xvcjogI2RjMjYyNjsgZm9udC1zaXplOiAwLjhyZW07IGZvbnQtd2VpZ2h0OiBib2xkOyB9CiAgPC9zdHlsZT4KPC9oZWFkPgo8Ym9keT4KCjxkaXYgY2xhc3M9ImNvbnRhaW5lciI+CiAgCiAgPCEtLSBDb25maWd1cmFjacOzbiBHZW5lcmFsIHkgVGlwbyBkZSBDYW1iaW8gLS0+CiAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICA8ZGl2IHN0eWxlPSJkaXNwbGF5OiBmbGV4OyBqdXN0aWZ5LWNvbnRlbnQ6IHNwYWNlLWJldHdlZW47IGFsaWduLWl0ZW1zOiBjZW50ZXI7IG1hcmdpbi1ib3R0b206IDEycHg7Ij4KICAgICAgPGgyPkNvbmZpZ3VyYWNpw7NuIGRlIERpdmlzYTwvaDI+CiAgICAgIDxzcGFuIGlkPSJyYXRlU3RhdHVzIiBjbGFzcz0iYmFkZ2UgYmFkZ2UtYXV0byI+Q29uc3VsdGFuZG8gdGlwbyBkZSBjYW1iaW8uLi48L3NwYW4+CiAgICA8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImdyaWQtZm9ybSIgc3R5bGU9ImdyaWQtdGVtcGxhdGUtY29sdW1uczogcmVwZWF0KGF1dG8tZml0LCBtaW5tYXgoMjIwcHgsIDFmcikpOyI+CiAgICAgIDxkaXYgY2xhc3M9ImZvcm0tZ3JvdXAiPgogICAgICAgIDxsYWJlbD5UaXBvIGRlIENhbWJpbyBBY3R1YWwgKFVTRCBhIE1YTik6PC9sYWJlbD4KICAgICAgICA8aW5wdXQgdHlwZT0ibnVtYmVyIiBpZD0idXNkVG9NeG4iIHN0ZXA9IjAuMDEiIHZhbHVlPSIyMC4wMCIgb25jaGFuZ2U9ImFjdHVhbGl6YXJUYWJsYVRvdGFsZXMoKSI+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJmb3JtLWdyb3VwIiBzdHlsZT0ianVzdGlmeS1jb250ZW50OiBmbGV4LWVuZDsiPgogICAgICAgIDxidXR0b24gdHlwZT0iYnV0dG9uIiBjbGFzcz0iYnRuLWNsZWFyIiBvbmNsaWNrPSJvYnRlbmVyVGlwb0NhbWJpbygpIj5BY3R1YWxpemFyIENhbWJpbyBlbiBWaXZvPC9idXR0b24+CiAgICAgIDwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+CgogIDwhLS0gRm9ybXVsYXJpbyBkZSBFbnRyYWRhIGRlIEZyYWdhbmNpYXMgLS0+CiAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICA8aDI+QWdyZWdhciBGcmFnYW5jaWE8L2gyPgogICAgPGRpdiBjbGFzcz0iZ3JpZC1mb3JtIj4KICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCIgc3R5bGU9ImdyaWQtY29sdW1uOiBzcGFuIDI7Ij4KICAgICAgICA8bGFiZWw+Tm9tYnJlIGRlIGxhIEZyYWdhbmNpYSAvIENhc2E6PC9sYWJlbD4KICAgICAgICA8aW5wdXQgdHlwZT0idGV4dCIgaWQ9ImZyYWdOYW1lIiBwbGFjZWhvbGRlcj0iRWouIExhdHRhZmEgS2hhbXJhaCAxMDBtbCI+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJmb3JtLWdyb3VwIj4KICAgICAgICA8bGFiZWw+UHJlY2lvIGRlIExpc3RhIChVU0QpOjwvbGFiZWw+CiAgICAgICAgPGlucHV0IHR5cGU9Im51bWJlciIgaWQ9ImZyYWdQcmljZSIgc3RlcD0iMC4wMSIgcGxhY2Vob2xkZXI9IkVqLiA1MC4wMCIgb25pbnB1dD0iY2FsY3VsYXJQcmV2aWV3KCkiPgogICAgICA8L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCI+CiAgICAgICAgPGxhYmVsPkRlc2N1ZW50byBlbiBsYSBww6FnaW5hICglKTo8L2xhYmVsPgogICAgICAgIDxpbnB1dCB0eXBlPSJudW1iZXIiIGlkPSJmcmFnRGlzY291bnQiIHN0ZXA9IjEiIHZhbHVlPSIwIiBwbGFjZWhvbGRlcj0iRWouIDE1IiBvbmlucHV0PSJjYWxjdWxhclByZXZpZXcoKSI+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJmb3JtLWdyb3VwIj4KICAgICAgICA8bGFiZWw+UGVzbyBBcHJveC4gcG9yIHVuaWRhZCAoa2cpOjwvbGFiZWw+CiAgICAgICAgPGlucHV0IHR5cGU9Im51bWJlciIgaWQ9ImZyYWdXZWlnaHQiIHN0ZXA9IjAuMDUiIHZhbHVlPSIwLjUiIHBsYWNlaG9sZGVyPSIwLjUiPgogICAgICA8L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0iZm9ybS1ncm91cCI+CiAgICAgICAgPGxhYmVsPkNhbnRpZGFkOjwvbGFiZWw+CiAgICAgICAgPGlucHV0IHR5cGU9Im51bWJlciIgaWQ9ImZyYWdRdHkiIHZhbHVlPSIxIiBtaW49IjEiPgogICAgICA8L2Rpdj4KICAgIDwvZGl2PgoKICAgIDxkaXYgc3R5bGU9ImJhY2tncm91bmQ6ICNmOGZhZmM7IHBhZGRpbmc6IDEycHg7IGJvcmRlci1yYWRpdXM6IDhweDsgbWFyZ2luLWJvdHRvbTogMTZweDsgZm9udC1zaXplOiAwLjlyZW07IGNvbG9yOiAjNDc1NTY5OyI+CiAgICAgIDxzdHJvbmc+VmlzdGEgcHJldmlhIGRlbCBwcm9kdWN0bzo8L3N0cm9uZz4gUHJlY2lvIGNvbiBkZXNjLjogPHNwYW4gaWQ9InByZXZpZXdVU0QiPiQwLjAwIFVTRDwvc3Bhbj4gfCBFbiBwZXNvczogPHNwYW4gaWQ9InByZXZpZXdNWE4iPiQwLjAwIE1YTjwvc3Bhbj4KICAgIDwvZGl2PgoKICAgIDxidXR0b24gdHlwZT0iYnV0dG9uIiBjbGFzcz0iYnRuLXByaW1hcnkiIG9uY2xpY2s9ImFncmVnYXJGcmFnYW5jaWEoKSI+KyBBZ3JlZ2FyIGFsIFBlZGlkbzwvYnV0dG9uPgogIDwvZGl2PgoKICA8IS0tIFZpc3RhIGRlIEZhY3R1cmEgLyBSZXN1bWVuIC0tPgogIDxkaXYgY2xhc3M9ImNhcmQiPgogICAgPGRpdiBzdHlsZT0iZGlzcGxheTogZmxleDsganVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuOyBhbGlnbi1pdGVtczogY2VudGVyOyBtYXJnaW4tYm90dG9tOiAxNnB4OyI+CiAgICAgIDxoMj5Db3RpemFjacOzbiAvIEZhY3R1cmE8L2gyPgogICAgICA8ZGl2IGNsYXNzPSJidG4tcm93Ij4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJidG4tZXhjZWwiIG9uY2xpY2s9ImV4cG9ydGFyRXhjZWwoKSI+RGVzY2FyZ2FyIEV4Y2VsPC9idXR0b24+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuLXBkZiIgb25jbGljaz0iZXhwb3J0YXJQREYoKSI+RGVzY2FyZ2FyIFBERjwvYnV0dG9uPgogICAgICAgIDxidXR0b24gY2xhc3M9ImJ0bi1pbWciIG9uY2xpY2s9ImV4cG9ydGFySW1hZ2VuKCkiPkRlc2NhcmdhciBJbWFnZW48L2J1dHRvbj4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJidG4tY2xlYXIiIG9uY2xpY2s9ImxpbXBpYXJMaXN0YSgpIj5MaW1waWFyIFRvZG88L2J1dHRvbj4KICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KCiAgICA8IS0tIERvY3VtZW50byBhIEV4cG9ydGFyIC0tPgogICAgPGRpdiBpZD0iaW52b2ljZS1hcmVhIj4KICAgICAgPGRpdiBjbGFzcz0iaW52b2ljZS1oZWFkZXIiPgogICAgICAgIDxkaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJpbnZvaWNlLXRpdGxlIj5DT1RJWkFDScOTTiAvIE5PVEEgREUgQ09NUFJBPC9kaXY+CiAgICAgICAgICA8ZGl2IHN0eWxlPSJjb2xvcjogIzY0NzQ4YjsgZm9udC1zaXplOiAwLjlyZW07Ij5KUyBGcmFnYW5jZXMgJmJ1bGw7IEltcG9ydGFjacOzbiB5IEVudHJlZ2EgYSBNw6l4aWNvPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0iaW52b2ljZS1tZXRhIj4KICAgICAgICAgIDxwPjxzdHJvbmc+RmVjaGE6PC9zdHJvbmc+IDxzcGFuIGlkPSJpbnZvaWNlRGF0ZSI+PC9zcGFuPjwvcD4KICAgICAgICAgIDxwPjxzdHJvbmc+VC5DLjo8L3N0cm9uZz4gPHNwYW4gaWQ9Imludm9pY2VSYXRlIj48L3NwYW4+IE1YTi9VU0Q8L3A+CiAgICAgICAgPC9kaXY+CiAgICAgIDwvZGl2PgoKICAgICAgPHRhYmxlPgogICAgICAgIDx0aGVhZD4KICAgICAgICAgIDx0cj4KICAgICAgICAgICAgPHRoPkRlc2NyaXBjacOzbjwvdGg+CiAgICAgICAgICAgIDx0aCBjbGFzcz0idGV4dC1jZW50ZXIiPkNhbnQuPC90aD4KICAgICAgICAgICAgPHRoIGNsYXNzPSJ0ZXh0LXJpZ2h0Ij5Vbml0YXJpbyAoVVNEKTwvdGg+CiAgICAgICAgICAgIDx0aCBjbGFzcz0idGV4dC1yaWdodCI+VW5pdGFyaW8gKE1YTik8L3RoPgogICAgICAgICAgICA8dGggY2xhc3M9InRleHQtcmlnaHQiPlN1YnRvdGFsIChNWE4pPC90aD4KICAgICAgICAgICAgPHRoIGNsYXNzPSJ0ZXh0LWNlbnRlciI+QWNjacOzbjwvdGg+CiAgICAgICAgICA8L3RyPgogICAgICAgIDwvdGhlYWQ+CiAgICAgICAgPHRib2R5IGlkPSJpdGVtc1RhYmxlQm9keSI+CiAgICAgICAgICA8IS0tIEZpbGFzIGdlbmVyYWRhcyBkaW7DoW1pY2FtZW50ZSAtLT4KICAgICAgICA8L3Rib2R5PgogICAgICA8L3RhYmxlPgoKICAgICAgPGRpdiBjbGFzcz0idG90YWxzLWJveCI+CiAgICAgICAgPGRpdiBjbGFzcz0idG90YWxzLXJvdyI+CiAgICAgICAgICA8c3Bhbj5TdWJ0b3RhbCBQcm9kdWN0b3M6PC9zcGFuPgogICAgICAgICAgPHNwYW4gaWQ9InRvdFN1YnRvdGFsTVhOIj4kMC4wMCBNWE48L3NwYW4+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0idG90YWxzLXJvdyI+CiAgICAgICAgICA8c3Bhbj5JbXB1ZXN0b3MgeSBHZXN0acOzbiBkZSBBZHVhbmEgKFRheCk6PC9zcGFuPgogICAgICAgICAgPHNwYW4gaWQ9InRvdFRheE1YTiI+JDAuMDAgTVhOPC9zcGFuPgogICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgY2xhc3M9InRvdGFscy1yb3ciPgogICAgICAgICAgPHNwYW4+VGFyaWZhIENydWNlIGUgSW1wb3J0YWNpw7NuOjwvc3Bhbj4KICAgICAgICAgIDxzcGFuIGlkPSJ0b3RDcnVjZU1YTiI+JDAuMDAgTVhOPC9zcGFuPgogICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgY2xhc3M9InRvdGFscy1yb3ciIHN0eWxlPSJmb250LXNpemU6IDAuOHJlbTsgY29sb3I6ICM2NDc0OGI7Ij4KICAgICAgICAgIDxzcGFuPlBlc28gdG90YWwgYWN1bXVsYWRvOjwvc3Bhbj4KICAgICAgICAgIDxzcGFuIGlkPSJ0b3RQZXNvIj4wLjAwIGtnPC9zcGFuPgogICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgaWQ9ImN1c3RvbUNydWNlV2FybmluZyIgY2xhc3M9InRhZy1hbGVydCIgc3R5bGU9ImRpc3BsYXk6IG5vbmU7Ij4KICAgICAgICAgICogUGVzbyBtYXlvciBhIDEwIGtnOiBSZXF1aWVyZSBjb3RpemFjacOzbiBwZXJzb25hbGl6YWRhIGRlIGNydWNlLgogICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgY2xhc3M9InRvdGFscy1yb3cgZmluYWwiPgogICAgICAgICAgPHNwYW4+VE9UQUwgQSBQQUdBUjo8L3NwYW4+CiAgICAgICAgICA8c3BhbiBpZD0idG90RmluYWxNWE4iPiQwLjAwIE1YTjwvc3Bhbj4KICAgICAgICA8L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJ0b3RhbHMtcm93IiBzdHlsZT0iZm9udC1zaXplOiAwLjg1cmVtOyBjb2xvcjogIzY0NzQ4YjsganVzdGlmeS1jb250ZW50OiBmbGV4LWVuZDsiPgogICAgICAgICAgPHNwYW4gaWQ9InRvdEZpbmFsVVNEIj4oJDAuMDAgVVNEIGFwcm94Lik8L3NwYW4+CiAgICAgICAgPC9kaXY+CiAgICAgIDwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+Cgo8L2Rpdj4KCjxzY3JpcHQ+CiAgbGV0IGl0ZW1zID0gW107CiAgY29uc3QgTUFSR0VOX0dBTkFOQ0lBX1VTRCA9IDMuMDA7IC8vIFR1cyAkMyBVU0QgcG9yIHBpZXphIGVubWFzY2FyYWRvcyBjb21vIFRheCAvIEZlZSBkZSBHZXN0acOzbgoKICAvLyAxLiBPYnRlbmVyIFRpcG8gZGUgQ2FtYmlvIGVuIFZpdm8gZGUgVVNEIGEgTVhOCiAgYXN5bmMgZnVuY3Rpb24gb2J0ZW5lclRpcG9DYW1iaW8oKSB7CiAgICBjb25zdCBzdGF0dXMgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncmF0ZVN0YXR1cycpOwogICAgc3RhdHVzLmlubmVyVGV4dCA9ICJBY3R1YWxpemFuZG8uLi4iOwogICAgdHJ5IHsKICAgICAgY29uc3QgcmVzcG9uc2UgPSBhd2FpdCBmZXRjaCgnaHR0cHM6Ly9vcGVuLmVyLWFwaS5jb20vdjYvbGF0ZXN0L1VTRCcpOwogICAgICBjb25zdCBkYXRhID0gYXdhaXQgcmVzcG9uc2UuanNvbigpOwogICAgICBpZiAoZGF0YSAmJiBkYXRhLnJhdGVzICYmIGRhdGEucmF0ZXMuTVhOKSB7CiAgICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3VzZFRvTXhuJykudmFsdWUgPSBkYXRhLnJhdGVzLk1YTi50b0ZpeGVkKDIpOwogICAgICAgIHN0YXR1cy5pbm5lclRleHQgPSBgRW4gdml2bzogJCR7ZGF0YS5yYXRlcy5NWE4udG9GaXhlZCgyKX0gTVhOYDsKICAgICAgICBhY3R1YWxpemFyVGFibGFUb3RhbGVzKCk7CiAgICAgIH0KICAgIH0gY2F0Y2ggKGUpIHsKICAgICAgc3RhdHVzLmlubmVyVGV4dCA9ICJNYW51YWwgKEZhbGxvIEFQSSkiOwogICAgfQogIH0KCiAgLy8gUHJldmlzdWFsaXphZG9yIGVuIHRpZW1wbyByZWFsCiAgZnVuY3Rpb24gY2FsY3VsYXJQcmV2aWV3KCkgewogICAgY29uc3QgcHJpY2UgPSBwYXJzZUZsb2F0KGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdmcmFnUHJpY2UnKS52YWx1ZSkgfHwgMDsKICAgIGNvbnN0IGRpc2NvdW50ID0gcGFyc2VGbG9hdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZnJhZ0Rpc2NvdW50JykudmFsdWUpIHx8IDA7CiAgICBjb25zdCByYXRlID0gcGFyc2VGbG9hdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndXNkVG9NeG4nKS52YWx1ZSkgfHwgMTsKCiAgICBjb25zdCBwcmVjaW9GaW5hbFVTRCA9IHByaWNlICogKDEgLSAoZGlzY291bnQgLyAxMDApKTsKICAgIGNvbnN0IHByZWNpb0ZpbmFsTVhOID0gcHJlY2lvRmluYWxVU0QgKiByYXRlOwoKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdwcmV2aWV3VVNEJykuaW5uZXJUZXh0ID0gYCQke3ByZWNpb0ZpbmFsVVNELnRvRml4ZWQoMil9IFVTRGA7CiAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncHJldmlld01YTicpLmlubmVyVGV4dCA9IGAkJHtwcmVjaW9GaW5hbE1YTi50b0ZpeGVkKDIpfSBNWE5gOwogIH0KCiAgLy8gMi4gQWdyZWdhciBmcmFnYW5jaWEgYSBsYSBsaXN0YQogIGZ1bmN0aW9uIGFncmVnYXJGcmFnYW5jaWEoKSB7CiAgICBjb25zdCBuYW1lID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZyYWdOYW1lJykudmFsdWUudHJpbSgpOwogICAgY29uc3QgcHJpY2VVU0QgPSBwYXJzZUZsb2F0KGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdmcmFnUHJpY2UnKS52YWx1ZSkgfHwgMDsKICAgIGNvbnN0IGRpc2NvdW50ID0gcGFyc2VGbG9hdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZnJhZ0Rpc2NvdW50JykudmFsdWUpIHx8IDA7CiAgICBjb25zdCB3ZWlnaHQgPSBwYXJzZUZsb2F0KGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdmcmFnV2VpZ2h0JykudmFsdWUpIHx8IDAuNTsKICAgIGNvbnN0IHF0eSA9IHBhcnNlSW50KGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdmcmFnUXR5JykudmFsdWUpIHx8IDE7CgogICAgaWYgKCFuYW1lIHx8IHByaWNlVVNEIDw9IDApIHsKICAgICAgYWxlcnQoIlBvciBmYXZvciBpbnRyb2R1Y2UgZWwgbm9tYnJlIHkgZWwgcHJlY2lvIGVuIFVTRC4iKTsKICAgICAgcmV0dXJuOwogICAgfQoKICAgIGNvbnN0IHByaWNlQWZ0ZXJEaXNjb3VudFVTRCA9IHByaWNlVVNEICogKDEgLSAoZGlzY291bnQgLyAxMDApKTsKCiAgICBpdGVtcy5wdXNoKHsKICAgICAgaWQ6IERhdGUubm93KCksCiAgICAgIG5hbWU6IG5hbWUsCiAgICAgIHByaWNlVVNEOiBwcmljZUFmdGVyRGlzY291bnRVU0QsCiAgICAgIHdlaWdodDogd2VpZ2h0LAogICAgICBxdHk6IHF0eQogICAgfSk7CgogICAgLy8gUmVzZXQgZGUgY2FtcG9zCiAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZnJhZ05hbWUnKS52YWx1ZSA9ICcnOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZyYWdQcmljZScpLnZhbHVlID0gJyc7CiAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZnJhZ0Rpc2NvdW50JykudmFsdWUgPSAnMCc7CiAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZnJhZ1F0eScpLnZhbHVlID0gJzEnOwogICAgY2FsY3VsYXJQcmV2aWV3KCk7CgogICAgYWN0dWFsaXphclRhYmxhVG90YWxlcygpOwogIH0KCiAgZnVuY3Rpb24gZWxpbWluYXJJdGVtKGlkKSB7CiAgICBpdGVtcyA9IGl0ZW1zLmZpbHRlcihpdGVtID0+IGl0ZW0uaWQgIT09IGlkKTsKICAgIGFjdHVhbGl6YXJUYWJsYVRvdGFsZXMoKTsKICB9CgogIGZ1bmN0aW9uIGxpbXBpYXJMaXN0YSgpIHsKICAgIGlmIChjb25maXJtKCLCv0VzdMOhcyBzZWd1cm8gZGUgdmFjaWFyIGxhIGNvdGl6YWNpw7NuIGFjdHVhbD8iKSkgewogICAgICBpdGVtcyA9IFtdOwogICAgICBhY3R1YWxpemFyVGFibGFUb3RhbGVzKCk7CiAgICB9CiAgfQoKICAvLyAzLiBSZWdsYXMgZGUgY3J1Y2Ugc2Vnw7puIHBlc28KICBmdW5jdGlvbiBjYWxjdWxhckNydWNlKHBlc29Ub3RhbCkgewogICAgaWYgKHBlc29Ub3RhbCA8PSAwKSByZXR1cm4gMDsKICAgIGlmIChwZXNvVG90YWwgPD0gMSkgcmV0dXJuIDIwMDsKICAgIGlmIChwZXNvVG90YWwgPD0gMykgcmV0dXJuIDMwMDsKICAgIGlmIChwZXNvVG90YWwgPD0gNSkgcmV0dXJuIDQwMDsKICAgIGlmIChwZXNvVG90YWwgPCA2KSByZXR1cm4gNTAwOyAgICAgICAgICAgICAgICAgICAgICAgLy8gNS4xIGtnIGVuIGFkZWxhbnRlCiAgICBpZiAocGVzb1RvdGFsIDw9IDEwKSByZXR1cm4gTWF0aC5mbG9vcihwZXNvVG90YWwpICogMTAwOyAvLyA2IGtnICQ2MDAgLi4uIDEwIGtnICQxLDAwMAogICAgcmV0dXJuIDEwMDA7IC8vIEJhc2UgbcOtbmltYSBzaSBwYXNhIGRlIDEwIGtnIChzZSBtdWVzdHJhIGF2aXNvIGRlIGNvdGl6YWNpw7NuKQogIH0KCiAgLy8gNC4gQWN0dWFsaXphciB0YWJsYSB5IGPDoWxjdWxvcwogIGZ1bmN0aW9uIGFjdHVhbGl6YXJUYWJsYVRvdGFsZXMoKSB7CiAgICBjb25zdCByYXRlID0gcGFyc2VGbG9hdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndXNkVG9NeG4nKS52YWx1ZSkgfHwgMTsKICAgIGNvbnN0IHRib2R5ID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2l0ZW1zVGFibGVCb2R5Jyk7CiAgICB0Ym9keS5pbm5lckhUTUwgPSAnJzsKCiAgICBsZXQgc3VidG90YWxVU0QgPSAwOwogICAgbGV0IHRvdGFsUGVzbyA9IDA7CiAgICBsZXQgdG90YWxQaWV6YXMgPSAwOwoKICAgIGl0ZW1zLmZvckVhY2goaXRlbSA9PiB7CiAgICAgIGNvbnN0IGl0ZW1TdWJ0b3RhbFVTRCA9IGl0ZW0ucHJpY2VVU0QgKiBpdGVtLnF0eTsKICAgICAgY29uc3QgaXRlbVByaWNlTVhOID0gaXRlbS5wcmljZVVTRCAqIHJhdGU7CiAgICAgIGNvbnN0IGl0ZW1TdWJ0b3RhbE1YTiA9IGl0ZW1TdWJ0b3RhbFVTRCAqIHJhdGU7CgogICAgICBzdWJ0b3RhbFVTRCArPSBpdGVtU3VidG90YWxVU0Q7CiAgICAgIHRvdGFsUGVzbyArPSAoaXRlbS53ZWlnaHQgKiBpdGVtLnF0eSk7CiAgICAgIHRvdGFsUGllemFzICs9IGl0ZW0ucXR5OwoKICAgICAgY29uc3Qgcm93ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgndHInKTsKICAgICAgcm93LmlubmVySFRNTCA9IGAKICAgICAgICA8dGQ+PHN0cm9uZz4ke2l0ZW0ubmFtZX08L3N0cm9uZz48L3RkPgogICAgICAgIDx0ZCBjbGFzcz0idGV4dC1jZW50ZXIiPiR7aXRlbS5xdHl9PC90ZD4KICAgICAgICA8dGQgY2xhc3M9InRleHQtcmlnaHQiPiQke2l0ZW0ucHJpY2VVU0QudG9GaXhlZCgyKX08L3RkPgogICAgICAgIDx0ZCBjbGFzcz0idGV4dC1yaWdodCI+JCR7aXRlbVByaWNlTVhOLnRvRml4ZWQoMil9PC90ZD4KICAgICAgICA8dGQgY2xhc3M9InRleHQtcmlnaHQiPiQke2l0ZW1TdWJ0b3RhbE1YTi50b0ZpeGVkKDIpfTwvdGQ+CiAgICAgICAgPHRkIGNsYXNzPSJ0ZXh0LWNlbnRlciI+CiAgICAgICAgICA8YnV0dG9uIHN0eWxlPSJiYWNrZ3JvdW5kOiBub25lOyBib3JkZXI6IG5vbmU7IGNvbG9yOiAjZGMyNjI2OyBjdXJzb3I6IHBvaW50ZXI7IGZvbnQtc2l6ZTogMS4xcmVtOyIgb25jbGljaz0iZWxpbWluYXJJdGVtKCR7aXRlbS5pZH0pIj4mdGltZXM7PC9idXR0b24+CiAgICAgICAgPC90ZD4KICAgICAgYDsKICAgICAgdGJvZHkuYXBwZW5kQ2hpbGQocm93KTsKICAgIH0pOwoKICAgIC8vIEPDoWxjdWxvcyBkZSBUb3RhbGVzCiAgICBjb25zdCBzdWJ0b3RhbE1YTiA9IHN1YnRvdGFsVVNEICogcmF0ZTsKICAgIAogICAgLy8gR0FOQU5DSUEgRU5NQVNDQVJBREE6ICQzIFVTRCBwb3IgZnJhZ2FuY2lhIGNvbnZlcnRpZG9zIGEgTVhOIG1vc3RyYWRvcyBjb21vIEltcHVlc3RvL1RheAogICAgY29uc3QgdGF4T2N1bHRvVVNEID0gdG90YWxQaWV6YXMgKiBNQVJHRU5fR0FOQU5DSUFfVVNEOwogICAgY29uc3QgdGF4T2N1bHRvTVhOID0gdGF4T2N1bHRvVVNEICogcmF0ZTsKCiAgICAvLyBDb3N0byBkZSBDcnVjZQogICAgY29uc3QgY29zdG9DcnVjZSA9IGl0ZW1zLmxlbmd0aCA+IDAgPyBjYWxjdWxhckNydWNlKHRvdGFsUGVzbykgOiAwOwogICAgY29uc3QgdG90YWxGaW5hbE1YTiA9IHN1YnRvdGFsTVhOICsgdGF4T2N1bHRvTVhOICsgY29zdG9DcnVjZTsKICAgIGNvbnN0IHRvdGFsRmluYWxVU0QgPSB0b3RhbEZpbmFsTVhOIC8gcmF0ZTsKCiAgICAvLyBSZW5kZXJpemFyIHRvdGFsZXMKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd0b3RTdWJ0b3RhbE1YTicpLmlubmVyVGV4dCA9IGAkJHtzdWJ0b3RhbE1YTi50b0ZpeGVkKDIpfSBNWE5gOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RvdFRheE1YTicpLmlubmVyVGV4dCA9IGAkJHt0YXhPY3VsdG9NWE4udG9GaXhlZCgyKX0gTVhOYDsKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd0b3RDcnVjZU1YTicpLmlubmVyVGV4dCA9IGAkJHtjb3N0b0NydWNlLnRvRml4ZWQoMil9IE1YTmA7CiAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndG90UGVzbycpLmlubmVyVGV4dCA9IGAke3RvdGFsUGVzby50b0ZpeGVkKDIpfSBrZ2A7CiAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndG90RmluYWxNWE4nKS5pbm5lclRleHQgPSBgJCR7dG90YWxGaW5hbE1YTi50b0ZpeGVkKDIpfSBNWE5gOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RvdEZpbmFsVVNEJykuaW5uZXJUZXh0ID0gYCgkJHt0b3RhbEZpbmFsVVNELnRvRml4ZWQoMil9IFVTRCBhcHJveC4pYDsKCiAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnY3VzdG9tQ3J1Y2VXYXJuaW5nJykuc3R5bGUuZGlzcGxheSA9IHRvdGFsUGVzbyA+IDEwID8gJ2Jsb2NrJyA6ICdub25lJzsKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdpbnZvaWNlUmF0ZScpLmlubmVyVGV4dCA9IHJhdGUudG9GaXhlZCgyKTsKICB9CgogIC8vIDUuIEV4cG9ydGFjaW9uZXMKCiAgLy8gRXhwb3J0YXIgYSBFeGNlbAogIGZ1bmN0aW9uIGV4cG9ydGFyRXhjZWwoKSB7CiAgICBpZiAoaXRlbXMubGVuZ3RoID09PSAwKSB7CiAgICAgIGFsZXJ0KCJObyBoYXkgZWxlbWVudG9zIHBhcmEgZXhwb3J0YXIuIik7CiAgICAgIHJldHVybjsKICAgIH0KICAgIGNvbnN0IHJhdGUgPSBwYXJzZUZsb2F0KGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd1c2RUb014bicpLnZhbHVlKSB8fCAxOwogICAgY29uc3QgZGF0YSA9IGl0ZW1zLm1hcChpID0+ICh7CiAgICAgICJGcmFnYW5jaWEiOiBpLm5hbWUsCiAgICAgICJDYW50aWRhZCI6IGkucXR5LAogICAgICAiUHJlY2lvIFVTRCAoYy8gZGVzYy4pIjogKGkucHJpY2VVU0QpLnRvRml4ZWQoMiksCiAgICAgICJQcmVjaW8gVW5pdGFyaW8gTVhOIjogKGkucHJpY2VVU0QgKiByYXRlKS50b0ZpeGVkKDIpLAogICAgICAiU3VidG90YWwgTVhOIjogKGkucHJpY2VVU0QgKiBpLnF0eSAqIHJhdGUpLnRvRml4ZWQoMiksCiAgICAgICJQZXNvIEVzdGltYWRvIChrZykiOiAoaS53ZWlnaHQgKiBpLnF0eSkudG9GaXhlZCgyKQogICAgfSkpOwoKICAgIGNvbnN0IHdzID0gWExTWC51dGlscy5qc29uX3RvX3NoZWV0KGRhdGEpOwogICAgY29uc3Qgd2IgPSBYTFNYLnV0aWxzLmJvb2tfbmV3KCk7CiAgICBYTFNYLnV0aWxzLmJvb2tfYXBwZW5kX3NoZWV0KHdiLCB3cywgIkNvdGl6YWNpw7NuIik7CiAgICBYTFNYLndyaXRlRmlsZSh3YiwgIkNvdGl6YWNpb25fRnJhZ2FuY2lhcy54bHN4Iik7CiAgfQoKICAvLyAtLS0tIEV4cG9ydGFjacOzbiByb2J1c3RhIChQREYgLyBJbWFnZW4pIC0tLS0KICAvLyBTZSBjYXB0dXJhIGVsIGRvY3VtZW50byBjb24gaHRtbDJjYW52YXMgdXNhbmRvIHVuYSBjb3BpYSAob25jbG9uZSkgYSBhbmNobyBmaWpvLAogIC8vIHNpbiBsYSBjb2x1bW5hICJBY2Npw7NuIiB5IHNpbiBkZXBlbmRlciBkZWwgc2Nyb2xsIGRlIGxhIHZlbnRhbmEuCiAgbGV0IGV4cG9ydGFuZG8gPSBmYWxzZTsKCiAgZnVuY3Rpb24gY2FwdHVyYXJGYWN0dXJhKCkgewogICAgd2luZG93LnNjcm9sbFRvKDAsIDApOwogICAgY29uc3QgZWwgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnaW52b2ljZS1hcmVhJyk7CiAgICByZXR1cm4gaHRtbDJjYW52YXMoZWwsIHsKICAgICAgc2NhbGU6IDIsCiAgICAgIHVzZUNPUlM6IHRydWUsCiAgICAgIGxvZ2dpbmc6IGZhbHNlLAogICAgICBiYWNrZ3JvdW5kQ29sb3I6ICcjZmZmZmZmJywKICAgICAgc2Nyb2xsWDogMCwKICAgICAgc2Nyb2xsWTogLXdpbmRvdy5zY3JvbGxZLAogICAgICB3aW5kb3dXaWR0aDogODIwLAogICAgICBvbmNsb25lOiBmdW5jdGlvbiAoZG9jKSB7CiAgICAgICAgY29uc3QgYyA9IGRvYy5nZXRFbGVtZW50QnlJZCgnaW52b2ljZS1hcmVhJyk7CiAgICAgICAgYy5zdHlsZS53aWR0aCA9ICc3ODBweCc7CiAgICAgICAgYy5zdHlsZS5tYXhXaWR0aCA9ICc3ODBweCc7CiAgICAgICAgYy5zdHlsZS5tYXJnaW4gPSAnMCc7CiAgICAgICAgYy5zdHlsZS5ib3hTaGFkb3cgPSAnbm9uZSc7CiAgICAgICAgYy5xdWVyeVNlbGVjdG9yQWxsKCd0cicpLmZvckVhY2godHIgPT4geyBpZiAodHIubGFzdEVsZW1lbnRDaGlsZCkgdHIucmVtb3ZlQ2hpbGQodHIubGFzdEVsZW1lbnRDaGlsZCk7IH0pOwogICAgICAgIGNvbnN0IHRiID0gYy5xdWVyeVNlbGVjdG9yKCcudG90YWxzLWJveCcpOwogICAgICAgIGlmICh0YikgeyB0Yi5zdHlsZS53aWR0aCA9ICczMjBweCc7IH0KICAgICAgfQogICAgfSk7CiAgfQoKICBmdW5jdGlvbiBjb25UaW1lb3V0KHAsIG1zLCBtc2cpIHsKICAgIHJldHVybiBQcm9taXNlLnJhY2UoW3AsIG5ldyBQcm9taXNlKChfLCByZWopID0+IHNldFRpbWVvdXQoKCkgPT4gcmVqKG5ldyBFcnJvcihtc2cpKSwgbXMpKV0pOwogIH0KCiAgYXN5bmMgZnVuY3Rpb24gZXhwb3J0YXJQREYoKSB7CiAgICBpZiAoaXRlbXMubGVuZ3RoID09PSAwKSB7IGFsZXJ0KCJObyBoYXkgZWxlbWVudG9zIHBhcmEgZXhwb3J0YXIuIik7IHJldHVybjsgfQogICAgaWYgKGV4cG9ydGFuZG8pIHJldHVybjsKICAgIGlmICghd2luZG93LmpzcGRmIHx8IHR5cGVvZiBodG1sMmNhbnZhcyA9PT0gJ3VuZGVmaW5lZCcpIHsKICAgICAgYWxlcnQoIk5vIGNhcmdhcm9uIGxhcyBsaWJyZXLDrWFzIGRlIFBERi4gUmV2aXNhIHR1IGNvbmV4acOzbiBlIGludMOpbnRhbG8gZGUgbnVldm8uIik7CiAgICAgIHJldHVybjsKICAgIH0KICAgIGV4cG9ydGFuZG8gPSB0cnVlOwogICAgdHJ5IHsKICAgICAgY29uc3QgY2FudmFzID0gYXdhaXQgY29uVGltZW91dChjYXB0dXJhckZhY3R1cmEoKSwgMjUwMDAsICdUaWVtcG8gYWdvdGFkbyBhbCBnZW5lcmFyIGVsIFBERicpOwogICAgICBjb25zdCB7IGpzUERGIH0gPSB3aW5kb3cuanNwZGY7CiAgICAgIGNvbnN0IHBkZiA9IG5ldyBqc1BERih7IHVuaXQ6ICdtbScsIGZvcm1hdDogJ2E0Jywgb3JpZW50YXRpb246ICdwb3J0cmFpdCcgfSk7CiAgICAgIGNvbnN0IG1hcmdpbiA9IDEwOwogICAgICBjb25zdCBwYWdlVyA9IHBkZi5pbnRlcm5hbC5wYWdlU2l6ZS5nZXRXaWR0aCgpIC0gbWFyZ2luICogMjsKICAgICAgY29uc3QgcGFnZUggPSBwZGYuaW50ZXJuYWwucGFnZVNpemUuZ2V0SGVpZ2h0KCkgLSBtYXJnaW4gKiAyOwogICAgICBjb25zdCBtbVBlclB4ID0gcGFnZVcgLyBjYW52YXMud2lkdGg7CiAgICAgIGNvbnN0IHB4UGVyUGFnZSA9IE1hdGguZmxvb3IocGFnZUggLyBtbVBlclB4KTsKICAgICAgbGV0IHkgPSAwLCBmaXJzdCA9IHRydWU7CiAgICAgIHdoaWxlICh5IDwgY2FudmFzLmhlaWdodCkgewogICAgICAgIGNvbnN0IGggPSBNYXRoLm1pbihweFBlclBhZ2UsIGNhbnZhcy5oZWlnaHQgLSB5KTsKICAgICAgICBjb25zdCBwYXJ0ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnY2FudmFzJyk7CiAgICAgICAgcGFydC53aWR0aCA9IGNhbnZhcy53aWR0aDsKICAgICAgICBwYXJ0LmhlaWdodCA9IGg7CiAgICAgICAgY29uc3QgY3R4ID0gcGFydC5nZXRDb250ZXh0KCcyZCcpOwogICAgICAgIGN0eC5maWxsU3R5bGUgPSAnI2ZmZmZmZic7CiAgICAgICAgY3R4LmZpbGxSZWN0KDAsIDAsIHBhcnQud2lkdGgsIHBhcnQuaGVpZ2h0KTsKICAgICAgICBjdHguZHJhd0ltYWdlKGNhbnZhcywgMCwgeSwgY2FudmFzLndpZHRoLCBoLCAwLCAwLCBjYW52YXMud2lkdGgsIGgpOwogICAgICAgIGlmICghZmlyc3QpIHBkZi5hZGRQYWdlKCk7CiAgICAgICAgcGRmLmFkZEltYWdlKHBhcnQudG9EYXRhVVJMKCdpbWFnZS9qcGVnJywgMC45NSksICdKUEVHJywgbWFyZ2luLCBtYXJnaW4sIHBhZ2VXLCBoICogbW1QZXJQeCk7CiAgICAgICAgZmlyc3QgPSBmYWxzZTsKICAgICAgICB5ICs9IGg7CiAgICAgIH0KICAgICAgcGRmLnNhdmUoJ0NvdGl6YWNpb25fRnJhZ2FuY2lhc19KUy5wZGYnKTsKICAgIH0gY2F0Y2ggKGUpIHsKICAgICAgY29uc29sZS5lcnJvcihlKTsKICAgICAgYWxlcnQoIk5vIHNlIHB1ZG8gZ2VuZXJhciBlbCBQREY6ICIgKyAoZSAmJiBlLm1lc3NhZ2UgPyBlLm1lc3NhZ2UgOiBlKSArICJcblB1ZWRlcyB1c2FyICdEZXNjYXJnYXIgSW1hZ2VuJyBjb21vIGFsdGVybmF0aXZhLiIpOwogICAgfSBmaW5hbGx5IHsKICAgICAgZXhwb3J0YW5kbyA9IGZhbHNlOwogICAgfQogIH0KCiAgYXN5bmMgZnVuY3Rpb24gZXhwb3J0YXJJbWFnZW4oKSB7CiAgICBpZiAoaXRlbXMubGVuZ3RoID09PSAwKSB7IGFsZXJ0KCJObyBoYXkgZWxlbWVudG9zIHBhcmEgZXhwb3J0YXIuIik7IHJldHVybjsgfQogICAgaWYgKGV4cG9ydGFuZG8pIHJldHVybjsKICAgIGlmICh0eXBlb2YgaHRtbDJjYW52YXMgPT09ICd1bmRlZmluZWQnKSB7IGFsZXJ0KCJObyBjYXJnw7MgbGEgbGlicmVyw61hIGRlIGltYWdlbi4gUmVjYXJnYSBlIGludMOpbnRhbG8gZGUgbnVldm8uIik7IHJldHVybjsgfQogICAgZXhwb3J0YW5kbyA9IHRydWU7CiAgICB0cnkgewogICAgICBjb25zdCBjYW52YXMgPSBhd2FpdCBjb25UaW1lb3V0KGNhcHR1cmFyRmFjdHVyYSgpLCAyNTAwMCwgJ1RpZW1wbyBhZ290YWRvIGFsIGdlbmVyYXIgbGEgaW1hZ2VuJyk7CiAgICAgIGNvbnN0IGxpbmsgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdhJyk7CiAgICAgIGxpbmsuZG93bmxvYWQgPSAnQ290aXphY2lvbl9GcmFnYW5jaWFzX0pTLnBuZyc7CiAgICAgIGxpbmsuaHJlZiA9IGNhbnZhcy50b0RhdGFVUkwoJ2ltYWdlL3BuZycpOwogICAgICBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKGxpbmspOwogICAgICBsaW5rLmNsaWNrKCk7CiAgICAgIGxpbmsucmVtb3ZlKCk7CiAgICB9IGNhdGNoIChlKSB7CiAgICAgIGNvbnNvbGUuZXJyb3IoZSk7CiAgICAgIGFsZXJ0KCJObyBzZSBwdWRvIGdlbmVyYXIgbGEgaW1hZ2VuOiAiICsgKGUgJiYgZS5tZXNzYWdlID8gZS5tZXNzYWdlIDogZSkpOwogICAgfSBmaW5hbGx5IHsKICAgICAgZXhwb3J0YW5kbyA9IGZhbHNlOwogICAgfQogIH0KCiAgLy8gRXNjIGRlbnRybyBkZWwgY290aXphZG9yIGNpZXJyYSBsYSB2ZW50YW5hIChlbCBmb2NvIGVzdMOhIGVuIGVsIGlmcmFtZSkKICBkb2N1bWVudC5hZGRFdmVudExpc3RlbmVyKCdrZXlkb3duJywgZnVuY3Rpb24gKGUpIHsKICAgIGlmIChlLmtleSA9PT0gJ0VzY2FwZScgJiYgd2luZG93LnBhcmVudCAmJiB3aW5kb3cucGFyZW50LmNsb3NlQ2FsY01vZGFsKSB3aW5kb3cucGFyZW50LmNsb3NlQ2FsY01vZGFsKCk7CiAgfSk7CgogIC8vIEluaWNpYWxpemFjacOzbgogIHdpbmRvdy5vbmxvYWQgPSBmdW5jdGlvbigpIHsKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdpbnZvaWNlRGF0ZScpLmlubmVyVGV4dCA9IG5ldyBEYXRlKCkudG9Mb2NhbGVEYXRlU3RyaW5nKCdlcy1NWCcpOwogICAgb2J0ZW5lclRpcG9DYW1iaW8oKTsKICB9Owo8L3NjcmlwdD4KCjwvYm9keT4KPC9odG1sPgo=";
+    /* Código HTML completo del Cotizador con Costo de Importación Opcional */
+    const CALC_HTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cotizador y Facturación de Fragancias</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+
+  <style>
+    :root {
+      --primary: #1e293b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --border: #e2e8f0;
+      --success: #16a34a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 24px 16px; }
+    .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 24px; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+    h2, h3 { color: var(--primary); margin-bottom: 16px; font-weight: 700; }
+    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 0.85rem; font-weight: 600; color: #475569; }
+    input, select { padding: 10px 12px; border: 1.5px solid #94a3b8; border-radius: 8px; font-size: 1rem; outline: none; background: #f8fafc; color: #0f172a; }
+    input:focus, select:focus { border-color: var(--accent); background: #ffffff; box-shadow: 0 0 0 3px rgba(37,99,235,.2); }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    button { cursor: pointer; padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; transition: all 0.2s; font-size: 0.9rem; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-excel { background: #107c41; color: white; }
+    .btn-pdf { background: #dc2626; color: white; }
+    .btn-img { background: #6b21a8; color: white; }
+    .btn-clear { background: #64748b; color: white; }
+
+    #invoice-area { background: #ffffff; padding: 30px; border-radius: 10px; border: 1px solid #cbd5e1; }
+    .invoice-header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px; }
+    .invoice-title { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+    .invoice-meta { font-size: 0.85rem; color: #64748b; text-align: right; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
+    th { background: #f1f5f9; text-align: left; padding: 10px; color: #334155; }
+    td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .totals-box { margin-left: auto; width: 340px; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; }
+    .totals-row { display: flex; justify-content: space-between; }
+    .totals-row.final { font-weight: bold; font-size: 1.15rem; border-top: 2px solid #cbd5e1; padding-top: 8px; color: var(--primary); }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+    .badge-auto { background: #e0f2fe; color: #0284c7; }
+    .tag-alert { color: #dc2626; font-size: 0.8rem; font-weight: bold; }
+    .import-options-card { background: #f1f5f9; border-radius: 8px; padding: 14px; border: 1px solid #cbd5e1; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  
+  <!-- Configuración General y Divisas -->
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2>Configuración de Divisa</h2>
+      <span id="rateStatus" class="badge badge-auto">Consultando tipo de cambio...</span>
+    </div>
+    <div class="grid-form" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+      <div class="form-group">
+        <label>Tipo de Cambio Actual (USD a MXN):</label>
+        <input type="number" id="usdToMxn" step="0.01" value="20.00" onchange="actualizarTablaTotales()">
+      </div>
+      <div class="form-group" style="justify-content: flex-end;">
+        <button type="button" class="btn-clear" onclick="obtenerTipoCambio()">Actualizar Cambio en Vivo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configuración Opcional del Costo de Importación -->
+  <div class="card">
+    <h2>Costo de Importación (Opcional)</h2>
+    <div class="import-options-card">
+      <div class="grid-form" style="margin-bottom: 0;">
+        <div class="form-group">
+          <label>Modo de Cobro de Importación:</label>
+          <select id="importMode" onchange="cambiarModoImportacion()">
+            <option value="percentage">Por Porcentaje (Ej. 14%)</option>
+            <option value="fixed_usd">Cantidad Fija por Pieza (USD)</option>
+            <option value="fixed_mxn">Cantidad Fija Total (MXN)</option>
+            <option value="disabled">Sin Costo de Importación ($0)</option>
+          </select>
+        </div>
+        <div class="form-group" id="importValGroup">
+          <label id="importValLabel">Porcentaje a cobrar (%):</label>
+          <input type="number" id="importVal" step="0.5" value="14" oninput="actualizarTablaTotales()">
+        </div>
+      </div>
+      <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px;" id="importHelpText">
+        Se aplicará un 14% sobre el subtotal del pedido como tarifa opcional de importación.
+      </p>
+    </div>
+  </div>
+
+  <!-- Formulario de Entrada de Fragancias -->
+  <div class="card">
+    <h2>Agregar Fragancia</h2>
+    <div class="grid-form">
+      <div class="form-group" style="grid-column: span 2;">
+        <label>Nombre de la Fragancia / Casa:</label>
+        <input type="text" id="fragName" placeholder="Ej. Lattafa Khamrah 100ml">
+      </div>
+      <div class="form-group">
+        <label>Precio de Lista (USD):</label>
+        <input type="number" id="fragPrice" step="0.01" placeholder="Ej. 50.00" oninput="calcularPreview()">
+      </div>
+      <div class="form-group">
+        <label>Descuento en la página (%):</label>
+        <input type="number" id="fragDiscount" step="1" value="0" placeholder="Ej. 15" oninput="calcularPreview()">
+      </div>
+      <div class="form-group">
+        <label>Peso Aprox. por unidad (kg):</label>
+        <input type="number" id="fragWeight" step="0.05" value="0.5" placeholder="0.5">
+      </div>
+      <div class="form-group">
+        <label>Cantidad:</label>
+        <input type="number" id="fragQty" value="1" min="1">
+      </div>
+    </div>
+
+    <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; color: #475569;">
+      <strong>Vista previa del producto:</strong> Precio con desc: <span id="previewUSD">$0.00 USD</span> | En pesos: <span id="previewMXN">$0.00 MXN</span>
+    </div>
+
+    <button type="button" class="btn-primary" onclick="agregarFragancia()">+ Agregar al Pedido</button>
+  </div>
+
+  <!-- Vista de Factura / Resumen -->
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h2>Cotización / Factura</h2>
+      <div class="btn-row">
+        <button class="btn-excel" onclick="exportarExcel()">Descargar Excel</button>
+        <button class="btn-pdf" onclick="exportarPDF()">Descargar PDF</button>
+        <button class="btn-img" onclick="exportarImagen()">Descargar Imagen</button>
+        <button class="btn-clear" onclick="limpiarLista()">Limpiar Todo</button>
+      </div>
+    </div>
+
+    <!-- Documento a Exportar -->
+    <div id="invoice-area">
+      <div class="invoice-header">
+        <div>
+          <div class="invoice-title">COTIZACIÓN / NOTA DE COMPRA</div>
+          <div style="color: #64748b; font-size: 0.9rem;">JS Fragances &bull; Importación y Entrega a México</div>
+        </div>
+        <div class="invoice-meta">
+          <p><strong>Fecha:</strong> <span id="invoiceDate"></span></p>
+          <p><strong>T.C.:</strong> <span id="invoiceRate"></span> MXN/USD</p>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Descripción</th>
+            <th class="text-center">Cant.</th>
+            <th class="text-right">Unitario (USD)</th>
+            <th class="text-right">Unitario (MXN)</th>
+            <th class="text-right">Subtotal (MXN)</th>
+            <th class="text-center">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="itemsTableBody"></tbody>
+      </table>
+
+      <div class="totals-box">
+        <div class="totals-row">
+          <span>Subtotal Productos:</span>
+          <span id="totSubtotalMXN">$0.00 MXN</span>
+        </div>
+        <div class="totals-row" id="rowImportTax">
+          <span id="labelImportTax">Costo de Importación:</span>
+          <span id="totTaxMXN">$0.00 MXN</span>
+        </div>
+        <div class="totals-row">
+          <span>Tarifa Cruce e Importación:</span>
+          <span id="totCruceMXN">$0.00 MXN</span>
+        </div>
+        <div class="totals-row" style="font-size: 0.8rem; color: #64748b;">
+          <span>Peso total acumulado:</span>
+          <span id="totPeso">0.00 kg</span>
+        </div>
+        <div id="customCruceWarning" class="tag-alert" style="display: none;">
+          * Peso mayor a 10 kg: Requiere cotización personalizada de cruce.
+        </div>
+        <div class="totals-row final">
+          <span>TOTAL A PAGAR:</span>
+          <span id="totFinalMXN">$0.00 MXN</span>
+        </div>
+        <div class="totals-row" style="font-size: 0.85rem; color: #64748b; justify-content: flex-end;">
+          <span id="totFinalUSD">($0.00 USD aprox.)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let items = [];
+
+  function cambiarModoImportacion() {
+    const mode = document.getElementById('importMode').value;
+    const group = document.getElementById('importValGroup');
+    const label = document.getElementById('importValLabel');
+    const input = document.getElementById('importVal');
+    const help = document.getElementById('importHelpText');
+
+    if (mode === 'percentage') {
+      group.style.display = 'flex';
+      label.innerText = 'Porcentaje a cobrar (%):';
+      input.value = input.value || '14';
+      help.innerText = 'Se aplicará el ' + input.value + '% sobre el subtotal de productos.';
+    } else if (mode === 'fixed_usd') {
+      group.style.display = 'flex';
+      label.innerText = 'Monto en USD por pieza:';
+      input.value = '3.00';
+      help.innerText = 'Se sumará el monto en USD convertido a MXN por cada fragancia.';
+    } else if (mode === 'fixed_mxn') {
+      group.style.display = 'flex';
+      label.innerText = 'Monto fijo total (MXN):';
+      input.value = '250';
+      help.innerText = 'Se agregará una cuota fija en pesos como costo de importación.';
+    } else {
+      group.style.display = 'none';
+      help.innerText = 'Sin cobro de costo de importación ($0 MXN).';
+    }
+    actualizarTablaTotales();
+  }
+
+  async function obtenerTipoCambio() {
+    const status = document.getElementById('rateStatus');
+    status.innerText = "Actualizando...";
+    try {
+      const response = await fetch('https://open.er-api.com/v6/latest/USD');
+      const data = await response.json();
+      if (data && data.rates && data.rates.MXN) {
+        document.getElementById('usdToMxn').value = data.rates.MXN.toFixed(2);
+        status.innerText = "En vivo: $" + data.rates.MXN.toFixed(2) + " MXN";
+        actualizarTablaTotales();
+      }
+    } catch (e) {
+      status.innerText = "Manual (Fallo API)";
+    }
+  }
+
+  function calcularPreview() {
+    const price = parseFloat(document.getElementById('fragPrice').value) || 0;
+    const discount = parseFloat(document.getElementById('fragDiscount').value) || 0;
+    const rate = parseFloat(document.getElementById('usdToMxn').value) || 1;
+
+    const precioFinalUSD = price * (1 - (discount / 100));
+    const precioFinalMXN = precioFinalUSD * rate;
+
+    document.getElementById('previewUSD').innerText = "$" + precioFinalUSD.toFixed(2) + " USD";
+    document.getElementById('previewMXN').innerText = "$" + precioFinalMXN.toFixed(2) + " MXN";
+  }
+
+  function agregarFragancia() {
+    const name = document.getElementById('fragName').value.trim();
+    const priceUSD = parseFloat(document.getElementById('fragPrice').value) || 0;
+    const discount = parseFloat(document.getElementById('fragDiscount').value) || 0;
+    const weight = parseFloat(document.getElementById('fragWeight').value) || 0.5;
+    const qty = parseInt(document.getElementById('fragQty').value) || 1;
+
+    if (!name || priceUSD <= 0) {
+      alert("Por favor introduce el nombre y el precio en USD.");
+      return;
+    }
+
+    const priceAfterDiscountUSD = priceUSD * (1 - (discount / 100));
+
+    items.push({
+      id: Date.now(),
+      name: name,
+      priceUSD: priceAfterDiscountUSD,
+      weight: weight,
+      qty: qty
+    });
+
+    document.getElementById('fragName').value = '';
+    document.getElementById('fragPrice').value = '';
+    document.getElementById('fragDiscount').value = '0';
+    document.getElementById('fragQty').value = '1';
+    calcularPreview();
+    actualizarTablaTotales();
+  }
+
+  function eliminarItem(id) {
+    items = items.filter(item => item.id !== id);
+    actualizarTablaTotales();
+  }
+
+  function limpiarLista() {
+    if (confirm("¿Estás seguro de vaciar la cotización actual?")) {
+      items = [];
+      actualizarTablaTotales();
+    }
+  }
+
+  function calcularCruce(pesoTotal) {
+    if (pesoTotal <= 0) return 0;
+    if (pesoTotal <= 1) return 200;
+    if (pesoTotal <= 3) return 300;
+    if (pesoTotal <= 5) return 400;
+    if (pesoTotal < 6) return 500;
+    if (pesoTotal <= 10) return Math.floor(pesoTotal) * 100;
+    return 1000;
+  }
+
+  function actualizarTablaTotales() {
+    const rate = parseFloat(document.getElementById('usdToMxn').value) || 1;
+    const tbody = document.getElementById('itemsTableBody');
+    tbody.innerHTML = '';
+
+    let subtotalUSD = 0;
+    let totalPeso = 0;
+    let totalPiezas = 0;
+
+    items.forEach(item => {
+      const itemSubtotalUSD = item.priceUSD * item.qty;
+      const itemPriceMXN = item.priceUSD * rate;
+      const itemSubtotalMXN = itemSubtotalUSD * rate;
+
+      subtotalUSD += itemSubtotalUSD;
+      totalPeso += (item.weight * item.qty);
+      totalPiezas += item.qty;
+
+      const row = document.createElement('tr');
+      row.innerHTML = '<td><strong>' + item.name + '</strong></td>' +
+        '<td class="text-center">' + item.qty + '</td>' +
+        '<td class="text-right">$' + item.priceUSD.toFixed(2) + '</td>' +
+        '<td class="text-right">$' + itemPriceMXN.toFixed(2) + '</td>' +
+        '<td class="text-right">$' + itemSubtotalMXN.toFixed(2) + '</td>' +
+        '<td class="text-center"><button style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:1.1rem;" onclick="eliminarItem(' + item.id + ')">&times;</button></td>';
+      tbody.appendChild(row);
+    });
+
+    const subtotalMXN = subtotalUSD * rate;
+    
+    // CÁLCULO DINÁMICO DEL COSTO DE IMPORTACIÓN (CAMBIO 1)
+    const mode = document.getElementById('importMode').value;
+    const valInput = parseFloat(document.getElementById('importVal').value) || 0;
+    let taxOcultoMXN = 0;
+    const labelTax = document.getElementById('labelImportTax');
+
+    if (mode === 'percentage') {
+      taxOcultoMXN = subtotalMXN * (valInput / 100);
+      labelTax.innerText = 'Costo de Importación (' + valInput + '%):';
+    } else if (mode === 'fixed_usd') {
+      taxOcultoMXN = (totalPiezas * valInput) * rate;
+      labelTax.innerText = 'Costo de Importación ($' + valInput.toFixed(2) + ' USD/pza):';
+    } else if (mode === 'fixed_mxn') {
+      taxOcultoMXN = items.length > 0 ? valInput : 0;
+      labelTax.innerText = 'Costo de Importación (Fijo):';
+    } else {
+      taxOcultoMXN = 0;
+      labelTax.innerText = 'Costo de Importación (Sin cargo):';
+    }
+
+    const costoCruce = items.length > 0 ? calcularCruce(totalPeso) : 0;
+    const totalFinalMXN = subtotalMXN + taxOcultoMXN + costoCruce;
+    const totalFinalUSD = totalFinalMXN / rate;
+
+    document.getElementById('totSubtotalMXN').innerText = "$" + subtotalMXN.toFixed(2) + " MXN";
+    document.getElementById('totTaxMXN').innerText = "$" + taxOcultoMXN.toFixed(2) + " MXN";
+    document.getElementById('totCruceMXN').innerText = "$" + costoCruce.toFixed(2) + " MXN";
+    document.getElementById('totPeso').innerText = totalPeso.toFixed(2) + " kg";
+    document.getElementById('totFinalMXN').innerText = "$" + totalFinalMXN.toFixed(2) + " MXN";
+    document.getElementById('totFinalUSD').innerText = "($" + totalFinalUSD.toFixed(2) + " USD aprox.)";
+
+    document.getElementById('customCruceWarning').style.display = totalPeso > 10 ? 'block' : 'none';
+    document.getElementById('invoiceRate').innerText = rate.toFixed(2);
+  }
+
+  function exportarExcel() {
+    if (items.length === 0) { alert("No hay elementos para exportar."); return; }
+    const rate = parseFloat(document.getElementById('usdToMxn').value) || 1;
+    const data = items.map(i => ({
+      "Fragancia": i.name,
+      "Cantidad": i.qty,
+      "Precio USD (c/ desc.)": (i.priceUSD).toFixed(2),
+      "Precio Unitario MXN": (i.priceUSD * rate).toFixed(2),
+      "Subtotal MXN": (i.priceUSD * i.qty * rate).toFixed(2),
+      "Peso Estimado (kg)": (i.weight * i.qty).toFixed(2)
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Cotización");
+    XLSX.writeFile(wb, "Cotizacion_Fragancias.xlsx");
+  }
+
+  let exportando = false;
+
+  function capturarFactura() {
+    window.scrollTo(0, 0);
+    const el = document.getElementById('invoice-area');
+    return html2canvas(el, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      scrollX: 0,
+      scrollY: -window.scrollY,
+      windowWidth: 820,
+      onclone: function (doc) {
+        const c = doc.getElementById('invoice-area');
+        c.style.width = '780px';
+        c.style.maxWidth = '780px';
+        c.style.margin = '0';
+        c.style.boxShadow = 'none';
+        c.querySelectorAll('tr').forEach(tr => { if (tr.lastElementChild) tr.removeChild(tr.lastElementChild); });
+        const tb = c.querySelector('.totals-box');
+        if (tb) tb.style.width = '340px';
+      }
+    });
+  }
+
+  function conTimeout(p, ms, msg) {
+    return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(msg)), ms))]);
+  }
+
+  async function exportarPDF() {
+    if (items.length === 0) { alert("No hay elementos para exportar."); return; }
+    if (exportando) return;
+    exportando = true;
+    try {
+      const canvas = await conTimeout(capturarFactura(), 25000, 'Tiempo agotado al generar el PDF');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+      const margin = 10;
+      const pageW = pdf.internal.pageSize.getWidth() - margin * 2;
+      const pageH = pdf.internal.pageSize.getHeight() - margin * 2;
+      const mmPerPx = pageW / canvas.width;
+      const pxPerPage = Math.floor(pageH / mmPerPx);
+      let y = 0, first = true;
+      while (y < canvas.height) {
+        const h = Math.min(pxPerPage, canvas.height - y);
+        const part = document.createElement('canvas');
+        part.width = canvas.width;
+        part.height = h;
+        const ctx = part.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, part.width, part.height);
+        ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+        if (!first) pdf.addPage();
+        pdf.addImage(part.toDataURL('image/jpeg', 0.95), 'JPEG', margin, margin, pageW, h * mmPerPx);
+        first = false;
+        y += h;
+      }
+      pdf.save('Cotizacion_Fragancias_JS.pdf');
+    } catch (e) {
+      alert("No se pudo generar el PDF: " + (e && e.message ? e.message : e));
+    } finally {
+      exportando = false;
+    }
+  }
+
+  async function exportarImagen() {
+    if (items.length === 0) { alert("No hay elementos para exportar."); return; }
+    if (exportando) return;
+    exportando = true;
+    try {
+      const canvas = await conTimeout(capturarFactura(), 25000, 'Tiempo agotado al generar la imagen');
+      const link = document.createElement('a');
+      link.download = 'Cotizacion_Fragancias_JS.png';
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e) {
+      alert("No se pudo generar la imagen: " + (e && e.message ? e.message : e));
+    } finally {
+      exportando = false;
+    }
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && window.parent && window.parent.closeCalcModal) window.parent.closeCalcModal();
+  });
+
+  window.onload = function () {
+    document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('es-MX');
+    obtenerTipoCambio();
+    cambiarModoImportacion();
+  };
+<\/script>
+</body>
+</html>`;
+
     let loaded = false;
     window.openCalcModal = function(){
       if (typeof isAdminLoggedIn !== 'undefined' && !isAdminLoggedIn) return;
       if (!loaded) {
-        document.getElementById('calc-frame').srcdoc = new TextDecoder().decode(Uint8Array.from(atob(CALC_B64), c => c.charCodeAt(0)));
+        document.getElementById('calc-frame').srcdoc = CALC_HTML;
         loaded = true;
       }
       document.getElementById('calc-modal').classList.remove('hidden');
