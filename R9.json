@@ -75,16 +75,16 @@
    },
    "prices": {
     "3ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 210
     },
     "5ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 330
     },
     "10ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 625
     },
     "bottle": {
      "price": 0,
