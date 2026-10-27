@@ -1061,6 +1061,11 @@
                 <label class="px-2 py-0.5 rounded bg-amber-950/60 border border-gold text-gold font-extrabold text-[9px] cursor-pointer"><input type="checkbox" id="frag-bottle-ondemand"> 📦 BAJO PEDIDO</label>
               </div>
             </div>
+            <div class="flex items-center gap-1.5 text-[9px] font-bold flex-wrap">
+              <span class="text-zinc-400 uppercase tracking-wider">Tipo de botella:</span>
+              <label class="px-2 py-0.5 rounded border border-zinc-600 cursor-pointer"><input type="radio" name="frag-bottle-type" id="frag-bottle-type-linea" value="linea" checked> 🏷️ De línea</label>
+              <label class="px-2 py-0.5 rounded border border-gold/60 text-gold cursor-pointer"><input type="radio" name="frag-bottle-type" id="frag-bottle-type-tester" value="tester"> 🧪 Tester</label>
+            </div>
             <input type="number" id="frag-price-bottle" placeholder="Precio Botella (o dejar en 0)" class="w-full themed-input rounded-lg px-2.5 py-1 text-xs text-gold font-bold">
           </div>
         </div>
@@ -1542,6 +1547,7 @@
 
     // ================= GUIAS Y CALCULADORA VOLUMÉTRICA =================
     function openShippingModal() {
+      if (typeof acOnOpen === 'function') acOnOpen();
       document.getElementById('shipping-modal').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -1618,6 +1624,7 @@
 
     function handleShippingSubmit(e) {
       e.preventDefault();
+      if (typeof acSave === 'function') acSave();
       const courier = document.getElementById('ship-courier').value;
       const weight = document.getElementById('ship-weight').value;
       const contents = document.getElementById('ship-contents').value.trim();
@@ -1674,6 +1681,7 @@
     }
 
     const SIZES = [['3ml', '3 ml'], ['5ml', '5 ml'], ['10ml', '10 ml'], ['bottle', 'Botella']];
+    const isTesterBottle = f => (typeof f === 'string' ? fragrances.find(x => x.id === f) : f)?.prices?.bottle?.type === 'tester';
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const r1 = n => Math.round(n * 10) / 10;
     const fmtMl = n => Number.isInteger(n) ? n : n.toFixed(1);
@@ -1713,16 +1721,18 @@
         '10ml': 'border-zinc-700/60 hover:border-gold/60 bg-zinc-900/40',
         'bottle': 'border-zinc-700/60 hover:border-gold/60 bg-zinc-900/40'
       };
-      const btns = SIZES.map(([k, l]) => {
+      const btns = SIZES.map(([k, l0]) => {
+        const l = (k === 'bottle' && isTesterBottle(f)) ? (pv ? 'Botella Tester' : '🧪 Tester') : l0;
         const s = sizeState(f, k);
         if (k === 'bottle' && s.onDemand) {
           const btnTone = 'border border-gold bg-gold/15 text-gold font-bold';
-          return `<button onclick="orderBottleOnDemand('${f.id}')" title="Encargar botella bajo pedido vía WhatsApp" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl ${btnTone} transition flex flex-col items-center hover:brightness-125 cursor-pointer"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-extrabold text-gold">BOTELLA</span><span class="${pv ? 'text-xs' : 'text-[10px]'} font-bold leading-tight">${s.label === 'Bajo Pedido' ? 'BAJO PEDIDO' : s.label}</span></button>`;
+          return `<button onclick="orderBottleOnDemand('${f.id}')" title="Encargar botella bajo pedido vía WhatsApp" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl ${btnTone} transition flex flex-col items-center hover:brightness-125 cursor-pointer"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-extrabold text-gold">${isTesterBottle(f) ? '🧪 TESTER' : 'BOTELLA'}</span><span class="${pv ? 'text-xs' : 'text-[10px]'} font-bold leading-tight">${s.label === 'Bajo Pedido' ? 'BAJO PEDIDO' : s.label}</span></button>`;
         }
         return `<button ${s.ok ? `onclick="addToCart('${f.id}','${k}')"` : 'disabled'} title="${s.ok ? '' : esc(s.reason)}" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl border ${tone[k]} transition flex flex-col items-center ${s.ok ? 'hover:brightness-125 cursor-pointer' : 'opacity-30 cursor-not-allowed'}"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-bold tracking-wider ${k === '5ml' ? 'text-gold' : 'text-zinc-400'}">${l}</span><span class="${pv ? 'text-xs' : 'text-[11px]'} font-bold ${s.ok ? '' : 'text-zinc-500 line-through'}">${s.label}</span></button>`;
       }).join('');
 
       const notes = [];
+      if (isTesterBottle(f) && f.prices?.bottle?.price > 0) notes.push('🧪 La botella completa es versión tester (no de línea)');
       if (hasMl(f) && ['3ml', '5ml', '10ml'].some(k => f.prices?.[k]?.price > 0)) {
         const a = availMl(f);
         if (a <= 0) notes.push('🚫 Decants agotados');
@@ -1965,6 +1975,7 @@
       const text = `¡Hola! 👋 Me interesa solicitar *BAJO PEDIDO / ENCARGO* el frasco completo de:\n\n` +
                    `🏷️ *Casa:* ${f.brand}\n` +
                    `🌸 *Fragancia:* ${f.name}\n` +
+                   `🧴 *Tipo de botella:* ${isTesterBottle(f) ? 'Tester' : 'De línea'}\n` +
                    `✨ *Concentración:* ${f.concentration || 'EDP'}${priceText}\n\n` +
                    `¿Me podrías confirmar tiempo de entrega estimado y coordinar el encargo por favor?`;
       window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
@@ -1984,7 +1995,7 @@
       const it = cart.find(i => i.fragId === fragId && i.size === size);
       if (it) it.qty += 1; else cart.push({ fragId, name: frag.name, brand: frag.brand, size, price: frag.prices[size].price, qty: 1 });
       updateCartUI(); refreshStockAreas(fragId);
-      showToast(`Agregado a la bolsa: ${frag.name} (${size === 'bottle' ? 'Botella Completa' : size})`);
+      showToast(`Agregado a la bolsa: ${frag.name} (${size === 'bottle' ? (isTesterBottle(frag) ? 'Botella Tester' : 'Botella Completa') : size})`);
     }
 
     function removeFromCart(i) { const id = cart[i].fragId; cart.splice(i, 1); updateCartUI(); refreshStockAreas(id); }
@@ -2000,7 +2011,7 @@
       const box = document.getElementById('cart-items-container'); let n = 0, total = 0;
       box.innerHTML = cart.length ? cart.map((it, idx) => {
         n += it.qty; total += it.price * it.qty;
-        return `<div class="p-2.5 rounded-xl themed-input border flex items-center justify-between gap-2"><div><span class="text-[8px] uppercase tracking-luxury text-gold font-bold block">${esc(it.brand)}</span><span class="text-xs font-semibold block truncate max-w-[140px]">${esc(it.name)}</span><span class="text-[10px] text-zinc-400">${it.size === 'bottle' ? 'Botella' : it.size} (${formatPrice(it.price)})</span></div><div class="flex items-center gap-1"><button onclick="changeCartQty(${idx},-1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">&minus;</button><span class="text-xs font-bold w-3 text-center">${it.qty}</span><button onclick="changeCartQty(${idx},1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">+</button><span class="text-xs text-gold font-bold w-12 text-right font-mono">${formatPrice(it.price * it.qty)}</span><button onclick="removeFromCart(${idx})" class="p-1 text-zinc-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>`;
+        return `<div class="p-2.5 rounded-xl themed-input border flex items-center justify-between gap-2"><div><span class="text-[8px] uppercase tracking-luxury text-gold font-bold block">${esc(it.brand)}</span><span class="text-xs font-semibold block truncate max-w-[140px]">${esc(it.name)}</span><span class="text-[10px] text-zinc-400">${it.size === 'bottle' ? (isTesterBottle(it.fragId) ? 'Botella Tester' : 'Botella') : it.size} (${formatPrice(it.price)})</span></div><div class="flex items-center gap-1"><button onclick="changeCartQty(${idx},-1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">&minus;</button><span class="text-xs font-bold w-3 text-center">${it.qty}</span><button onclick="changeCartQty(${idx},1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">+</button><span class="text-xs text-gold font-bold w-12 text-right font-mono">${formatPrice(it.price * it.qty)}</span><button onclick="removeFromCart(${idx})" class="p-1 text-zinc-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>`;
       }).join('') : '<div class="py-8 text-center text-zinc-500"><div class="text-2xl mb-1 text-gold">✦</div><p>Tu bolsa de pedido está vacía</p></div>';
       document.getElementById('cart-count').textContent = n;
       document.getElementById('cart-total-price').textContent = total ? formatPrice(total) : getCurrencySymbol() + '0';
@@ -2043,7 +2054,7 @@
       cart.forEach((item) => {
         const subtotal = item.price * item.qty;
         total += subtotal;
-        const sizeTag = item.size === 'bottle' ? 'BOTELLA COMPLETA' : item.size;
+        const sizeTag = item.size === 'bottle' ? (isTesterBottle(item.fragId) ? 'BOTELLA TESTER' : 'BOTELLA COMPLETA') : item.size;
         orderListText += `▪ ${item.qty}x ${item.brand} - ${item.name} (${sizeTag}) -> ${formatPrice(subtotal)}\n`;
       });
 
@@ -2161,6 +2172,7 @@
         document.getElementById('form-edit-id').value = '';
         document.getElementById('modal-title').textContent = 'Agregar Fragancia';
         document.getElementById('frag-bottle-ondemand').checked = false;
+        document.getElementById('frag-bottle-type-linea').checked = true;
         updateImagePreview('');
         pyLoad(null);
       }
@@ -2178,8 +2190,51 @@
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) { document.getElementById('frag-image-url').value = e.target.result; updateImagePreview(e.target.result); };
+      reader.onload = function(e) {
+        const raw = e.target.result;
+        const img = new Image();
+        img.onload = function() {
+          let out = raw;
+          try { out = cleanBlackBackground(img) || raw; } catch (err) { console.warn('No se pudo limpiar el fondo:', err); }
+          document.getElementById('frag-image-url').value = out;
+          updateImagePreview(out);
+          if (out !== raw) showToast('Fondo negro quitado automáticamente ✓', 2800);
+        };
+        img.onerror = function() { document.getElementById('frag-image-url').value = raw; updateImagePreview(raw); };
+        img.src = raw;
+      };
       reader.readAsDataURL(file);
+    }
+
+    // Si la foto trae un fondo negro pegado a los bordes (pasa cuando un PNG transparente se guarda o
+    // comparte desde Fotos), lo vuelve transparente. Solo toca el negro conectado al borde de la imagen.
+    function cleanBlackBackground(img) {
+      const maxDim = 1000;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (Math.max(w, h) > maxDim) { const k = maxDim / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k); }
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const ctx = cv.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0, w, h);
+      const im = ctx.getImageData(0, 0, w, h), d = im.data;
+      const isBlack = i => d[i + 3] < 20 || (d[i] <= 10 && d[i + 1] <= 10 && d[i + 2] <= 10);
+      // Solo se limpia si las 4 esquinas son negras
+      const corners = [0, (w - 1) * 4, (h - 1) * w * 4, ((h - 1) * w + (w - 1)) * 4];
+      if (!corners.every(i => d[i + 3] >= 200 && isBlack(i))) return null;
+      const seen = new Uint8Array(w * h), stack = [];
+      const push = (x, y) => { if (x < 0 || y < 0 || x >= w || y >= h) return; const k = y * w + x; if (seen[k]) return; if (!isBlack(k * 4)) return; seen[k] = 1; stack.push(k); };
+      for (let x = 0; x < w; x++) { push(x, 0); push(x, h - 1); }
+      for (let y = 0; y < h; y++) { push(0, y); push(w - 1, y); }
+      while (stack.length) { const k = stack.pop(), x = k % w, y = (k - x) / w; push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1); }
+      // Borde: un pixel oscuro pegado al fondo quitado se vuelve semitransparente para evitar halo negro
+      const fringe = [];
+      for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+        const k = y * w + x; if (seen[k]) continue;
+        if (seen[k - 1] || seen[k + 1] || seen[k - w] || seen[k + w]) { const i = k * 4; if (Math.max(d[i], d[i + 1], d[i + 2]) < 70) fringe.push(i); }
+      }
+      for (let k = 0; k < seen.length; k++) if (seen[k]) d[k * 4 + 3] = 0;
+      fringe.forEach(i => { d[i + 3] = 90; });
+      ctx.putImageData(im, 0, 0);
+      return cv.toDataURL('image/png');
     }
 
     async function handleFragranceSubmit(e) {
@@ -2206,6 +2261,7 @@
       const pBottle = parseFloat(document.getElementById('frag-price-bottle').value) || 0;
       const pBottleAvail = document.getElementById('frag-bottle-avail').checked;
       const pBottleOnDemand = document.getElementById('frag-bottle-ondemand').checked;
+      const pBottleType = document.getElementById('frag-bottle-type-tester').checked ? 'tester' : 'linea';
 
       const itemData = {
         id: editId || 'frag-' + Date.now(),
@@ -2216,7 +2272,7 @@
           "3ml": { price: p3, inStock: p3Avail },
           "5ml": { price: p5, inStock: p5Avail },
           "10ml": { price: p10, inStock: p10Avail },
-          "bottle": { price: pBottle, inStock: pBottleAvail, onDemand: pBottleOnDemand }
+          "bottle": { price: pBottle, inStock: pBottleAvail, onDemand: pBottleOnDemand, type: pBottleType }
         }
       };
 
@@ -2262,6 +2318,8 @@
       document.getElementById('frag-price-bottle').value = pBottle.price || '';
       document.getElementById('frag-bottle-avail').checked = pBottle.inStock;
       document.getElementById('frag-bottle-ondemand').checked = !!pBottle.onDemand;
+      document.getElementById('frag-bottle-type-tester').checked = pBottle.type === 'tester';
+      document.getElementById('frag-bottle-type-linea').checked = pBottle.type !== 'tester';
 
       updateImagePreview(frag.image || '');
       pyLoad(frag.pyramid || pvPyramidFor(frag, true));
@@ -2870,6 +2928,164 @@ addEventListener('keydown', e => { if (e.key === 'Escape') closeDecantCalc(); })
 document.getElementById('decant-modal').addEventListener('click', e => { if (e.target.id === 'decant-modal') closeDecantCalc(); });
 document.addEventListener('DOMContentLoaded', pyRender);
 pyRender();
+</script>
+
+<script>
+/* ===== Autollenado de guías: remitente y destinatario ===== */
+const AC_CONTACTS = 'jf26_contacts', AC_SENDER = 'jf26_sender';
+const AC_FIELDS = ['name', 'phone', 'street', 'cp', 'colonia', 'city'];
+const acLoad = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } };
+const acStore = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const acEl = (p, f) => document.getElementById(p + '-' + f);
+const acVal = (p, f) => (acEl(p, f) ? acEl(p, f).value.trim() : '');
+const acRead = p => { const o = {}; AC_FIELDS.forEach(f => { o[f] = acVal(p, f); }); return o; };
+function acFill(p, data, onlyEmpty) {
+  AC_FIELDS.forEach(f => { const el = acEl(p, f); if (!el || !data[f]) return; if (onlyEmpty && el.value.trim()) return; el.value = data[f]; });
+}
+
+function acBuild() {
+  [['orig', true], ['dest', false]].forEach(([p, withNote]) => {
+    if (document.getElementById('ac-bar-' + p) || !acEl(p, 'name')) return;
+    acEl(p, 'name').closest('.grid').insertAdjacentHTML('beforebegin', `
+      <div id="ac-bar-${p}" class="space-y-1.5">
+        <div class="flex gap-1.5">
+          <select id="ac-sel-${p}" onchange="acPick('${p}', this)" class="flex-1 min-w-0 themed-input rounded-xl px-2 py-1 text-[11px]"></select>
+          <button type="button" onclick="acTogglePaste('${p}')" class="px-2.5 py-1 rounded-xl bg-gold/15 border border-gold/50 text-gold font-bold text-[10px] whitespace-nowrap">📋 Pegar datos</button>
+        </div>
+        <div id="ac-paste-${p}" class="hidden space-y-1.5">
+          <textarea id="ac-text-${p}" rows="4" placeholder="Pega aquí nombre, teléfono, calle, colonia, C.P. y ciudad (de WhatsApp, notas, etc.)" class="w-full themed-input rounded-xl px-2.5 py-1.5 text-[11px]"></textarea>
+          <button type="button" onclick="acParse('${p}')" class="w-full py-1.5 rounded-xl bg-gold text-black font-bold text-[11px]">⚡ Autollenar campos</button>
+        </div>
+        ${withNote ? '<p class="text-[9px] text-zinc-500">Tus contactos se guardan solo en este dispositivo · <button type="button" onclick="acClear()" class="underline">borrar datos guardados</button></p>' : ''}
+      </div>`);
+    acEl(p, 'cp').closest('.grid').insertAdjacentHTML('afterend', `<div id="ac-hint-${p}" class="hidden flex flex-wrap items-center gap-1 text-[10px]"></div>`);
+    acEl(p, 'name').setAttribute('list', 'ac-contacts-list');
+    acEl(p, 'name').addEventListener('change', () => acNameChosen(p));
+    acEl(p, 'cp').addEventListener('input', () => acCpLookup(p));
+  });
+  if (!document.getElementById('ac-contacts-list')) document.body.insertAdjacentHTML('beforeend', '<datalist id="ac-contacts-list"></datalist>');
+}
+function acRefresh() {
+  const list = acLoad(AC_CONTACTS, []);
+  const opts = '<option value="">⚡ Contactos guardados…</option>' + list.map((c, i) => `<option value="${i}">${esc(c.name)}${c.colonia || c.city ? ' · ' + esc(c.colonia || c.city) : ''}</option>`).join('');
+  ['orig', 'dest'].forEach(p => { const s = document.getElementById('ac-sel-' + p); if (s) s.innerHTML = opts; });
+  const dl = document.getElementById('ac-contacts-list');
+  if (dl) dl.innerHTML = list.map(c => `<option value="${esc(c.name)}"></option>`).join('');
+}
+function acOnOpen() {
+  try {
+    acBuild(); acRefresh();
+    const s = acLoad(AC_SENDER, null);
+    if (s) acFill('orig', s, true);
+  } catch (e) { console.warn('Autollenado:', e); }
+}
+function acTogglePaste(p) { document.getElementById('ac-paste-' + p).classList.toggle('hidden'); const t = document.getElementById('ac-text-' + p); if (t) t.focus(); }
+function acPick(p, sel) {
+  const c = acLoad(AC_CONTACTS, [])[parseInt(sel.value, 10)];
+  if (c) { acFill(p, c, false); acCpLookup(p); }
+  sel.value = '';
+}
+function acNameChosen(p) {
+  const n = acVal(p, 'name').toLowerCase(); if (!n) return;
+  const c = acLoad(AC_CONTACTS, []).find(x => (x.name || '').toLowerCase() === n);
+  if (c) { acFill(p, c, true); acCpLookup(p); }
+}
+function acSave() {
+  try {
+    const o = acRead('orig'), d = acRead('dest');
+    if (o.name) acStore(AC_SENDER, o);
+    let list = acLoad(AC_CONTACTS, []);
+    const key = x => ((x.name || '') + '|' + (x.phone || '')).toLowerCase();
+    [d, o].forEach(c => { if (!c.name) return; list = list.filter(x => key(x) !== key(c)); list.unshift(Object.assign({}, c)); });
+    acStore(AC_CONTACTS, list.slice(0, 40));
+    acRefresh();
+  } catch (e) {}
+}
+function acClear() {
+  if (!confirm('¿Borrar los contactos y el remitente guardados en este dispositivo?')) return;
+  try { localStorage.removeItem(AC_CONTACTS); localStorage.removeItem(AC_SENDER); } catch (e) {}
+  acRefresh(); showToast('Datos guardados borrados');
+}
+
+/* Detecta teléfono, C.P., nombre, calle, colonia y ciudad en un texto pegado */
+function acParseText(text) {
+  const out = { name: '', phone: '', street: '', cp: '', colonia: '', city: '' };
+  let t = String(text || '').replace(/\r/g, '');
+  // Teléfono
+  const phRe = /\+?\d[\d \t().-]{8,16}\d/g; let m;
+  while ((m = phRe.exec(t))) {
+    let dg = m[0].replace(/\D/g, '');
+    if (dg.length === 13 && dg.startsWith('521')) dg = dg.slice(3);
+    else if (dg.length === 12 && dg.startsWith('52')) dg = dg.slice(2);
+    if (dg.length === 10) { out.phone = dg; t = t.replace(m[0], ' '); break; }
+  }
+  // C.P.
+  const lab = t.match(/(?:c\.?\s?p\.?|c[oó]digo\s+postal)\s*[:#.\-]?\s*(\d{5})(?!\d)/i);
+  if (lab) { out.cp = lab[1]; t = t.replace(lab[0], ' '); }
+  else {
+    const all = [...t.matchAll(/(?<!\d)(\d{5})(?!\d)/g)];
+    if (all.length) { const last = all[all.length - 1]; out.cp = last[1]; t = t.slice(0, last.index) + ' ' + t.slice(last.index + 5); }
+  }
+  let lines = t.split('\n').map(s => s.trim()).filter(Boolean);
+  if (lines.length === 1 && lines[0].includes(',')) lines = lines[0].split(',').map(s => s.trim()).filter(Boolean);
+  lines = lines.filter(l => !/^(?:tel[eé]fono|tel\.?|cel(?:ular)?|whatsapp|c\.?\s?p\.?|c[oó]digo postal)\s*[:\-]?\s*$/i.test(l));
+  const labels = [
+    ['name', /^(?:nombre(?:\s+completo)?|destinatario|remitente|quien recibe|recibe|a nombre de)\s*[:\-]\s*(.+)$/i],
+    ['street', /^(?:calle(?:\s+y\s+n[uú]mero)?|direcci[oó]n|domicilio)\s*[:\-]\s*(.+)$/i],
+    ['colonia', /^(?:colonia|fraccionamiento|col\.|fracc\.|col(?=[\s:])|fracc(?=[\s:]))\s*[:\-]?\s*(.+)$/i],
+    ['city', /^(?:ciudad(?:\s*(?:y|\/)\s*estado)?|municipio|estado|edo\.?)\s*[:\-]\s*(.+)$/i]
+  ];
+  const clean = v => v.trim().replace(/[,;.\s]+$/, '');
+  const addCity = v => { v = clean(v); if (v && !out.city.toLowerCase().includes(v.toLowerCase())) out.city = out.city ? out.city + ', ' + v : v; };
+  const rest = [];
+  lines.forEach(line => {
+    for (const [k, re] of labels) {
+      const mm = line.match(re);
+      if (mm) { const v = clean(mm[1]); if (k === 'city') addCity(v); else if (!out[k]) out[k] = v; return; }
+    }
+    rest.push(line);
+  });
+  const streetWord = /^(calle|av\.?|avenida|blvd\.?|boulevard|privada|priv\.?|andador|prol\.?|prolongaci[oó]n|calzada|calz\.?|carretera|camino|paseo|cerrada|cda\.?|c\.)\s/i;
+  rest.forEach(line => {
+    const v = clean(line); if (!v) return;
+    if (!out.street && (streetWord.test(v) || /\d/.test(v))) { out.street = v; return; }
+    if (!out.name && !/\d/.test(v) && v.split(/\s+/).length <= 5 && !v.includes(',')) { out.name = v; return; }
+    if (!/\d/.test(v)) addCity(v);
+  });
+  return out;
+}
+function acParse(p) {
+  const box = document.getElementById('ac-text-' + p);
+  const r = acParseText(box.value);
+  if (!Object.values(r).some(Boolean)) return showToast('No pude detectar datos, revisa el texto', 3000);
+  acFill(p, r, false);
+  box.value = ''; document.getElementById('ac-paste-' + p).classList.add('hidden');
+  acCpLookup(p);
+  showToast('Datos autollenados ✓ revisa que estén completos', 3200);
+}
+
+/* Sugerencias por C.P. (estado y colonias). Si no hay internet, simplemente no aparecen. */
+const acCpCache = {};
+async function acCpLookup(p) {
+  const hint = document.getElementById('ac-hint-' + p); if (!hint) return;
+  const cp = acVal(p, 'cp');
+  if (!/^\d{5}$/.test(cp)) { hint.classList.add('hidden'); hint.innerHTML = ''; return; }
+  try {
+    let data = acCpCache[cp];
+    if (!data) { const r = await fetch('https://api.zippopotam.us/mx/' + cp); if (!r.ok) throw new Error('sin datos'); data = await r.json(); acCpCache[cp] = data; }
+    if (acVal(p, 'cp') !== cp) return;
+    const places = data.places || [];
+    const state = places[0] && places[0].state || '';
+    const names = [...new Set(places.map(x => x['place name']).filter(Boolean))].slice(0, 8);
+    hint.innerHTML = '';
+    const mk = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'px-2 py-0.5 rounded-full bg-gold/15 border border-gold/40 text-gold'; b.textContent = txt; b.onclick = fn; hint.appendChild(b); };
+    const l = document.createElement('span'); l.className = 'text-zinc-400'; l.textContent = 'C.P. ' + cp + ':'; hint.appendChild(l);
+    if (state) mk('📍 ' + state, () => { const c = acEl(p, 'city'); const cur = c.value.trim(); if (!cur) c.value = state; else if (!cur.toLowerCase().includes(state.toLowerCase())) c.value = cur + ', ' + state; });
+    names.forEach(n => mk(n, () => { acEl(p, 'colonia').value = n; }));
+    if (names.length === 1 && !acVal(p, 'colonia')) acEl(p, 'colonia').value = names[0];
+    if (state || names.length) hint.classList.remove('hidden'); else hint.classList.add('hidden');
+  } catch (e) { hint.classList.add('hidden'); hint.innerHTML = ''; }
+}
 </script>
 </body>
 </html>
