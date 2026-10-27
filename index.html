@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
 <html lang="es" id="html-root" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
-  <title id="page-title">JS FRAGANCES — Scent Vault & Sillage Studio</title>
+  <title id="page-title">JS FRAGANCES -- Scent Vault & Sillage Studio</title>
   <meta name="description" content="Catálogo exclusivo de decants, curaduría de perfumes de autor y generador de guías express.">
 
   <!-- Tailwind CSS -->
@@ -518,6 +518,14 @@
       <div class="p-3 rounded-2xl themed-subbox border space-y-2">
         <span class="text-[10px] uppercase tracking-luxury text-zinc-400 font-bold block">Preferencias de Visualización</span>
         <div class="flex items-center justify-between gap-2">
+                <!-- BOTÓN COTIZACIÓN KRONI EN VIVO -->
+        <div class="pt-1">
+          <button type="button" onclick="cotizarConKroniEnVivo()" class="w-full py-2.5 rounded-xl border border-gold/70 text-gold hover:bg-gold hover:text-black font-bold uppercase tracking-wider text-[11px] transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Cotizar Tarifas en Vivo (Kroni Go)</span>
+          </button>
+        </div>
+
           <button onclick="toggleTheme()" class="flex-1 py-1.5 rounded-xl border border-zinc-700 hover:border-gold text-[11px] font-semibold text-zinc-200 flex items-center justify-center gap-1.5">
             <i data-lucide="sun-medium" class="w-3.5 h-3.5 text-gold"></i>
             <span>Alternar Tema</span>
@@ -625,10 +633,10 @@
           <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-semibold hidden md:inline">Orden:</span>
           <select id="sort-order" onchange="filterCatalog()" class="themed-input border rounded-xl px-2 py-1.5 text-xs focus:outline-none">
             <option value="recent">Más recientes</option>
-            <option value="name_asc">Nombre (A — Z)</option>
-            <option value="name_desc">Nombre (Z — A)</option>
-            <option value="brand_asc">Casa (A — Z)</option>
-            <option value="brand_desc">Casa (Z — A)</option>
+            <option value="name_asc">Nombre (A -- Z)</option>
+            <option value="name_desc">Nombre (Z -- A)</option>
+            <option value="brand_asc">Casa (A -- Z)</option>
+            <option value="brand_desc">Casa (Z -- A)</option>
           </select>
         </div>
 
@@ -838,8 +846,8 @@
             <label class="block font-semibold mb-1">Rango / Peso *</label>
             <select id="ship-weight" onchange="updateShippingPricePreview()" required class="w-full themed-input rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-gold">
               <option value="">Selecciona peso...</option>
-              <option value="1 kg - $170 MXN">1 kg (Sobre/Caja pequeña) — $170 MXN</option>
-              <option value="2 kg - $180 MXN">2 kg — $180 MXN</option>
+              <option value="1 kg - $170 MXN">1 kg (Sobre/Caja pequeña) -- $170 MXN</option>
+              <option value="2 kg - $180 MXN">2 kg -- $180 MXN</option>
               <option value="3 kg (Bajo cotización)">3 kg (Bajo cotización)</option>
               <option value="4 a 5 kg (Bajo cotización)">4 a 5 kg (Bajo cotización)</option>
               <option value="Guía Especial / Carga (Cotizar)">Más de 5 kg (Cotizar)</option>
@@ -1814,7 +1822,7 @@
         else if (a <= getLow()) notes.push(`⚠️ Pocos ml disponibles: solo ${fmtMl(a)} ml`);
       }
       if (hasPcs(f) && f.prices?.bottle?.inStock && f.stock.bottles - cartPcs(f.id) === 1) notes.push('⚠️ Última botella disponible');
-      const adm = !pv && isAdminLoggedIn ? `<p class="no-print text-[10px] text-zinc-500 mt-1.5 font-mono">📦 Piezas: ${hasPcs(f) ? f.stock.bottles : '—'} &bull; 💧 ${hasMl(f) ? fmtMl(f.stock.ml) + ' ml' : '—'}</p>` : '';
+      const adm = !pv && isAdminLoggedIn ? `<p class="no-print text-[10px] text-zinc-500 mt-1.5 font-mono">📦 Piezas: ${hasPcs(f) ? f.stock.bottles : '--'} &bull; 💧 ${hasMl(f) ? fmtMl(f.stock.ml) + ' ml' : '--'}</p>` : '';
       return `<div class="grid ${pv ? 'grid-cols-2 sm:grid-cols-4 gap-2' : 'grid-cols-4 gap-1.5'} text-center">${btns}</div>${notes.map(n => `<p class="mt-2 px-2 py-0.5 rounded bg-red-950/30 border border-red-500/30 text-[10px] font-semibold text-red-300">${n}</p>`).join('')}${adm}`;
     }
 
@@ -2499,7 +2507,7 @@
 
       const ig = document.getElementById('ft-ig-link');
       if (ig) ig.href = 'https://instagram.com/' + (storeConfig.instagram || '').replace('@', '');
-      document.getElementById('page-title').textContent = `${storeConfig.name} — Scent Vault & Sillage Studio`;
+      document.getElementById('page-title').textContent = `${storeConfig.name} -- Scent Vault & Sillage Studio`;
 
       const logoImg = document.getElementById('header-logo-img');
       const logoIcon = document.getElementById('header-logo-icon');
@@ -2539,7 +2547,7 @@
 
     function populateInvSelect(sel) {
       const s = document.getElementById('inv-perfume'), cur = sel || s.value || '__new__';
-      s.innerHTML = '<option value="__new__">➕ Nueva Fragancia en Catálogo</option>' + fragrances.map(f => `<option value="${f.id}">${esc(f.brand)} — ${esc(f.name)}</option>`).join('');
+      s.innerHTML = '<option value="__new__">➕ Nueva Fragancia en Catálogo</option>' + fragrances.map(f => `<option value="${f.id}">${esc(f.brand)} -- ${esc(f.name)}</option>`).join('');
       s.value = [...s.options].some(o => o.value === cur) ? cur : '__new__';
     }
 
@@ -2598,7 +2606,7 @@
         .filter(f => `${f.brand} ${f.name}`.toLowerCase().includes(q))
         .map(f => {
           const badge = hasMl(f) ? (f.stock.ml <= 0 ? '<span class="px-1.5 rounded bg-red-950 text-red-300 font-mono">Agotado</span>' : f.stock.ml <= getLow() ? '<span class="px-1.5 rounded bg-amber-950 text-amber-300 font-mono">Pocos ml</span>' : '') : '';
-          return `<div class="flex items-center justify-between gap-2 p-2 rounded-lg themed-input border"><div class="min-w-0"><span class="text-[9px] text-gold font-bold uppercase tracking-wider block">${esc(f.brand)}</span><span class="font-semibold block truncate">${esc(f.name)}</span></div><div class="flex items-center gap-2 shrink-0 text-[11px] font-mono"><span>🍾 ${hasPcs(f) ? f.stock.bottles : '—'}</span><span>💧 ${hasMl(f) ? fmtMl(f.stock.ml) + ' ml' : '—'}</span>${badge}<button onclick="selectInvPerfume('${f.id}')" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-gold font-sans text-xs">Ajustar</button></div></div>`;
+          return `<div class="flex items-center justify-between gap-2 p-2 rounded-lg themed-input border"><div class="min-w-0"><span class="text-[9px] text-gold font-bold uppercase tracking-wider block">${esc(f.brand)}</span><span class="font-semibold block truncate">${esc(f.name)}</span></div><div class="flex items-center gap-2 shrink-0 text-[11px] font-mono"><span>🍾 ${hasPcs(f) ? f.stock.bottles : '--'}</span><span>💧 ${hasMl(f) ? fmtMl(f.stock.ml) + ' ml' : '--'}</span>${badge}<button onclick="selectInvPerfume('${f.id}')" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-gold font-sans text-xs">Ajustar</button></div></div>`;
         }).join('') || '<p class="text-zinc-500 text-center py-3">Sin resultados</p>';
     }
 
@@ -2864,7 +2872,7 @@ function pvPyramidFor(frag, asDraftOnly) {
   return out;
 }
 function pvChips(list, cls, fallbackEmoji) {
-  if (!list || !list.length) return '<span class="text-zinc-500">—</span>';
+  if (!list || !list.length) return '<span class="text-zinc-500">--</span>';
   return list.map(n => `<span class="px-2 py-0.5 rounded-md bg-zinc-800/80 border border-zinc-700 ${cls}">${esc(n.e || fallbackEmoji)} ${esc(n.t)}</span>`).join('');
 }
 
@@ -2959,7 +2967,7 @@ function dcUpdate() {
         <div class="flex justify-between"><span>ml vendibles</span><strong>${r.sellable} ml</strong></div>
         <div class="flex justify-between"><span>Costo del perfume por ml</span><strong>${dcMoney(r.costMl)}</strong></div>
         ${r.extraDecant ? `<div class="flex justify-between"><span>Extras por decant</span><strong>${dcMoney(r.extraDecant)}</strong></div>` : ''}
-        <div class="pt-1 text-[10px] text-zinc-400">Ganancia neta si vendes toda la botella en un solo tamaño (ya descuenta insumos y extras; “recuperas con” = decants para cubrir la inversión):</div>
+        <div class="pt-1 text-[10px] text-zinc-400">Ganancia neta si vendes toda la botella en un solo tamaño (ya descuenta insumos y extras; "recuperas con" = decants para cubrir la inversión):</div>
         ${lines}</div>`;
   }
   dcSave();
@@ -3233,5 +3241,83 @@ function acWire() {
 }
 acWire();
 </script>
+// Conexión con tu Cloudflare Worker
+const URL_WORKER_KRONI = "https://tiny-base-38fckroni-cotizador.briandejesussss.workers.dev";
+
+async function cotizarConKroniEnVivo() {
+  const origCP = document.getElementById('orig-cp').value.trim();
+  const destCP = document.getElementById('dest-cp').value.trim();
+  const l = parseFloat(document.getElementById('calc-length').value) || 15;
+  const w = parseFloat(document.getElementById('calc-width').value) || 15;
+  const h = parseFloat(document.getElementById('calc-height').value) || 10;
+  const realWeight = parseFloat(document.getElementById('calc-real-weight').value) || 1;
+
+  if (!/^\d{5}$/.test(origCP)) {
+    showToast('Ingresa un Código Postal de Origen válido (5 dígitos)');
+    document.getElementById('orig-cp').focus();
+    return;
+  }
+  if (!/^\d{5}$/.test(destCP)) {
+    showToast('Ingresa un Código Postal de Destino válido (5 dígitos)');
+    document.getElementById('dest-cp').focus();
+    return;
+  }
+
+  showToast('Consultando tarifas de Kroni Go...');
+
+  try {
+    const res = await fetch(URL_WORKER_KRONI, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }, authorization: "kg_test_RtUxY77yr2g2Z4ZhWtKR5PrcKwEe9JnC"
+      body: JSON.stringify({
+        origin: { postal_code: origCP },
+        destination: { postal_code: destCP },
+        packages: [{
+          weight: realWeight,
+          length: l,
+          width: w,
+          height: h
+        }]
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.rates || data.rates.length === 0) {
+      showToast('No se encontraron paqueterías disponibles para esta ruta.');
+      return;
+    }
+
+    const selectCourier = document.getElementById('ship-courier');
+    selectCourier.innerHTML = '<option value="">Selecciona la paquetería cotizada...</option>';
+
+    data.rates.forEach(r => {
+      const dias = r.delivery_days ? ` (${r.delivery_days} días)` : '';
+      const precio = r.final_price || r.price;
+      const texto = `${r.carrier} - ${r.service || 'Estándar'}${dias} -- $${precio} MXN`;
+      
+      const opt = document.createElement('option');
+      opt.value = `${r.carrier} (${r.service || 'Estándar'}) - $${precio} MXN`;
+      opt.textContent = texto;
+      selectCourier.appendChild(opt);
+    });
+
+    const display = document.getElementById('ship-price-display');
+    const val = document.getElementById('ship-price-val');
+    if (display && val) {
+      val.textContent = 'Tarifas calculadas con éxito';
+      display.classList.remove('hidden');
+    }
+
+    showToast('¡Tarifas cargadas con éxito!');
+    if (window.lucide) lucide.createIcons();
+
+  } catch (error) {
+    console.error('Error al cotizar:', error);
+    showToast('No se pudo conectar con el cotizador de envíos.');
+  }
+}
+
+
 </body>
 </html>
