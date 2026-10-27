@@ -876,42 +876,117 @@
           </div>
         </div>
 
-        <!-- ORIGEN -->
-        <div class="p-3 rounded-xl themed-subbox space-y-1.5">
-          <span class="text-[10px] font-bold text-gold block uppercase tracking-wider flex items-center gap-1">
-            <i data-lucide="map-pin" class="w-3 h-3 text-gold"></i> Origen (Remitente)
-          </span>
-          <div class="grid grid-cols-2 gap-2">
-            <input type="text" id="orig-name" required placeholder="Nombre remitente" class="w-full themed-input rounded-xl px-2.5 py-1.5">
-            <input type="tel" id="orig-phone" required placeholder="Teléfono (10 dígitos)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+        <!-- ORIGEN (REMITENTE) -->
+        <div id="ac-card-orig" class="p-3 rounded-xl themed-subbox space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-bold text-gold uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="map-pin" class="w-3 h-3 text-gold"></i> Origen (Remitente)
+            </span>
+            <select id="ac-sel-orig" onchange="acPick('orig', this)" class="max-w-[55%] themed-input rounded-xl px-2 py-1 text-[10px]"></select>
           </div>
-          <div class="grid grid-cols-3 gap-2">
-            <input type="text" id="orig-street" required placeholder="Calle y número" class="col-span-2 w-full themed-input rounded-xl px-2.5 py-1.5">
-            <input type="text" id="orig-cp" required placeholder="C.P." class="w-full themed-input rounded-xl px-2.5 py-1.5">
+
+          <div class="p-2.5 rounded-xl border border-dashed border-gold/50 bg-gold/5 space-y-1.5">
+            <span class="text-[11px] font-bold text-gold">✨ Pega la dirección completa</span>
+            <textarea id="orig-paste" rows="3" placeholder="Ej. José Cisneros, Bustamante 202, col. Álvaro Obregón, Irapuato, Gto., CP 36530, tel. 462 157 9710" class="w-full themed-input rounded-xl px-2.5 py-1.5 text-[11px]"></textarea>
+            <button type="button" onclick="acParse('orig')" class="px-3 py-1.5 rounded-xl bg-gold text-black font-bold text-[11px]">✨ Llenar campos</button>
+            <p class="text-[10px] text-zinc-400">Como te la mandaron por WhatsApp. Revisa los campos antes de continuar.</p>
           </div>
-          <div class="grid grid-cols-2 gap-2">
+
+          <div><label class="block mb-1 font-semibold text-[11px]">Código postal*</label>
+            <div class="relative">
+              <input type="text" id="orig-cp" required inputmode="numeric" maxlength="5" pattern="[0-9]{5}" placeholder="C.P. (5 dígitos)" autocomplete="postal-code" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+              <span id="orig-cp-ok" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">✓</span>
+            </div>
+            <p id="orig-cp-msg" class="hidden text-[10px] text-zinc-400 mt-1"></p>
+          </div>
+
+          <div><label class="block mb-1 font-semibold text-[11px]">Colonia*</label>
+            <select id="orig-colonia-sel" class="hidden w-full themed-input rounded-xl px-2.5 py-1.5"></select>
             <input type="text" id="orig-colonia" required placeholder="Colonia" class="w-full themed-input rounded-xl px-2.5 py-1.5">
-            <input type="text" id="orig-city" required placeholder="Ciudad y Estado" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+            <button type="button" id="orig-colonia-toggle" class="hidden text-[10px] underline text-gold mt-1"></button>
           </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="block mb-1 font-semibold text-[11px]">Ciudad / Municipio*</label><input type="text" id="orig-city" required placeholder="Se llena con el C.P." class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+            <div><label class="block mb-1 font-semibold text-[11px]">Estado*</label><input type="text" id="orig-state" required placeholder="Se llena con el C.P." class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          </div>
+
+          <div><label class="block mb-1 font-semibold text-[11px]">Calle*</label><input type="text" id="orig-street" required placeholder="Calle" autocomplete="address-line1" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="block mb-1 font-semibold text-[11px]">Número exterior*</label><input type="text" id="orig-ext" required placeholder="123" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+            <div><label class="block mb-1 font-semibold text-[11px]">Número interior</label><input type="text" id="orig-int" placeholder="Depto 4B" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          </div>
+          <label class="flex items-center gap-1.5 text-[11px] text-zinc-400 cursor-pointer"><input type="checkbox" id="orig-noext"> Sin número (S/N)</label>
+
+          <div><label class="block mb-1 font-semibold text-[11px]">Nombre del remitente*</label><input type="text" id="orig-name" required list="ac-contacts-list" autocomplete="off" placeholder="Nombre remitente" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          <div><label class="block mb-1 font-semibold text-[11px]">Empresa (remitente en la guía, opcional)</label><input type="text" id="orig-company" placeholder="Nombre del negocio" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          <div><label class="block mb-1 font-semibold text-[11px]">Teléfono*</label>
+            <div class="flex gap-2">
+              <span class="px-2.5 py-1.5 rounded-xl themed-input text-zinc-400 whitespace-nowrap">🇲🇽 +52</span>
+              <input type="tel" id="orig-phone" required inputmode="numeric" maxlength="10" pattern="[0-9]{10}" placeholder="10 dígitos" autocomplete="tel-national" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+            </div>
+          </div>
+          <div><label class="block mb-1 font-semibold text-[11px]">Referencias (opcional)</label><input type="text" id="orig-ref" placeholder="Casa blanca, portón negro…" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          <label class="flex items-center gap-1.5 text-[11px] cursor-pointer"><input type="checkbox" id="orig-save" checked> Guardar en Mis direcciones</label>
+          <p class="text-[9px] text-zinc-500">Tus direcciones se guardan solo en este dispositivo · <button type="button" onclick="acClear()" class="underline">borrar direcciones guardadas</button></p>
         </div>
 
-        <!-- DESTINO -->
-        <div class="p-3 rounded-xl themed-subbox space-y-1.5">
-          <span class="text-[10px] font-bold text-gold block uppercase tracking-wider flex items-center gap-1">
-            <i data-lucide="flag" class="w-3 h-3 text-gold"></i> Destino (Destinatario)
-          </span>
-          <div class="grid grid-cols-2 gap-2">
-            <input type="text" id="dest-name" required placeholder="Nombre quien recibe" class="w-full themed-input rounded-xl px-2.5 py-1.5">
-            <input type="tel" id="dest-phone" required placeholder="Teléfono (10 dígitos)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+        <!-- DESTINO (DESTINATARIO) -->
+        <div id="ac-card-dest" class="p-3 rounded-xl themed-subbox space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-bold text-gold uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="flag" class="w-3 h-3 text-gold"></i> Destino (Destinatario)
+            </span>
+            <select id="ac-sel-dest" onchange="acPick('dest', this)" class="max-w-[55%] themed-input rounded-xl px-2 py-1 text-[10px]"></select>
           </div>
-          <div class="grid grid-cols-3 gap-2">
-            <input type="text" id="dest-street" required placeholder="Calle y número" class="col-span-2 w-full themed-input rounded-xl px-2.5 py-1.5">
-            <input type="text" id="dest-cp" required placeholder="C.P." class="w-full themed-input rounded-xl px-2.5 py-1.5">
+
+          <div class="p-2.5 rounded-xl border border-dashed border-gold/50 bg-gold/5 space-y-1.5">
+            <span class="text-[11px] font-bold text-gold">✨ Pega la dirección completa</span>
+            <textarea id="dest-paste" rows="3" placeholder="Ej. José Cisneros, Bustamante 202, col. Álvaro Obregón, Irapuato, Gto., CP 36530, tel. 462 157 9710" class="w-full themed-input rounded-xl px-2.5 py-1.5 text-[11px]"></textarea>
+            <button type="button" onclick="acParse('dest')" class="px-3 py-1.5 rounded-xl bg-gold text-black font-bold text-[11px]">✨ Llenar campos</button>
+            <p class="text-[10px] text-zinc-400">Como te la mandaron por WhatsApp. Revisa los campos antes de continuar.</p>
           </div>
-          <div class="grid grid-cols-2 gap-2">
+
+          <div><label class="block mb-1 font-semibold text-[11px]">Código postal*</label>
+            <div class="relative">
+              <input type="text" id="dest-cp" required inputmode="numeric" maxlength="5" pattern="[0-9]{5}" placeholder="C.P. (5 dígitos)" autocomplete="postal-code" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+              <span id="dest-cp-ok" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">✓</span>
+            </div>
+            <p id="dest-cp-msg" class="hidden text-[10px] text-zinc-400 mt-1"></p>
+          </div>
+
+          <div><label class="block mb-1 font-semibold text-[11px]">Colonia*</label>
+            <select id="dest-colonia-sel" class="hidden w-full themed-input rounded-xl px-2.5 py-1.5"></select>
             <input type="text" id="dest-colonia" required placeholder="Colonia" class="w-full themed-input rounded-xl px-2.5 py-1.5">
-            <input type="text" id="dest-city" required placeholder="Ciudad y Estado" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+            <button type="button" id="dest-colonia-toggle" class="hidden text-[10px] underline text-gold mt-1"></button>
           </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="block mb-1 font-semibold text-[11px]">Ciudad / Municipio*</label><input type="text" id="dest-city" required placeholder="Se llena con el C.P." class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+            <div><label class="block mb-1 font-semibold text-[11px]">Estado*</label><input type="text" id="dest-state" required placeholder="Se llena con el C.P." class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          </div>
+
+          <div><label class="block mb-1 font-semibold text-[11px]">Calle*</label><input type="text" id="dest-street" required placeholder="Calle" autocomplete="address-line1" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="block mb-1 font-semibold text-[11px]">Número exterior*</label><input type="text" id="dest-ext" required placeholder="123" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+            <div><label class="block mb-1 font-semibold text-[11px]">Número interior</label><input type="text" id="dest-int" placeholder="Depto 4B" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          </div>
+          <label class="flex items-center gap-1.5 text-[11px] text-zinc-400 cursor-pointer"><input type="checkbox" id="dest-noext"> Sin número (S/N)</label>
+
+          <div><label class="block mb-1 font-semibold text-[11px]">Nombre de quien recibe*</label><input type="text" id="dest-name" required list="ac-contacts-list" autocomplete="off" placeholder="Nombre quien recibe" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          <div><label class="block mb-1 font-semibold text-[11px]">Empresa (opcional)</label><input type="text" id="dest-company" placeholder="Nombre del negocio" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          <div><label class="block mb-1 font-semibold text-[11px]">Teléfono*</label>
+            <div class="flex gap-2">
+              <span class="px-2.5 py-1.5 rounded-xl themed-input text-zinc-400 whitespace-nowrap">🇲🇽 +52</span>
+              <input type="tel" id="dest-phone" required inputmode="numeric" maxlength="10" pattern="[0-9]{10}" placeholder="10 dígitos" autocomplete="tel-national" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+            </div>
+          </div>
+          <div><label class="block mb-1 font-semibold text-[11px]">Correo electrónico (opcional)</label><input type="email" id="dest-email" placeholder="correo@ejemplo.com" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          <div><label class="block mb-1 font-semibold text-[11px]">Referencias (opcional)</label><input type="text" id="dest-ref" placeholder="Casa blanca, portón negro…" class="w-full themed-input rounded-xl px-2.5 py-1.5"></div>
+          <label class="flex items-center gap-1.5 text-[11px] cursor-pointer"><input type="checkbox" id="dest-save" checked> Guardar en Mis direcciones</label>
+          
         </div>
 
         <!-- CALCULADORA VOLUMÉTRICA -->
@@ -1659,10 +1734,10 @@
       msg += `📊 *Peso Facturable (Mayor):* ${billW} kg\n\n`;
 
       msg += `📍 *DATOS DE ORIGEN (REMITENTE):*\n`;
-      msg += `• Nombre: ${oName}\n• Teléfono: ${oPhone}\n• Calle y No.: ${oStreet}\n• Colonia: ${oColonia}\n• C.P.: ${oCP}\n• Ciudad/Edo.: ${oCity}\n\n`;
+      msg += acMsgBlock('orig') + '\n\n';
 
       msg += `🏁 *DATOS DE DESTINO (DESTINATARIO):*\n`;
-      msg += `• Nombre: ${dName}\n• Teléfono: ${dPhone}\n• Calle y No.: ${dStreet}\n• Colonia: ${dColonia}\n• C.P.: ${dCP}\n• Ciudad/Edo.: ${dCity}\n\n`;
+      msg += acMsgBlock('dest') + '\n\n';
       msg += `¿Me apoyas confirmando la cotización y los datos para pago por favor?`;
 
       const cleanPhone = storeConfig.whatsapp.replace(/[^0-9]/g, '');
@@ -2931,117 +3006,184 @@ pyRender();
 </script>
 
 <script>
-/* ===== Autollenado de guías: remitente y destinatario ===== */
+/* ===== Direcciones de guías: pegar dirección, C.P. automático y Mis direcciones ===== */
 const AC_CONTACTS = 'jf26_contacts', AC_SENDER = 'jf26_sender';
-const AC_FIELDS = ['name', 'phone', 'street', 'cp', 'colonia', 'city'];
+const AC_FIELDS = ['name', 'company', 'phone', 'email', 'street', 'ext', 'int', 'cp', 'colonia', 'city', 'state', 'ref'];
 const acLoad = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } };
 const acStore = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const acEl = (p, f) => document.getElementById(p + '-' + f);
 const acVal = (p, f) => (acEl(p, f) ? acEl(p, f).value.trim() : '');
+const acNorm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const acRead = p => { const o = {}; AC_FIELDS.forEach(f => { o[f] = acVal(p, f); }); return o; };
+
+const AC_STATES = { ags: 'Aguascalientes', bc: 'Baja California', bcs: 'Baja California Sur', camp: 'Campeche', chis: 'Chiapas', chih: 'Chihuahua', cdmx: 'Ciudad de México', df: 'Ciudad de México', coah: 'Coahuila', col: 'Colima', dgo: 'Durango', gto: 'Guanajuato', gro: 'Guerrero', hgo: 'Hidalgo', jal: 'Jalisco', mex: 'Estado de México', edomex: 'Estado de México', mich: 'Michoacán', mor: 'Morelos', nay: 'Nayarit', nl: 'Nuevo León', oax: 'Oaxaca', pue: 'Puebla', qro: 'Querétaro', qroo: 'Quintana Roo', slp: 'San Luis Potosí', sin: 'Sinaloa', son: 'Sonora', tab: 'Tabasco', tamps: 'Tamaulipas', tlax: 'Tlaxcala', ver: 'Veracruz', yuc: 'Yucatán', zac: 'Zacatecas' };
+const AC_STATE_BY_NAME = {}; Object.values(AC_STATES).forEach(n => { AC_STATE_BY_NAME[acNorm(n)] = n; });
+AC_STATE_BY_NAME[acNorm('Coahuila de Zaragoza')] = 'Coahuila'; AC_STATE_BY_NAME[acNorm('Veracruz de Ignacio de la Llave')] = 'Veracruz'; AC_STATE_BY_NAME[acNorm('Michoacán de Ocampo')] = 'Michoacán'; AC_STATE_BY_NAME[acNorm('México')] = 'Estado de México';
+const acStateOf = s => AC_STATES[acNorm(s)] || AC_STATE_BY_NAME[acNorm(s)] || '';
+
+/* --- Llenado de campos --- */
+function acSetNoExt(p, on) {
+  const cb = acEl(p, 'noext'), ext = acEl(p, 'ext'); if (!cb || !ext) return;
+  cb.checked = !!on; ext.disabled = !!on;
+  if (on) ext.value = 'S/N'; else if (ext.value === 'S/N') ext.value = '';
+}
 function acFill(p, data, onlyEmpty) {
-  AC_FIELDS.forEach(f => { const el = acEl(p, f); if (!el || !data[f]) return; if (onlyEmpty && el.value.trim()) return; el.value = data[f]; });
+  AC_FIELDS.forEach(f => {
+    const el = acEl(p, f); if (!el || !data[f]) return;
+    if (onlyEmpty && el.value.trim()) return;
+    el.value = data[f];
+    if (f === 'city' || f === 'state') delete el.dataset.auto;
+  });
+  if (/^s\/?n$/i.test(acVal(p, 'ext'))) acSetNoExt(p, true);
+}
+function acColoniaMode(p, mode) {
+  const sel = acEl(p, 'colonia-sel'), inp = acEl(p, 'colonia'), tg = acEl(p, 'colonia-toggle');
+  const hasOpts = sel.options.length > 1, useSel = mode === 'select' && hasOpts;
+  sel.classList.toggle('hidden', !useSel); inp.classList.toggle('hidden', useSel);
+  sel.required = useSel; inp.required = !useSel;
+  tg.classList.toggle('hidden', !hasOpts);
+  tg.textContent = useSel ? '¿No aparece tu colonia? Escríbela' : '← Elegir de la lista';
+  tg.dataset.mode = useSel ? 'select' : 'text';
+}
+function acSetColoniaOptions(p, list) {
+  const sel = acEl(p, 'colonia-sel'), inp = acEl(p, 'colonia');
+  sel.innerHTML = '<option value="">Selecciona una colonia</option>' + list.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  const cur = inp.value.trim();
+  if (cur) {
+    const k = acNorm(cur), m = list.find(n => acNorm(n) === k) || list.find(n => acNorm(n).includes(k) || k.includes(acNorm(n)));
+    if (m) { sel.value = m; inp.value = m; acColoniaMode(p, 'select'); } else acColoniaMode(p, 'text');
+  } else acColoniaMode(p, list.length ? 'select' : 'text');
 }
 
-function acBuild() {
-  [['orig', true], ['dest', false]].forEach(([p, withNote]) => {
-    if (document.getElementById('ac-bar-' + p) || !acEl(p, 'name')) return;
-    acEl(p, 'name').closest('.grid').insertAdjacentHTML('beforebegin', `
-      <div id="ac-bar-${p}" class="space-y-1.5">
-        <div class="flex gap-1.5">
-          <select id="ac-sel-${p}" onchange="acPick('${p}', this)" class="flex-1 min-w-0 themed-input rounded-xl px-2 py-1 text-[11px]"></select>
-          <button type="button" onclick="acTogglePaste('${p}')" class="px-2.5 py-1 rounded-xl bg-gold/15 border border-gold/50 text-gold font-bold text-[10px] whitespace-nowrap">📋 Pegar datos</button>
-        </div>
-        <div id="ac-paste-${p}" class="hidden space-y-1.5">
-          <textarea id="ac-text-${p}" rows="4" placeholder="Pega aquí nombre, teléfono, calle, colonia, C.P. y ciudad (de WhatsApp, notas, etc.)" class="w-full themed-input rounded-xl px-2.5 py-1.5 text-[11px]"></textarea>
-          <button type="button" onclick="acParse('${p}')" class="w-full py-1.5 rounded-xl bg-gold text-black font-bold text-[11px]">⚡ Autollenar campos</button>
-        </div>
-        ${withNote ? '<p class="text-[9px] text-zinc-500">Tus contactos se guardan solo en este dispositivo · <button type="button" onclick="acClear()" class="underline">borrar datos guardados</button></p>' : ''}
-      </div>`);
-    acEl(p, 'cp').closest('.grid').insertAdjacentHTML('afterend', `<div id="ac-hint-${p}" class="hidden flex flex-wrap items-center gap-1 text-[10px]"></div>`);
-    acEl(p, 'name').setAttribute('list', 'ac-contacts-list');
-    acEl(p, 'name').addEventListener('change', () => acNameChosen(p));
-    acEl(p, 'cp').addEventListener('input', () => acCpLookup(p));
-  });
-  if (!document.getElementById('ac-contacts-list')) document.body.insertAdjacentHTML('beforeend', '<datalist id="ac-contacts-list"></datalist>');
+/* --- C.P.: busca estado, municipio y colonias (si no hay internet se llena a mano) --- */
+async function acFetchJson(url, ms) {
+  const c = new AbortController(), t = setTimeout(() => c.abort(), ms || 6000);
+  try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error('http ' + r.status); return await r.json(); } finally { clearTimeout(t); }
 }
+const acCpCache = {};
+async function acFetchCP(cp) {
+  if (acCpCache[cp]) return acCpCache[cp];
+  const uniq = a => [...new Set(a.filter(Boolean).map(s => String(s).trim()))];
+  const g = (o, ...ks) => { for (const k of ks) if (o && o[k]) return o[k]; return ''; };
+  const tries = [
+    async () => { const j = await acFetchJson('https://sepomex.icalialabs.com/api/v1/zip_codes?zip_code=' + cp + '&per_page=100'); const z = (j && j.zip_codes) || []; if (!z.length) return null; return { state: g(z[0], 'd_estado', 'D_estado'), city: g(z[0], 'd_mnpio', 'D_mnpio', 'd_ciudad'), colonias: uniq(z.map(o => g(o, 'd_asenta', 'D_asenta'))) }; },
+    async () => { const j = await acFetchJson('https://api-sepomex.hckdrk.mx/query/info_cp/' + cp + '?type=simplified'); const rs = (Array.isArray(j) ? j : [j]).map(x => x && (x.response || x)).filter(Boolean); if (!rs.length) return null; const cols = []; rs.forEach(r => { const a = r.asentamiento; if (Array.isArray(a)) cols.push(...a); else if (a) cols.push(a); }); return { state: rs[0].estado || '', city: rs[0].municipio || rs[0].ciudad || '', colonias: uniq(cols) }; },
+    async () => { const j = await acFetchJson('https://api.zippopotam.us/mx/' + cp); const pl = j.places || []; if (!pl.length) return null; return { state: pl[0].state || '', city: '', colonias: uniq(pl.map(x => x['place name'])) }; }
+  ];
+  for (const t of tries) { try { const r = await t(); if (r && (r.state || r.city || r.colonias.length)) { acCpCache[cp] = r; return r; } } catch (e) {} }
+  return null;
+}
+async function acCpLookup(p, force) {
+  const cp = acVal(p, 'cp'), ok = acEl(p, 'cp-ok'), msg = acEl(p, 'cp-msg');
+  ok.classList.add('hidden'); msg.classList.add('hidden');
+  if (!/^\d{5}$/.test(cp)) { acSetColoniaOptions(p, []); return; }
+  msg.textContent = 'Buscando C.P. …'; msg.classList.remove('hidden');
+  const info = await acFetchCP(cp);
+  if (acVal(p, 'cp') !== cp) return;
+  if (!info) {
+    msg.textContent = 'No pude validar el C.P. automáticamente: llena colonia, ciudad y estado a mano.';
+    acSetColoniaOptions(p, []); return;
+  }
+  msg.classList.add('hidden'); ok.classList.remove('hidden');
+  [['city', info.city], ['state', info.state]].forEach(([f, v]) => {
+    const el = acEl(p, f); if (!v) return;
+    if (force || !el.value.trim() || el.dataset.auto === '1') { el.value = v; el.dataset.auto = '1'; }
+  });
+  acSetColoniaOptions(p, info.colonias);
+}
+
+/* --- Mis direcciones --- */
 function acRefresh() {
   const list = acLoad(AC_CONTACTS, []);
-  const opts = '<option value="">⚡ Contactos guardados…</option>' + list.map((c, i) => `<option value="${i}">${esc(c.name)}${c.colonia || c.city ? ' · ' + esc(c.colonia || c.city) : ''}</option>`).join('');
+  const opts = '<option value="">📒 Mis direcciones…</option>' + list.map((c, i) => `<option value="${i}">${esc(c.name)}${c.colonia || c.city ? ' · ' + esc(c.colonia || c.city) : ''}</option>`).join('');
   ['orig', 'dest'].forEach(p => { const s = document.getElementById('ac-sel-' + p); if (s) s.innerHTML = opts; });
-  const dl = document.getElementById('ac-contacts-list');
-  if (dl) dl.innerHTML = list.map(c => `<option value="${esc(c.name)}"></option>`).join('');
+  const dl = document.getElementById('ac-contacts-list'); if (dl) dl.innerHTML = list.map(c => `<option value="${esc(c.name)}"></option>`).join('');
 }
-function acOnOpen() {
-  try {
-    acBuild(); acRefresh();
-    const s = acLoad(AC_SENDER, null);
-    if (s) acFill('orig', s, true);
-  } catch (e) { console.warn('Autollenado:', e); }
-}
-function acTogglePaste(p) { document.getElementById('ac-paste-' + p).classList.toggle('hidden'); const t = document.getElementById('ac-text-' + p); if (t) t.focus(); }
 function acPick(p, sel) {
   const c = acLoad(AC_CONTACTS, [])[parseInt(sel.value, 10)];
-  if (c) { acFill(p, c, false); acCpLookup(p); }
+  if (c) { AC_FIELDS.forEach(f => { const el = acEl(p, f); if (el) el.value = ''; }); acSetNoExt(p, false); acFill(p, c, false); acCpLookup(p, false); }
   sel.value = '';
 }
 function acNameChosen(p) {
   const n = acVal(p, 'name').toLowerCase(); if (!n) return;
   const c = acLoad(AC_CONTACTS, []).find(x => (x.name || '').toLowerCase() === n);
-  if (c) { acFill(p, c, true); acCpLookup(p); }
+  if (c) { acFill(p, c, true); acCpLookup(p, false); }
 }
 function acSave() {
   try {
-    const o = acRead('orig'), d = acRead('dest');
-    if (o.name) acStore(AC_SENDER, o);
+    const key = x => ((x.name || '') + '|' + (x.phone || '') + '|' + (x.cp || '')).toLowerCase();
     let list = acLoad(AC_CONTACTS, []);
-    const key = x => ((x.name || '') + '|' + (x.phone || '')).toLowerCase();
-    [d, o].forEach(c => { if (!c.name) return; list = list.filter(x => key(x) !== key(c)); list.unshift(Object.assign({}, c)); });
+    ['dest', 'orig'].forEach(p => {
+      const c = acRead(p); if (!c.name || !acEl(p, 'save').checked) return;
+      if (p === 'orig') acStore(AC_SENDER, c);
+      list = list.filter(x => key(x) !== key(c)); list.unshift(c);
+    });
     acStore(AC_CONTACTS, list.slice(0, 40));
     acRefresh();
   } catch (e) {}
 }
 function acClear() {
-  if (!confirm('¿Borrar los contactos y el remitente guardados en este dispositivo?')) return;
+  if (!confirm('¿Borrar las direcciones y el remitente guardados en este dispositivo?')) return;
   try { localStorage.removeItem(AC_CONTACTS); localStorage.removeItem(AC_SENDER); } catch (e) {}
-  acRefresh(); showToast('Datos guardados borrados');
+  acRefresh(); showToast('Direcciones guardadas borradas');
+}
+function acOnOpen() {
+  try {
+    acRefresh();
+    const s = acLoad(AC_SENDER, null);
+    if (s && !acVal('orig', 'name') && !acVal('orig', 'cp')) { acFill('orig', s, true); acCpLookup('orig', false); }
+  } catch (e) { console.warn('Direcciones:', e); }
+}
+function acMsgBlock(p) {
+  const g = f => acVal(p, f);
+  const calle = g('street') + (g('ext') ? ' ' + g('ext') : '') + (g('int') ? ', ' + g('int') : '');
+  const edo = [g('city'), g('state')].filter(Boolean).join(', ');
+  return `• Nombre: ${g('name')}\n` + (g('company') ? `• Empresa: ${g('company')}\n` : '') + `• Teléfono: ${g('phone')}\n` + (g('email') ? `• Correo: ${g('email')}\n` : '') +
+    `• Calle y No.: ${calle}\n• Colonia: ${g('colonia')}\n• C.P.: ${g('cp')}\n• Ciudad/Edo.: ${edo}` + (g('ref') ? `\n• Referencias: ${g('ref')}` : '');
 }
 
-/* Detecta teléfono, C.P., nombre, calle, colonia y ciudad en un texto pegado */
+/* --- Pegar dirección completa --- */
+function acSplitStreet(s) {
+  let street = String(s || '').trim(), ext = '', int = '', m;
+  m = street.match(/[\s,]+((?:int(?:erior)?\.?|depto\.?|dpto\.?|departamento|local|bodega)\s*#?\s*[\w-]+)\s*$/i);
+  if (m) { int = m[1].trim(); street = street.slice(0, m.index).trim(); }
+  m = street.match(/[\s,]+(?:#|no\.?|n[úu]m(?:ero)?\.?|ext(?:erior)?\.?)?\s*(\d+[A-Za-z]?(?:-\d+)?|s\/?n)\s*$/i);
+  if (m && street.slice(0, m.index).trim()) { ext = /^s\/?n$/i.test(m[1]) ? 'S/N' : m[1]; street = street.slice(0, m.index).trim(); }
+  return { street: street.replace(/[,\s]+$/, ''), ext, int };
+}
 function acParseText(text) {
-  const out = { name: '', phone: '', street: '', cp: '', colonia: '', city: '' };
+  const out = { name: '', company: '', phone: '', email: '', street: '', ext: '', int: '', cp: '', colonia: '', city: '', state: '', ref: '' };
   let t = String(text || '').replace(/\r/g, '');
-  // Teléfono
+  const em = t.match(/[\w.+-]+@[\w-]+\.[\w.-]+/); if (em) { out.email = em[0]; t = t.replace(em[0], ' '); }
   const phRe = /\+?\d[\d \t().-]{8,16}\d/g; let m;
   while ((m = phRe.exec(t))) {
     let dg = m[0].replace(/\D/g, '');
-    if (dg.length === 13 && dg.startsWith('521')) dg = dg.slice(3);
-    else if (dg.length === 12 && dg.startsWith('52')) dg = dg.slice(2);
+    if (dg.length === 13 && dg.startsWith('521')) dg = dg.slice(3); else if (dg.length === 12 && dg.startsWith('52')) dg = dg.slice(2);
     if (dg.length === 10) { out.phone = dg; t = t.replace(m[0], ' '); break; }
   }
-  // C.P.
   const lab = t.match(/(?:c\.?\s?p\.?|c[oó]digo\s+postal)\s*[:#.\-]?\s*(\d{5})(?!\d)/i);
   if (lab) { out.cp = lab[1]; t = t.replace(lab[0], ' '); }
-  else {
-    const all = [...t.matchAll(/(?<!\d)(\d{5})(?!\d)/g)];
-    if (all.length) { const last = all[all.length - 1]; out.cp = last[1]; t = t.slice(0, last.index) + ' ' + t.slice(last.index + 5); }
-  }
+  else { const all = [...t.matchAll(/(?<!\d)(\d{5})(?!\d)/g)]; if (all.length) { const last = all[all.length - 1]; out.cp = last[1]; t = t.slice(0, last.index) + ' ' + t.slice(last.index + 5); } }
   let lines = t.split('\n').map(s => s.trim()).filter(Boolean);
   if (lines.length === 1 && lines[0].includes(',')) lines = lines[0].split(',').map(s => s.trim()).filter(Boolean);
-  lines = lines.filter(l => !/^(?:tel[eé]fono|tel\.?|cel(?:ular)?|whatsapp|c\.?\s?p\.?|c[oó]digo postal)\s*[:\-]?\s*$/i.test(l));
+  lines = lines.filter(l => !/^(?:tel[eé]fono|tel\.?|cel(?:ular)?|whatsapp|correo|email|e-mail|c\.?\s?p\.?|c[oó]digo postal)\s*[:\-]?\s*$/i.test(l));
   const labels = [
     ['name', /^(?:nombre(?:\s+completo)?|destinatario|remitente|quien recibe|recibe|a nombre de)\s*[:\-]\s*(.+)$/i],
+    ['company', /^(?:empresa|negocio)\s*[:\-]\s*(.+)$/i],
+    ['ref', /^(?:referencias?)\s*[:\-]\s*(.+)$/i],
+    ['ext', /^(?:n[úu]mero\s+exterior|n[úu]m\.?\s*ext\.?|no\.?\s*ext\.?|exterior|ext\.?)\s*[:\-]\s*(.+)$/i],
+    ['int', /^(?:n[úu]mero\s+interior|n[úu]m\.?\s*int\.?|no\.?\s*int\.?|interior|int\.?)\s*[:\-]\s*(.+)$/i],
     ['street', /^(?:calle(?:\s+y\s+n[uú]mero)?|direcci[oó]n|domicilio)\s*[:\-]\s*(.+)$/i],
     ['colonia', /^(?:colonia|fraccionamiento|col\.|fracc\.|col(?=[\s:])|fracc(?=[\s:]))\s*[:\-]?\s*(.+)$/i],
-    ['city', /^(?:ciudad(?:\s*(?:y|\/)\s*estado)?|municipio|estado|edo\.?)\s*[:\-]\s*(.+)$/i]
+    ['state', /^(?:estado|edo\.?)\s*[:\-]\s*(.+)$/i],
+    ['city', /^(?:ciudad|municipio|localidad)\s*[:\-]\s*(.+)$/i]
   ];
   const clean = v => v.trim().replace(/[,;.\s]+$/, '');
-  const addCity = v => { v = clean(v); if (v && !out.city.toLowerCase().includes(v.toLowerCase())) out.city = out.city ? out.city + ', ' + v : v; };
   const rest = [];
   lines.forEach(line => {
     for (const [k, re] of labels) {
       const mm = line.match(re);
-      if (mm) { const v = clean(mm[1]); if (k === 'city') addCity(v); else if (!out[k]) out[k] = v; return; }
+      if (mm) { const v = clean(mm[1]); if (k === 'state') out.state = acStateOf(v) || v; else if (!out[k]) out[k] = v; return; }
     }
     rest.push(line);
   });
@@ -3050,42 +3192,46 @@ function acParseText(text) {
     const v = clean(line); if (!v) return;
     if (!out.street && (streetWord.test(v) || /\d/.test(v))) { out.street = v; return; }
     if (!out.name && !/\d/.test(v) && v.split(/\s+/).length <= 5 && !v.includes(',')) { out.name = v; return; }
-    if (!/\d/.test(v)) addCity(v);
+    if (!/\d/.test(v)) v.split(',').map(clean).filter(Boolean).forEach(seg => {
+      const st = acStateOf(seg);
+      if (st && !out.state) out.state = st; else if (!out.city) out.city = seg; else if (!out.colonia) out.colonia = seg;
+    });
   });
+  if (out.street) { const sp = acSplitStreet(out.street); out.street = sp.street; if (!out.ext) out.ext = sp.ext; if (!out.int) out.int = sp.int; }
+  if (out.state) out.state = acStateOf(out.state) || out.state;
   return out;
 }
 function acParse(p) {
-  const box = document.getElementById('ac-text-' + p);
+  const box = document.getElementById(p + '-paste');
   const r = acParseText(box.value);
   if (!Object.values(r).some(Boolean)) return showToast('No pude detectar datos, revisa el texto', 3000);
   acFill(p, r, false);
-  box.value = ''; document.getElementById('ac-paste-' + p).classList.add('hidden');
-  acCpLookup(p);
-  showToast('Datos autollenados ✓ revisa que estén completos', 3200);
+  acColoniaMode(p, 'text');
+  box.value = '';
+  acCpLookup(p, true);
+  showToast('Campos llenados ✓ revisa que estén completos', 3200);
 }
 
-/* Sugerencias por C.P. (estado y colonias). Si no hay internet, simplemente no aparecen. */
-const acCpCache = {};
-async function acCpLookup(p) {
-  const hint = document.getElementById('ac-hint-' + p); if (!hint) return;
-  const cp = acVal(p, 'cp');
-  if (!/^\d{5}$/.test(cp)) { hint.classList.add('hidden'); hint.innerHTML = ''; return; }
-  try {
-    let data = acCpCache[cp];
-    if (!data) { const r = await fetch('https://api.zippopotam.us/mx/' + cp); if (!r.ok) throw new Error('sin datos'); data = await r.json(); acCpCache[cp] = data; }
-    if (acVal(p, 'cp') !== cp) return;
-    const places = data.places || [];
-    const state = places[0] && places[0].state || '';
-    const names = [...new Set(places.map(x => x['place name']).filter(Boolean))].slice(0, 8);
-    hint.innerHTML = '';
-    const mk = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'px-2 py-0.5 rounded-full bg-gold/15 border border-gold/40 text-gold'; b.textContent = txt; b.onclick = fn; hint.appendChild(b); };
-    const l = document.createElement('span'); l.className = 'text-zinc-400'; l.textContent = 'C.P. ' + cp + ':'; hint.appendChild(l);
-    if (state) mk('📍 ' + state, () => { const c = acEl(p, 'city'); const cur = c.value.trim(); if (!cur) c.value = state; else if (!cur.toLowerCase().includes(state.toLowerCase())) c.value = cur + ', ' + state; });
-    names.forEach(n => mk(n, () => { acEl(p, 'colonia').value = n; }));
-    if (names.length === 1 && !acVal(p, 'colonia')) acEl(p, 'colonia').value = names[0];
-    if (state || names.length) hint.classList.remove('hidden'); else hint.classList.add('hidden');
-  } catch (e) { hint.classList.add('hidden'); hint.innerHTML = ''; }
+/* --- Conexión de eventos (una sola vez) --- */
+function acWire() {
+  ['orig', 'dest'].forEach(p => {
+    if (!acEl(p, 'cp')) return;
+    acEl(p, 'cp').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); acCpLookup(p, false); });
+    acEl(p, 'phone').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); });
+    acEl(p, 'noext').addEventListener('change', e => acSetNoExt(p, e.target.checked));
+    acEl(p, 'name').addEventListener('change', () => acNameChosen(p));
+    ['city', 'state'].forEach(f => acEl(p, f).addEventListener('input', e => { delete e.target.dataset.auto; }));
+    acEl(p, 'colonia-sel').addEventListener('change', e => { acEl(p, 'colonia').value = e.target.value; });
+    acEl(p, 'colonia-toggle').addEventListener('click', e => {
+      const goText = e.target.dataset.mode === 'select', inp = acEl(p, 'colonia'), sel = acEl(p, 'colonia-sel');
+      if (!goText) { const k = acNorm(inp.value), m = [...sel.options].find(o => o.value && acNorm(o.value) === k); sel.value = m ? m.value : ''; inp.value = m ? m.value : ''; }
+      acColoniaMode(p, goText ? 'text' : 'select');
+    });
+  });
+  if (!document.getElementById('ac-contacts-list')) document.body.insertAdjacentHTML('beforeend', '<datalist id="ac-contacts-list"></datalist>');
+  acRefresh();
 }
+acWire();
 </script>
 </body>
 </html>
