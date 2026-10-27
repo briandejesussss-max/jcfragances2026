@@ -1017,15 +1017,6 @@
           </div>
         </div>
 
-        <!-- COTIZADOR AUTOMÁTICO DE GUÍAS -->
-        <div id="auto-rates-box" class="p-3 rounded-xl themed-subbox border border-gold/30 space-y-2">
-          <span class="text-[9px] font-bold text-gold uppercase tracking-wider block">Cotiza y elige tu paquetería</span>
-          <button type="button" onclick="autoQuoteRates()" class="w-full py-2 rounded-xl bg-gold text-black font-bold text-[11px]">🔎 Cotizar paqueterías</button>
-          <div id="auto-rates-list" class="space-y-1.5"></div>
-          <button type="button" id="auto-generate-btn" onclick="autoCreateOrder()" class="hidden w-full py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-[11px]">✅ Pagar y generar mi guía</button>
-          <p id="auto-rates-msg" class="text-[10px] text-zinc-400 text-center"></p>
-        </div>
-
         <button type="submit" class="w-full py-3 rounded-full bg-gold text-black font-bold text-xs uppercase tracking-luxury hover:brightness-110 transition shadow-md flex items-center justify-center gap-1.5">
           <i data-lucide="message-circle" class="w-4 h-4"></i>
           <span>Enviar Solicitud de Guía a WhatsApp</span>
@@ -1704,73 +1695,6 @@
       }
     }
 
-    // ===== COTIZADOR AUTOMÁTICO (Worker + Kroni Go) =====
-    const AUTO_GUIDES = { WORKER_URL: 'https://tiny-base-38fckroni-cotizador.briandejesussss.workers.dev', DEMO_MARGIN: 20 }; // WORKER_URL vacío = modo DEMO local
-    let autoSel = null;
-    function autoBillable() {
-      const g = id => parseFloat(document.getElementById(id)?.value) || 0;
-      return Math.max(g('calc-real-weight'), (g('calc-length') * g('calc-width') * g('calc-height')) / 5000);
-    }
-    async function autoQuoteRates() {
-      const msg = document.getElementById('auto-rates-msg'), list = document.getElementById('auto-rates-list');
-      const origCP = document.getElementById('orig-cp').value.trim(), destCP = document.getElementById('dest-cp').value.trim(), kg = parseFloat(document.getElementById('calc-real-weight')?.value) || 0;
-      autoSel = null; document.getElementById('auto-generate-btn').classList.add('hidden');
-      if (!/^\d{5}$/.test(origCP) || !/^\d{5}$/.test(destCP) || kg <= 0 || !(+document.getElementById('calc-length').value > 0 && +document.getElementById('calc-width').value > 0 && +document.getElementById('calc-height').value > 0)) { msg.textContent = 'Captura C.P. de origen, destino, peso real y medidas (largo, ancho y alto) del paquete.'; return; }
-      msg.textContent = 'Cotizando...'; list.innerHTML = '';
-      try {
-        let rates;
-        if (AUTO_GUIDES.WORKER_URL) {
-          const r = await fetch(AUTO_GUIDES.WORKER_URL + '/quote', { method: 'POST', headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ origCP, destCP, weightKg: kg, l: +document.getElementById('calc-length').value || 0, w: +document.getElementById('calc-width').value || 0, h: +document.getElementById('calc-height').value || 0 }) });
-          rates = (await r.json()).rates;
-        } else { // DEMO: tarifas simuladas
-          const k = Math.max(1, Math.ceil(kg));
-          rates = [['DHL Express', 1.25, 2], ['Estafeta', 1.0, 3], ['FedEx', 1.15, 2], ['Paquetexpress', 0.9, 4]]
-            .map(([carrier, f, days]) => ({ carrier, service: 'Terrestre', days, price: Math.ceil(f * (95 + 32 * k) + AUTO_GUIDES.DEMO_MARGIN), token: 'demo' }))
-            .sort((a, b) => a.price - b.price);
-        }
-        if (!rates || !rates.length) { msg.textContent = 'No hay tarifas para esa ruta.'; return; }
-        list.innerHTML = rates.map((r, i) => `<button type="button" data-i="${i}" class="auto-rate w-full flex items-center justify-between px-3 py-2 rounded-xl themed-input border text-left text-[11px]">
-          <span><b>${r.carrier}</b> · ${r.service}<br><span class="text-[10px] text-zinc-400">${r.days} días hábiles${i === 0 ? ' · 💰 la más barata' : ''}</span></span>
-          <b class="text-gold text-sm">$${r.price} MXN</b></button>`).join('');
-        list.querySelectorAll('.auto-rate').forEach(b => b.onclick = () => {
-          autoSel = rates[+b.dataset.i];
-          list.querySelectorAll('.auto-rate').forEach(x => x.style.outline = '');
-          b.style.outline = '2px solid #c9a24b';
-          const sel = document.getElementById('ship-courier');
-          if ([...sel.options].some(o => o.value === autoSel.carrier)) sel.value = autoSel.carrier;
-          document.getElementById('auto-generate-btn').classList.remove('hidden');
-          msg.textContent = `Elegiste ${autoSel.carrier} por $${autoSel.price} MXN.`;
-        });
-        msg.textContent = AUTO_GUIDES.WORKER_URL ? 'Elige una opción.' : 'Modo DEMO: tarifas simuladas. Elige una opción.';
-      } catch (e) { msg.textContent = 'No se pudo cotizar. Intenta de nuevo.'; }
-    }
-    async function autoCreateOrder() {
-      const msg = document.getElementById('auto-rates-msg');
-      if (!autoSel) return;
-      const form = document.getElementById('shipping-form');
-      if (!form.checkValidity()) { form.reportValidity(); return; }
-      if (!AUTO_GUIDES.WORKER_URL) { msg.textContent = `✅ DEMO: aquí se cobrarían $${autoSel.price} MXN y al confirmarse el pago se generaría la guía ${autoSel.carrier} automáticamente.`; return; }
-      msg.textContent = 'Preparando tu pago...';
-      const v = id => document.getElementById(id)?.value.trim() || '';
-      const pk = p => ({ contact_name: v(p+'-name'), company_name: v(p+'-company') || null, email: p === 'dest' ? v('dest-email') : null, phone: v(p+'-phone'), street: v(p+'-street'), street_number: document.getElementById(p+'-noext')?.checked ? 'S/N' : v(p+'-ext'), interior_number: v(p+'-int') || null, neighborhood: v(p+'-colonia'), municipality: v(p+'-city'), state: v(p+'-state'), postal_code: v(p+'-cp'), references: v(p+'-ref') || null });
-      try {
-        const r = await fetch(AUTO_GUIDES.WORKER_URL + '/order', { method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ token: autoSel.token, origin: pk('orig'), dest: pk('dest'), pkg: { contents: v('ship-contents') }, returnUrl: location.origin + location.pathname }) });
-        const d = await r.json();
-        if (d.checkoutUrl) location.href = d.checkoutUrl; else if (d.labelUrl) { msg.innerHTML = `✅ Guía generada${d.test ? ' (PRUEBA)' : ''}: <b>${d.tracking}</b> · <a href="${d.labelUrl}" target="_blank" class="underline text-gold">Descargar etiqueta PDF</a>`; } else msg.textContent = d.error || 'No se pudo generar la guía.';
-      } catch (e) { msg.textContent = 'No se pudo crear el pedido.'; }
-    }
-
-    window.addEventListener('load', async () => { // regreso desde Mercado Pago: espera la guía y muestra la descarga
-      const id = new URLSearchParams(location.search).get('guia'); if (!id || !AUTO_GUIDES.WORKER_URL) return;
-      const bar = document.createElement('div'); bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:12px;background:#111;color:#fff;text-align:center;font-size:13px';
-      bar.textContent = 'Pago recibido, generando tu guía...'; document.body.appendChild(bar);
-      for (let i = 0; i < 15; i++) { try { const d = await (await fetch(AUTO_GUIDES.WORKER_URL + '/label/' + id)).json();
-        if (d.status === 'ready') { bar.innerHTML = `✅ Tu guía <b>${d.tracking}</b> está lista · <a href="${d.labelUrl}" target="_blank" style="color:#c9a24b;text-decoration:underline">Descargar etiqueta PDF</a>`; return; } } catch (e) {}
-        await new Promise(r => setTimeout(r, 3000)); }
-      bar.textContent = 'Tu pago está registrado; la guía tarda un poco más. Escríbenos por WhatsApp si no llega.';
-    });
     function realWeightDisplay(v) { return (parseFloat(v) > 0) ? `${v} kg` : 'No especificado'; }
 
     function handleShippingSubmit(e) {
@@ -1803,7 +1727,6 @@
       let msg = `📦 *SOLICITUD DE GUÍA DE ENVÍO PREPAGADA* 📦\n\n`;
       msg += `🚚 *Paquetería:* ${courier}\n`;
       msg += `⚖️ *Guía Seleccionada:* ${weight}\n`;
-      if (typeof autoSel !== 'undefined' && autoSel) msg += `💲 *Tarifa elegida:* ${autoSel.carrier} — $${autoSel.price} MXN\n`;
       msg += `🏷️ *Contenido:* ${contents}\n`;
       msg += `📏 *Dimensiones:* ${length} x ${width} x ${height} cm\n`;
       msg += `⚖️ *Peso Báscula:* ${realWeightDisplay(realW)}\n`;
