@@ -19,16 +19,16 @@
    "notes": "🌿🍊 Notas de Salida\n\n🍋 Limón · 🍊 Bergamota · 🍊 Mandarina verde · 🍊 Naranja · 🍈 Toronja blanca · 🍈 Toronja · 🌿 Menta · 🌿 Eucalipto · 🌿 Neroli · 🌱 Notas verdes · 🌾 Pasto recién cortado\n\n \n\n🌼🌿 Notas de Corazón \n\n🥒 Pepino · 🍈 Higo · 🌱 Bambú · 🌿 Aloe Vera · 🌿 Cannabis · 🌸 Jazmín · 🌸 Orquídea · 🍑 Ciruela · 🌿 Tierra\n\n  \n\n🌲🖤 Notas de Fondo\n\n🌲 Vetiver · 🌲 Cedro · 🕯️ Copal blanco · 🕯️ Benjuí · 🕯️ Ládano español · 🟤 Ámbar · 🍦 Vainilla de Madagascar",
    "prices": {
     "3ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 200
     },
     "5ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 310
     },
     "10ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 580
     },
     "bottle": {
      "price": 1500,
