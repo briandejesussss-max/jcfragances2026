@@ -19,16 +19,16 @@
    "notes": "Pisello Parfum\nCarrito\nIr directamente a la información del producto\n\nAbrir elemento multimedia 1 en una ventana modal\n\nAbrir elemento multimedia 2 en una ventana modal\n\nAbrir elemento multimedia 3 en una ventana modal\n\nAbrir elemento multimedia 4 en una ventana modal\n\nAbrir elemento multimedia 5 en una ventana modal\n\n1\n/\nde\n5\n\nPisello Parfum\n\nTURTLE HOUSE -50ml-\nPrecio habitual$ 1,800.00 MXN\nCantidad\nCantidad\nReducir cantidad para TURTLE HOUSE -50ml-\n1\nAumentar cantidad para TURTLE HOUSE -50ml-\n\nAgregar al carrito\nComprar ahora\nNotas de Salida\n\n🍊 Mandarina verde · 🍊 Mandarina · 🍊 Naranja · 🍊 Toronja blanca · 🍋 Limón · 🍊 Toronja rosa · 🍈 Lima · 🥒 Pepino · 🌊 Notas marinas\n\n \n\nCorazón\n\n🌊 Algas · 🧂 Sal · 🌊 Calone · 🌊 Arrecifes · 🌳 Cedro\n\n \n\nFondo\n\n⚪ Almizcle · ⚪ Ambroxan · ⚪ Ámbar gris · 🌳 Musgo de roble",
    "prices": {
     "3ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 220
     },
     "5ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 340
     },
     "10ml": {
-     "price": 0,
-     "inStock": true
+     "inStock": true,
+     "price": 640
     },
     "bottle": {
      "price": 1970,
