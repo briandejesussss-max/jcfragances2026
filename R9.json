@@ -143,7 +143,7 @@
      "inStock": true
     },
     "bottle": {
-     "price": 2750,
+     "price": 2980,
      "inStock": true,
      "onDemand": true,
      "type": "tester"
