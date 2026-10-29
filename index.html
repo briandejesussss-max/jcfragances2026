@@ -675,6 +675,25 @@
     .hero-btn{translate:var(--mx2,0px) var(--my2,0px)}
     @media(prefers-reduced-motion:reduce){#ap-splash,.ap-aura,.ap-fly{display:none !important}.hero-copy{opacity:1;transform:none}.marquee-track{animation:none !important}}
     @media(hover:none){.ap-aura{display:none}}
+
+    /* =====================================================================
+       ===== CORRECCIÓN: marcos de imagen limpios (PNG sin cajas negras) y tarjetas ordenadas =====
+       ===================================================================== */
+    html .stage-bottle, html.dark .stage-bottle, html:not(.dark) .stage-bottle{ background:transparent !important; border-radius:22px !important; }
+    .stage-bottle{ position:relative; display:flex; align-items:center; justify-content:center; }
+    .stage-bottle img{ background:transparent !important; }
+    /* Tamaño uniforme: todas las botellas dentro de un marco del mismo alto */
+    #curated-shelf .stage-bottle{ height:clamp(140px,24vw,200px) !important; padding:.5rem !important; }
+    #catalog-sheet .card-silloria .stage-bottle{ height:13rem !important; padding:.9rem !important; border-bottom:0 !important; }
+    .card-silloria .stage-bottle img{ width:100% !important; height:100% !important; max-width:100% !important; max-height:100% !important; object-fit:contain !important; filter:drop-shadow(0 14px 20px rgba(0,0,0,.28)); }
+    #curated-shelf .card-silloria{ justify-content:flex-start !important; gap:.35rem; }
+    /* Insignias y corazón en sus esquinas (cada una en su lugar, sin encimarse) */
+    .stage-bottle>.absolute{ position:absolute; z-index:4; }
+    .stage-bottle>.absolute.top-2\.5{ top:.625rem; }
+    .stage-bottle>.absolute.left-2\.5{ left:.625rem; right:auto; }
+    .stage-bottle>.absolute.right-2\.5{ right:.625rem; left:auto; }
+    .stage-bottle>.absolute.bottom-2{ bottom:.5rem; top:auto; }
+    .stage-bottle>.absolute.right-2{ right:.5rem; left:auto; }
   </style>
 </head>
 <body class="flex flex-col antialiased selection:bg-[#FF8A00] selection:text-black min-h-screen w-full">
@@ -3949,6 +3968,48 @@ acWire();
       });
     }).observe(document.body, { attributes: true, attributeFilter: ['class', 'style'], attributeOldValue: true, subtree: true });
   }
+})();
+</script>
+
+<script>
+/* Quita el fondo negro pegado a los bordes de las fotos ya guardadas (misma técnica que al subir una foto) */
+(function () {
+  'use strict';
+  var cache = new Map(), cleaned = new Set(), queue = [], busy = false;
+  function run() {
+    if (busy) return; busy = true;
+    (function next() {
+      var img = queue.shift();
+      if (!img) { busy = false; return; }
+      try {
+        var src = img.currentSrc || img.src;
+        if (src && !cleaned.has(src) && typeof cleanBlackBackground === 'function' && img.naturalWidth > 0) {
+          var hit = cache.get(src), out;
+          if (hit !== undefined) out = hit;
+          else { out = null; try { out = cleanBlackBackground(img) || null; } catch (e) { out = null; } cache.set(src, out); }
+          if (out) { cleaned.add(out); img.src = out; }
+        }
+      } catch (e) {}
+      setTimeout(next, 30);
+    })();
+  }
+  function enqueue(img) {
+    if (!img || img.tagName !== 'IMG') return;
+    var src = img.currentSrc || img.src;
+    if (!src || cleaned.has(src)) return;
+    if (img.complete && img.naturalWidth > 0) { queue.push(img); run(); }
+    else img.addEventListener('load', function () { enqueue(img); }, { once: true });
+  }
+  function scan() {
+    document.querySelectorAll('.stage-bottle img, #pv-img').forEach(enqueue);
+  }
+  ['catalog-sheet', 'curated-shelf'].forEach(function (id) {
+    var t = document.getElementById(id);
+    if (t) new MutationObserver(scan).observe(t, { childList: true, subtree: true });
+  });
+  var pv = document.getElementById('pv-img');
+  if (pv) new MutationObserver(function () { enqueue(pv); }).observe(pv, { attributes: true, attributeFilter: ['src'] });
+  scan(); setTimeout(scan, 1200);
 })();
 </script>
 </body>
