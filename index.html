@@ -2,10 +2,19 @@
 <html lang="es" id="html-root" class="">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   
   <title id="page-title">JS FRAGANCES — Scent Vault & Sillage Studio</title>
   <meta name="description" content="Catálogo exclusivo de decants, curaduría de perfumes de autor y generador de guías express.">
+
+  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="JS FRAGANCES — Scent Vault & Sillage Studio">
+  <meta property="og:description" content="Catálogo exclusivo de decants, curaduría de perfumes de autor y generador de guías express.">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -792,9 +801,16 @@
       html{scroll-behavior:auto}
       *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
     }
+
+    /* ===== MEJORAS GENERALES ===== */
+    .skip-link{position:fixed;left:12px;top:-60px;z-index:10000;background:var(--ap-ink);color:var(--ap-white);padding:.6rem 1rem;border-radius:999px;font-weight:600;font-size:13px;transition:top .2s}
+    .skip-link:focus{top:12px}
+    /* sin zoom automático al escribir en celulares */
+    @media(max-width:640px){ input,select,textarea{font-size:16px !important} }
   </style>
 </head>
 <body class="flex flex-col antialiased selection:bg-[#FF8A00] selection:text-black min-h-screen w-full">
+  <a href="#catalogo" class="skip-link no-print">Saltar al catálogo</a>
 
   <div id="scroll-progress" aria-hidden="true"></div>
 
@@ -1584,7 +1600,7 @@
             </label>
           </div>
           <div class="w-12 h-14 rounded bg-zinc-900 border border-zinc-700 flex items-center justify-center overflow-hidden">
-            <img id="frag-preview-img" src="" class="w-full h-full object-contain hidden">
+            <img id="frag-preview-img" src="" alt="" class="w-full h-full object-contain hidden">
             <span id="frag-preview-placeholder" class="text-zinc-600 text-[8px]">Sin Foto</span>
           </div>
         </div>
@@ -2075,7 +2091,7 @@
               </button>
             </div>
             <div class="h-28 sm:h-32 flex items-center justify-center p-2 stage-bottle rounded-xl">
-              <img src="${imgOf(f)}" class="max-h-full max-w-full object-contain filter drop-shadow">
+              <img src="${imgOf(f)}" alt="${esc(f.name)}" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain filter drop-shadow">
             </div>
             <div class="pt-1.5 text-center">
               <span class="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-luxury block truncate">${esc(f.brand)}</span>
@@ -2292,7 +2308,7 @@
         <div class="card-silloria rounded-2xl overflow-hidden flex flex-col justify-between">
           <div>
             <div onclick="openProductView('${f.id}')" class="stage-bottle relative w-full h-48 sm:h-52 p-3 sm:p-4 flex items-center justify-center border-b border-white/5 cursor-pointer">
-              <img src="${imgOf(f)}" alt="${esc(f.name)}" loading="lazy" class="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]">
+              <img src="${imgOf(f)}" alt="${esc(f.name)}" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]">
               
               <div class="absolute top-2.5 left-2.5 flex flex-wrap gap-1">
                 <span class="themed-subbox border text-zinc-300 font-semibold text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full">${esc(f.concentration || 'EDP')}</span>
@@ -4126,6 +4142,77 @@ acWire();
       if(n>last){ b.classList.remove('bag-pop'); void b.offsetWidth; b.classList.add('bag-pop'); }
       last=n;
     }).observe(b,{childList:true,subtree:true,characterData:true});
+  }catch(e){}
+})();
+</script>
+<script>
+/* ---------- Bolsa: se conserva al recargar o volver a entrar ---------- */
+(function(){
+  try{
+    var KEY='js_cart_v1', ready=false;
+    var base=updateCartUI;
+    updateCartUI=function(){ base.apply(this,arguments); if(ready){ try{ localStorage.setItem(KEY,JSON.stringify(cart.map(function(i){return {fragId:i.fragId,size:i.size,qty:i.qty};}))); }catch(e){} } };
+    function restore(){
+      try{
+        var saved=JSON.parse(localStorage.getItem(KEY)||'[]'), fids=[];
+        (Array.isArray(saved)?saved:[]).forEach(function(s){
+          var f=fragrances.find(function(x){return x.id===s.fragId;});
+          if(!f||!f.prices||!f.prices[s.size]) return;
+          for(var k=0;k<(s.qty|0);k++){
+            if(!sizeState(f,s.size).ok) break;
+            var it=cart.find(function(i){return i.fragId===s.fragId&&i.size===s.size;});
+            if(it) it.qty+=1; else cart.push({fragId:s.fragId,name:f.name,brand:f.brand,size:s.size,price:f.prices[s.size].price,qty:1});
+          }
+          if(fids.indexOf(s.fragId)<0) fids.push(s.fragId);
+        });
+        ready=true; updateCartUI();
+        fids.forEach(function(id){ try{ refreshStockAreas(id); }catch(e){} });
+      }catch(e){ ready=true; }
+    }
+    var t0=Date.now(), iv=setInterval(function(){
+      if(remoteReady||Date.now()-t0>15000){ clearInterval(iv); restore(); }
+    },300);
+  }catch(e){}
+})();
+/* ---------- Bolsa: Escape, tocar fuera y sin scroll detrás ---------- */
+(function(){
+  try{
+    var d=document.getElementById('cart-drawer'); if(!d) return;
+    var openedAt=0;
+    function isOpen(){ return !d.classList.contains('hidden'); }
+    new MutationObserver(function(){
+      if(isOpen()){ openedAt=Date.now(); document.body.style.overflow='hidden'; }
+      else document.body.style.removeProperty('overflow');
+    }).observe(d,{attributes:true,attributeFilter:['class']});
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&isOpen()) toggleCartDrawer(); });
+    document.addEventListener('click',function(e){
+      if(!isOpen()||Date.now()-openedAt<350) return;
+      var path=e.composedPath?e.composedPath():[];
+      var inside=path.some(function(n){
+        return n===d||(n.getAttribute&&/toggleCartDrawer/.test(n.getAttribute('onclick')||''));
+      });
+      if(!inside) toggleCartDrawer();
+    });
+  }catch(e){}
+})();
+/* ---------- Accesibilidad: nombres para botones que solo tienen ícono ---------- */
+(function(){
+  try{
+    var MAP={'x':'Cerrar','menu':'Menú','moon':'Cambiar apariencia','sun':'Cambiar apariencia','shopping-bag':'Bolsa','arrow-up':'Volver arriba',
+      'heart':'Guardar en favoritos','plus':'Agregar','minus':'Quitar','trash-2':'Eliminar','trash':'Eliminar','search':'Buscar','copy':'Copiar',
+      'pencil':'Editar','edit':'Editar','edit-2':'Editar','edit-3':'Editar','share-2':'Compartir','truck':'Guías de envío','message-circle':'WhatsApp',
+      'chevron-down':'Mostrar más','chevron-up':'Mostrar menos','chevron-left':'Anterior','chevron-right':'Siguiente','download':'Descargar','upload':'Subir'};
+    function label(){
+      document.querySelectorAll('button:not([aria-label])').forEach(function(b){
+        if((b.textContent||'').trim()) return;
+        var t=b.getAttribute('title'); if(t){ b.setAttribute('aria-label',t); return; }
+        var ic=b.querySelector('[data-lucide]'); var n=ic&&ic.getAttribute('data-lucide');
+        if(n&&MAP[n]) b.setAttribute('aria-label',MAP[n]);
+      });
+    }
+    var tm=0;
+    new MutationObserver(function(){ clearTimeout(tm); tm=setTimeout(label,500); }).observe(document.body,{childList:true,subtree:true});
+    label();
   }catch(e){}
 })();
 </script>
