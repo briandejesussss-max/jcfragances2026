@@ -562,21 +562,22 @@
    "notes": "Notas de Salida\n\n🥭 Maracuyá (fruta de la pasión) · 🍊 Naranja · 🍈 Guayaba · 🥥 Coco cremoso · 🍈 Lima (limón verde) · 🍊 Mandarina · 🍊 Toronja (pomelo) rosada · 🍍 Piña dulce · 🍓 Fresa fresca · 🥭 Mango jugoso\n\n\n\n \n\n \n\nCorazón\n\n🌸 Violeta · 🌿 Menta fresca · 🌼 Iris · 🌲 Cedro · 🧡 Ámbar · 🌿 Cardamomo · 🌱 Vetiver · 🌳 Sándalo · 🌲 Notas de bosque verde,🍓 Fresa fresca · 🥭 Mango jugoso\n\n \n\n \n\nFondo\n\n🌊 Notas marinas limpias · ⚪ Ambroxan · ⚪ Almizcle sedoso · 🌿 Musgo · 🌲 Maderas blancas · 🍦 Vainilla cremosa · 🍦 Vainilla sexy envolvente · 🫧 Notas jabonosas elegantes,🍓 Fresa fresca · 🥭 Mango jugoso\n\n  \n\nSensación\n\n🌴 Tropical fresco · 🌊 Marino limpio · 🍍 Frutal cremoso · 🌿 Verde aromático · 🫧 Limpio jabonoso · ✨ Moderno, vibrante y sensual",
    "prices": {
     "3ml": {
-     "price": 210,
+     "price": 190,
      "inStock": true
     },
     "5ml": {
-     "price": 330,
+     "price": 290,
      "inStock": true
     },
     "10ml": {
-     "price": 625,
+     "price": 550,
      "inStock": true
     },
     "bottle": {
      "price": 1970,
      "inStock": true,
-     "onDemand": true
+     "onDemand": true,
+     "type": "linea"
     }
    }
   },
