@@ -3437,7 +3437,7 @@
     }
   }
   const BANK = { clabe: '646195405600875512', holder: 'Jesus Sanchez', bank: 'STP' }; // datos para transferencia
-  const SHIPPING = { base: 170, extra: 0, cps: [] }; // envío base; 'extra' y 'cps' = cargo y códigos postales de zona extendida
+  const SHIPPING = { base: 180, extra: 0, cps: [] }; // envío base; 'extra' y 'cps' = cargo y códigos postales de zona extendida
   const STATUS = { pendiente_pago: 'Pendiente de pago', pagado: 'Pagado', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
   const escH = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const closeM = id => document.getElementById(id).classList.add('hidden');
@@ -3466,7 +3466,7 @@
       '<div class="themed-subbox border rounded-xl p-3 space-y-1"><div class="font-bold uppercase text-[10px] text-gold">Transferencia</div>' +
       '<div>Productos: ' + escH(formatPrice(sub)) + ' · Envío: ' + escH(formatPrice(envio)) + '</div><div>Monto a transferir: <b>' + escH(formatPrice(total)) + '</b></div><div>CLABE: <b>' + clabe + '</b> <button onclick="navigator.clipboard.writeText(\'' + BANK.clabe + '\');showToast(\'CLABE copiada\')" class="underline ml-1">Copiar</button></div>' +
       '<div>Titular: <b>' + escH(BANK.holder) + '</b></div><div>Banco: <b>' + escH(BANK.bank) + '</b></div><div>Concepto: <b>' + escH(num) + '</b></div></div>' +
-      '<p class="text-zinc-400">El envío base es de ' + escH(formatPrice(SHIPPING.base)) + '; si tu código postal es zona extendida, te confirmamos por WhatsApp el cargo adicional. Cuando pagues, avísanos y confirmamos tu pago. Después te mandamos tu guía de envío.</p>' +
+      '<p class="text-zinc-400">El envío general es de ' + escH(formatPrice(SHIPPING.base)) + '. Si tu código postal es zona extendida, el costo cambia según la paquetería y te escribimos por WhatsApp con el monto final: espera ese mensaje antes de transferir. Cuando pagues, avísanos y confirmamos tu pago. Después te mandamos tu guía de envío.</p>' +
       '<a target="_blank" rel="noopener" href="' + waLink(storeConfig.whatsapp, msg) + '" class="block text-center py-2.5 rounded-full bg-[#25D366] text-black font-bold">Enviar comprobante por WhatsApp</a>';
     cart = []; saveLocalData(); updateCartUI(); renderCatalog();
     toggleCartDrawer(); openM('pay-modal');
@@ -3491,7 +3491,8 @@
     if (!data.length) { box.innerHTML = '<p class="text-zinc-400">Aún no hay pedidos.</p>'; return; }
     box.innerHTML = data.map(o => {
       const c = o.customer, btn = (st, t) => '<button onclick="setOrderStatus(\'' + o.id + '\',\'' + st + '\')" class="px-3 py-1 rounded-full bg-gold text-black font-bold">' + t + '</button>';
-      const msgs = { pagado: 'Hola ' + c.name + ', recibimos tu pago del pedido ' + o.number + ' ✅. Ya lo estamos preparando; te avisamos con tu guía de envío.',
+      const msgs = { pendiente_pago: 'Hola ' + c.name + ', sobre tu pedido ' + o.number + ': el envío para tu zona es de ' + formatPrice(o.shipping || 0) + '. Monto final a transferir: ' + formatPrice(o.total) + '. CLABE: ' + BANK.clabe + ' (' + BANK.holder + ', ' + BANK.bank + '). Concepto: ' + o.number + '.',
+        pagado: 'Hola ' + c.name + ', recibimos tu pago del pedido ' + o.number + ' ✅. Ya lo estamos preparando; te avisamos con tu guía de envío.',
         enviado: 'Hola ' + c.name + ', tu pedido ' + o.number + ' va en camino 📦. Paquetería: ' + o.carrier + '. Guía: ' + o.tracking + (o.tracking_url ? '. Rastreo: ' + o.tracking_url : ''),
         entregado: 'Hola ' + c.name + ', tu pedido ' + o.number + ' fue entregado con éxito 🎉. ¡Gracias por tu compra!' };
       return '<div class="themed-subbox border rounded-xl p-3 space-y-1"><div class="flex justify-between"><b>' + escH(o.number) + '</b><span class="text-gold font-bold">' + escH(STATUS[o.status] || o.status) + '</span></div>' +
@@ -3499,12 +3500,21 @@
         '<div class="text-zinc-400">' + escH([c.street, c.numExt, c.numInt, c.colonia, 'CP ' + c.cp, c.city, c.state].filter(Boolean).join(', ')) + '</div>' +
         '<div>' + o.items.map(i => escH(itemTxt(i))).join('<br>') + '</div><div>Envío: ' + escH(formatPrice(o.shipping || 0)) + '</div><div><b>Total: ' + escH(formatPrice(o.total)) + '</b></div>' +
         '<div class="flex flex-wrap gap-2 pt-1">' +
-        (o.status === 'pendiente_pago' ? btn('pagado', 'Marcar pagado') + btn('cancelado', 'Cancelar') : '') +
+        (o.status === 'pendiente_pago' ? '<div class="w-full flex items-center gap-2">Envío $ <input id="env-' + o.id + '" type="number" min="0" value="' + (o.shipping || 0) + '" class="themed-input rounded-lg px-2 py-1 w-24"><button onclick="setOrderShipping(\'' + o.id + '\')" class="px-3 py-1 rounded-full border border-gold text-gold font-bold">Actualizar envío</button></div>' + btn('pagado', 'Marcar pagado') + btn('cancelado', 'Cancelar') : '') +
         (o.status === 'pagado' ? '<input id="car-' + o.id + '" placeholder="Paquetería" class="themed-input rounded-lg px-2 py-1 w-28"><input id="gui-' + o.id + '" placeholder="No. de guía" class="themed-input rounded-lg px-2 py-1 w-32"><input id="url-' + o.id + '" placeholder="Link de rastreo (opcional)" class="themed-input rounded-lg px-2 py-1 w-full">' + btn('enviado', 'Marcar enviado') : '') +
         (o.status === 'enviado' ? btn('entregado', 'Marcar entregado') : '') +
         (msgs[o.status] ? '<a target="_blank" rel="noopener" href="' + waLink(c.phone, msgs[o.status]) + '" class="px-3 py-1 rounded-full bg-[#25D366] text-black font-bold">Avisar por WhatsApp</a>' : '') +
         '</div></div>';
     }).join('');
+  }
+  async function setOrderShipping(id) { // zona extendida / paquetería elegida: ajusta el envío y el total
+    const n = parseFloat(document.getElementById('env-' + id).value);
+    if (!isFinite(n) || n < 0) { showToast('Escribe un monto de envío válido'); return; }
+    const { data: o, error: e1 } = await sb.from('orders').select('total,shipping').eq('id', id).single();
+    if (e1) { showToast('No se pudo leer el pedido'); return; }
+    const { error } = await sb.from('orders').update({ shipping: n, total: Number(o.total) - Number(o.shipping || 0) + n }).eq('id', id);
+    if (error) { showToast('No se pudo actualizar el envío', 3500); return; }
+    showToast('Envío actualizado ✓ Avisa al cliente por WhatsApp', 3500); openOrders();
   }
   async function setOrderStatus(id, st) {
     const g = k => { const e = document.getElementById(k + '-' + id); return e ? e.value.trim() : ''; };
