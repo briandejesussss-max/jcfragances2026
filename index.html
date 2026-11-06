@@ -2766,7 +2766,133 @@
 
     function toggleCartDrawer() { document.getElementById('cart-drawer').classList.toggle('hidden'); }
 
-    async function sendOrderViaWhatsApp() {
+    // ================= DATOS BANCARIOS =================
+// Cambia estos 3 datos por los tuyos reales:
+const BANK_DETAILS = {
+  bank: "STP",
+  clabe: "646195405600875512",
+  owner: "Jesús Sánchez"
+};
+
+async function sendOrderViaWhatsApp() {
+  if (cart.length === 0) { 
+    showToast('Agrega al menos una fragancia a tu bolsa'); 
+    return; 
+  }
+  
+  const name = document.getElementById('order-customer-name').value.trim();
+  const phone = document.getElementById('order-customer-phone').value.trim();
+  const street = document.getElementById('order-street').value.trim();
+  const numExt = document.getElementById('order-num-ext').value.trim();
+  const numInt = document.getElementById('order-num-int').value.trim();
+  const cp = document.getElementById('order-cp').value.trim();
+  const colonia = document.getElementById('order-colonia').value.trim();
+  const city = document.getElementById('order-city').value.trim();
+  const state = document.getElementById('order-state').value.trim();
+
+  if (!name || !phone || !street || !numExt || !cp || !colonia || !city || !state) {
+    showToast('Por favor completa todos los datos de entrega');
+    return;
+  }
+
+  // Genera número de orden único tipo tienda (Ej. JS-7241)
+  const orderId = 'JS-' + Math.floor(1000 + Math.random() * 9000);
+  
+  let total = 0;
+  let itemsText = "";
+  cart.forEach((item) => {
+    const subtotal = item.price * item.qty;
+    total += subtotal;
+    const sizeTag = item.size === 'bottle' ? (isTesterBottle(item.fragId) ? 'Botella Tester' : 'Botella') : item.size;
+    itemsText += `▪ ${item.qty}x ${item.brand} - ${item.name} (${sizeTag}) -> ${formatPrice(subtotal)}\n`;
+  });
+
+  // Abre la ventana de pago con CLABE y datos bancarios
+  showTransferReceipt({
+    orderId,
+    name,
+    phone,
+    address: `${street} #${numExt}${numInt ? ' Int ' + numInt : ''}, Col. ${colonia}, C.P. ${cp}, ${city}, ${state}`,
+    itemsText,
+    total: formatPrice(total)
+  });
+}
+
+function showTransferReceipt(order) {
+  // Elimina modal previo si existiera
+  document.getElementById('transfer-modal')?.remove();
+
+  const modalHtml = `
+    <div id="transfer-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 text-xs">
+      <div class="themed-modal-bg rounded-2xl w-full max-w-md p-5 border border-gold/40 space-y-3.5 shadow-2xl">
+        <div class="text-center pb-2 border-b border-white/10">
+          <span class="text-gold font-bold text-[10px] tracking-widest uppercase">Orden Generada</span>
+          <h3 class="font-editorial text-2xl text-zinc-100 font-bold tracking-wider">${order.orderId}</h3>
+          <p class="text-zinc-400 text-[11px] mt-0.5">Realiza tu transferencia para preparar el envío</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl themed-subbox border border-gold/30 space-y-2 font-mono text-[11px]">
+          <div class="flex justify-between items-center"><span class="text-zinc-400 font-sans">Total a transferir:</span><strong class="text-gold text-base font-bold">${order.total}</strong></div>
+          <div class="flex justify-between"><span class="text-zinc-400 font-sans">Banco:</span><span>${BANK_DETAILS.bank}</span></div>
+          <div class="flex justify-between"><span class="text-zinc-400 font-sans">Beneficiario:</span><span>${BANK_DETAILS.owner}</span></div>
+          
+          <div class="flex justify-between items-center pt-2 border-t border-white/10">
+            <span class="text-zinc-400 font-sans">CLABE:</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-zinc-100 font-bold">${BANK_DETAILS.clabe}</span>
+              <button type="button" onclick="copyClabe('${BANK_DETAILS.clabe}')" class="px-2 py-0.5 rounded bg-gold text-black text-[10px] font-sans font-bold hover:brightness-110 active:scale-95 transition">Copiar</button>
+            </div>
+          </div>
+          
+          <div class="flex justify-between pt-1 border-t border-white/10"><span class="text-zinc-400 font-sans">Concepto / Referencia:</span><span class="text-gold font-bold">${order.orderId}</span></div>
+        </div>
+
+        <button onclick="confirmTransferOrder('${order.orderId}')" class="w-full py-3 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-black font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>Enviar orden y comprobante por WhatsApp</span>
+        </button>
+
+        <button type="button" onclick="document.getElementById('transfer-modal').remove()" class="w-full py-1 text-center text-zinc-400 hover:text-white transition">
+          Volver a la bolsa
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  window._currentPendingOrder = order;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function copyClabe(clabe) {
+  navigator.clipboard.writeText(clabe);
+  showToast('CLABE copiada al portapapeles ✓');
+}
+
+function confirmTransferOrder(orderId) {
+  const order = window._currentPendingOrder;
+  if (!order) return;
+
+  if (typeof applyDeduction === 'function') applyDeduction();
+  
+  let msg = `🛍️ *NUEVO PEDIDO: ${order.orderId}* 🛍️\n\n`;
+  msg += `👤 *CLIENTE:* ${order.name} (${order.phone})\n`;
+  msg += `📍 *ENVÍO:* ${order.address}\n\n`;
+  msg += `📦 *PRODUCTOS:*\n${order.itemsText}\n`;
+  msg += `💰 *TOTAL TRANSFERIDO:* ${order.total}\n\n`;
+  msg += `Adjunto mi captura de comprobante bancario para validación.`;
+
+  const cleanPhone = storeConfig.whatsapp.replace(/[^0-9]/g, '');
+  window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+
+  cart = [];
+  saveLocalData();
+  updateCartUI();
+  renderCatalog();
+  if (isAdminLoggedIn && typeof syncToGitHub === 'function') syncToGitHub();
+
+  document.getElementById('transfer-modal')?.remove();
+  toggleCartDrawer();
+}
       if (cart.length === 0) { showToast('Agrega al menos una fragancia a tu bolsa'); return; }
       const name = document.getElementById('order-customer-name').value.trim();
       const phone = document.getElementById('order-customer-phone').value.trim();
