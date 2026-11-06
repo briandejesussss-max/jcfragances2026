@@ -1159,6 +1159,7 @@
           <button onclick="toggleSidebarDrawer(); migrateToDatabase()" class="p-1.5 rounded-lg bg-zinc-800 text-[10px] text-amber-300 border border-zinc-700">Subir catálogo a la base de datos</button>
           <button onclick="toggleSidebarDrawer(); openStoreConfigModal()" class="p-1.5 rounded-lg bg-zinc-800 text-[10px] text-zinc-300 border border-zinc-700">Ajustes Tienda</button>
           <button onclick="toggleSidebarDrawer(); openInventoryModal()" class="p-1.5 rounded-lg bg-zinc-800 text-[10px] text-amber-300 border border-zinc-700">Gestor Stock</button>
+          <button onclick="toggleSidebarDrawer(); openOrders()" class="p-1.5 rounded-lg bg-zinc-800 text-[10px] text-amber-300 border border-zinc-700">Pedidos</button>
           <button onclick="toggleSidebarDrawer(); openFragranceModal()" class="p-1.5 rounded-lg bg-gold text-black font-bold text-[10px]">+ Perfume</button>
           <button onclick="toggleSidebarDrawer(); openCalcModal()" class="col-span-2 p-1.5 rounded-lg bg-zinc-800 text-[10px] text-amber-300 border border-zinc-700 flex items-center justify-center gap-1"><i data-lucide="calculator" class="w-3.5 h-3.5"></i> Calculadora de precios</button>
           <button onclick="toggleSidebarDrawer(); openDecantCalc()" class="col-span-2 p-1.5 rounded-lg bg-zinc-800 text-[10px] text-amber-300 border border-zinc-700 flex items-center justify-center gap-1"><i data-lucide="calculator" class="w-3.5 h-3.5"></i> Calculadora de Costo de Decants</button>
@@ -1683,7 +1684,7 @@
         </div>
         <div class="grid grid-cols-2 gap-2">
           <input type="text" id="order-state" placeholder="Estado *" class="w-full themed-input rounded-xl px-2.5 py-1.5">
-          <input type="email" id="order-email" placeholder="Correo (opcional)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+          <input type="email" id="order-email" placeholder="Correo * (aquí te damos seguimiento)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
         </div>
       </div>
     </div>
@@ -1695,10 +1696,11 @@
         <span id="cart-total-price" class="text-sm text-gold font-bold font-mono">$0</span>
       </div>
 
-      <button onclick="sendOrderViaWhatsApp()" class="w-full py-3 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-black font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition">
+      <button onclick="placeOrder()" class="w-full py-3 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-black font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition">
         <i data-lucide="message-circle" class="w-4 h-4"></i>
-        <span>Confirmar Pedido en WhatsApp</span>
+        <span>Realizar pedido y pagar</span>
       </button>
+      <button onclick="openTrack()" class="w-full py-1.5 text-[11px] underline text-zinc-400">Rastrear un pedido</button>
     </div>
   </div>
 
@@ -1813,6 +1815,9 @@
     </div>
   </div>
 
+<div class="no-print fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-3 text-xs" id="pay-modal"><div class="themed-modal-bg border border-white/10 rounded-2xl p-5 w-full max-w-md relative max-h-[90vh] overflow-y-auto"><button onclick="closeM('pay-modal')" class="absolute top-3 right-4 text-zinc-400 text-lg">✕</button><h3 class="font-editorial text-base font-bold text-gold mb-1">¡Pedido registrado!</h3><div id="pay-body" class="space-y-2"></div></div></div>
+<div class="no-print fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-3 text-xs" id="track-modal"><div class="themed-modal-bg border border-white/10 rounded-2xl p-5 w-full max-w-md relative max-h-[90vh] overflow-y-auto"><button onclick="closeM('track-modal')" class="absolute top-3 right-4 text-zinc-400 text-lg">✕</button><h3 class="font-editorial text-base font-bold text-gold mb-2">Rastrea tu pedido</h3><div class="space-y-2"><input id="trk-num" placeholder="Número de pedido (ej. JS-1001)" class="w-full themed-input rounded-xl px-3 py-2"><input id="trk-mail" type="email" placeholder="Correo con el que compraste" class="w-full themed-input rounded-xl px-3 py-2"><button onclick="doTrack()" class="w-full py-2 rounded-full bg-gold text-black font-bold">Consultar</button><div id="trk-out" class="pt-2"></div></div></div></div>
+<div class="no-print fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-3 text-xs" id="orders-modal"><div class="themed-modal-bg border border-white/10 rounded-2xl p-5 w-full max-w-md relative max-h-[90vh] overflow-y-auto"><button onclick="closeM('orders-modal')" class="absolute top-3 right-4 text-zinc-400 text-lg">✕</button><h3 class="font-editorial text-base font-bold text-gold mb-2">Pedidos</h3><div id="orders-list" class="space-y-2"></div></div></div>
   <!-- MODAL LOGIN ADMIN -->
   <div id="login-modal" class="no-print fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-3 text-xs">
     <div class="themed-modal-bg rounded-2xl w-full max-w-sm p-5 relative border border-gold/40">
@@ -3430,6 +3435,96 @@
       console.warn('DB sync:', e);
       showToast('No se pudo guardar. Revisa tu sesión y conexión', 4500);
     }
+  }
+  const BANK = { clabe: '646195405600875512', holder: 'Jesus Sanchez', bank: 'STP' }; // datos para transferencia
+  const STATUS = { pendiente_pago: 'Pendiente de pago', pagado: 'Pagado', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
+  const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const closeM = id => document.getElementById(id).classList.add('hidden');
+  const openM = id => document.getElementById(id).classList.remove('hidden');
+  const itemTxt = i => i.qty + 'x ' + i.brand + ' - ' + i.name + ' (' + (i.size === 'bottle' ? 'Botella' : i.size) + ')';
+  const waLink = (phone, msg) => { let d = String(phone || '').replace(/\D/g, ''); if (d.length === 10) d = '52' + d; return 'https://wa.me/' + d + '?text=' + encodeURIComponent(msg); };
+  async function placeOrder() {
+    if (!sb) return sendOrderViaWhatsApp();
+    if (!cart.length) { showToast('Agrega al menos una fragancia a tu bolsa'); return; }
+    const v = id => document.getElementById(id).value.trim();
+    const c = { name: v('order-customer-name'), phone: v('order-customer-phone'), email: v('order-email'), street: v('order-street'), numExt: v('order-num-ext'), numInt: v('order-num-int'), cp: v('order-cp'), colonia: v('order-colonia'), city: v('order-city'), state: v('order-state') };
+    if (!c.name || !c.phone || !c.street || !c.numExt || !c.cp || !c.colonia || !c.city || !c.state) { showToast('Completa tus datos de entrega'); return; }
+    if (!/^\S+@\S+\.\S+$/.test(c.email)) { showToast('Escribe tu correo para darte seguimiento'); return; }
+    showToast('Verificando disponibilidad...', 1500);
+    await refreshFromRemote();
+    if (stockIssues().length) { updateCartUI(); showToast('Algunas existencias cambiaron. Revisa tu bolsa.', 4000); return; }
+    const items = cart.map(i => ({ fragId: i.fragId, brand: i.brand, name: i.name, size: i.size, qty: i.qty, price: i.price }));
+    const total = items.reduce((a, i) => a + i.price * i.qty, 0);
+    const { data: num, error } = await sb.rpc('create_order', { p_customer: c, p_items: items, p_total: total });
+    if (error) { console.warn(error); showToast('No se pudo registrar el pedido. Intenta de nuevo', 4000); return; }
+    const clabe = BANK.clabe.replace(/(\d{3})(\d{3})(\d{4})(\d{4})(\d{4})/, '$1 $2 $3 $4 $5');
+    const msg = 'Hola, ya hice mi transferencia del pedido ' + num + ' por ' + formatPrice(total) + '. Te envío mi comprobante.';
+    document.getElementById('pay-body').innerHTML =
+      '<p>Tu número de pedido es <b class="text-gold text-sm">' + esc(num) + '</b>. Guárdalo para rastrearlo.</p>' +
+      '<div class="themed-subbox border rounded-xl p-3 space-y-1"><div class="font-bold uppercase text-[10px] text-gold">Transferencia</div>' +
+      '<div>Monto: <b>' + esc(formatPrice(total)) + '</b></div><div>CLABE: <b>' + clabe + '</b> <button onclick="navigator.clipboard.writeText(\'' + BANK.clabe + '\');showToast(\'CLABE copiada\')" class="underline ml-1">Copiar</button></div>' +
+      '<div>Titular: <b>' + esc(BANK.holder) + '</b></div><div>Banco: <b>' + esc(BANK.bank) + '</b></div><div>Concepto: <b>' + esc(num) + '</b></div></div>' +
+      '<p class="text-zinc-400">Cuando pagues, avísanos y confirmamos tu pago. Después te mandamos tu guía de envío.</p>' +
+      '<a target="_blank" rel="noopener" href="' + waLink(storeConfig.whatsapp, msg) + '" class="block text-center py-2.5 rounded-full bg-[#25D366] text-black font-bold">Enviar comprobante por WhatsApp</a>';
+    cart = []; saveLocalData(); updateCartUI(); renderCatalog();
+    toggleCartDrawer(); openM('pay-modal');
+  }
+  function openTrack() { openM('track-modal'); }
+  async function doTrack() {
+    const out = document.getElementById('trk-out');
+    const { data, error } = await sb.rpc('track_order', { p_number: document.getElementById('trk-num').value, p_email: document.getElementById('trk-mail').value });
+    if (error || !data || !data.length) { out.innerHTML = '<p class="text-red-400">No encontramos ese pedido. Revisa el número y el correo.</p>'; return; }
+    const o = data[0], steps = ['pendiente_pago', 'pagado', 'enviado', 'entregado'], at = steps.indexOf(o.status);
+    out.innerHTML = '<p class="font-bold mb-1">' + esc(o.number) + ' · ' + esc(STATUS[o.status]) + '</p>' +
+      steps.map((k, i) => '<div class="' + (i <= at ? 'text-gold font-semibold' : 'text-zinc-500') + '">' + (i <= at ? '●' : '○') + ' ' + STATUS[k] + '</div>').join('') +
+      (o.tracking ? '<p class="mt-2">Paquetería: <b>' + esc(o.carrier) + '</b><br>Guía: <b>' + esc(o.tracking) + '</b>' + (/^https?:\/\//.test(o.tracking_url || '') ? '<br><a class="underline" target="_blank" rel="noopener" href="' + esc(o.tracking_url) + '">Rastrear paquete</a>' : '') + '</p>' : '') +
+      '<p class="mt-2 text-zinc-400">' + o.items.map(i => esc(itemTxt(i))).join('<br>') + '<br>Total: ' + esc(formatPrice(o.total)) + '</p>';
+  }
+  async function openOrders() {
+    if (!isAdminLoggedIn || !sb) return;
+    openM('orders-modal');
+    const box = document.getElementById('orders-list'); box.innerHTML = 'Cargando...';
+    const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false }).limit(100);
+    if (error) { box.innerHTML = '<p class="text-red-400">No se pudieron cargar los pedidos.</p>'; return; }
+    if (!data.length) { box.innerHTML = '<p class="text-zinc-400">Aún no hay pedidos.</p>'; return; }
+    box.innerHTML = data.map(o => {
+      const c = o.customer, btn = (st, t) => '<button onclick="setOrderStatus(\'' + o.id + '\',\'' + st + '\')" class="px-3 py-1 rounded-full bg-gold text-black font-bold">' + t + '</button>';
+      const msgs = { pagado: 'Hola ' + c.name + ', recibimos tu pago del pedido ' + o.number + ' ✅. Ya lo estamos preparando; te avisamos con tu guía de envío.',
+        enviado: 'Hola ' + c.name + ', tu pedido ' + o.number + ' va en camino 📦. Paquetería: ' + o.carrier + '. Guía: ' + o.tracking + (o.tracking_url ? '. Rastreo: ' + o.tracking_url : ''),
+        entregado: 'Hola ' + c.name + ', tu pedido ' + o.number + ' fue entregado con éxito 🎉. ¡Gracias por tu compra!' };
+      return '<div class="themed-subbox border rounded-xl p-3 space-y-1"><div class="flex justify-between"><b>' + esc(o.number) + '</b><span class="text-gold font-bold">' + esc(STATUS[o.status] || o.status) + '</span></div>' +
+        '<div>' + esc(c.name) + ' · ' + esc(c.phone) + '<br>' + esc(c.email) + '</div>' +
+        '<div class="text-zinc-400">' + esc([c.street, c.numExt, c.numInt, c.colonia, 'CP ' + c.cp, c.city, c.state].filter(Boolean).join(', ')) + '</div>' +
+        '<div>' + o.items.map(i => esc(itemTxt(i))).join('<br>') + '</div><div><b>Total: ' + esc(formatPrice(o.total)) + '</b></div>' +
+        '<div class="flex flex-wrap gap-2 pt-1">' +
+        (o.status === 'pendiente_pago' ? btn('pagado', 'Marcar pagado') + btn('cancelado', 'Cancelar') : '') +
+        (o.status === 'pagado' ? '<input id="car-' + o.id + '" placeholder="Paquetería" class="themed-input rounded-lg px-2 py-1 w-28"><input id="gui-' + o.id + '" placeholder="No. de guía" class="themed-input rounded-lg px-2 py-1 w-32"><input id="url-' + o.id + '" placeholder="Link de rastreo (opcional)" class="themed-input rounded-lg px-2 py-1 w-full">' + btn('enviado', 'Marcar enviado') : '') +
+        (o.status === 'enviado' ? btn('entregado', 'Marcar entregado') : '') +
+        (msgs[o.status] ? '<a target="_blank" rel="noopener" href="' + waLink(c.phone, msgs[o.status]) + '" class="px-3 py-1 rounded-full bg-[#25D366] text-black font-bold">Avisar por WhatsApp</a>' : '') +
+        '</div></div>';
+    }).join('');
+  }
+  async function setOrderStatus(id, st) {
+    const g = k => { const e = document.getElementById(k + '-' + id); return e ? e.value.trim() : ''; };
+    const now = new Date().toISOString(), upd = { status: st };
+    if (st === 'pagado') upd.paid_at = now;
+    if (st === 'entregado') upd.delivered_at = now;
+    if (st === 'enviado') {
+      if (!g('car') || !g('gui')) { showToast('Escribe la paquetería y el número de guía'); return; }
+      Object.assign(upd, { carrier: g('car'), tracking: g('gui'), tracking_url: g('url') || null, shipped_at: now });
+    }
+    if (st === 'pagado') {
+      const { data: o } = await sb.from('orders').select('items').eq('id', id).single();
+      (o ? o.items : []).forEach(i => { // descuenta inventario solo al confirmar el pago
+        const f = fragrances.find(x => x.id === i.fragId); if (!f) return;
+        if (i.size === 'bottle') { if (hasPcs(f)) f.stock.bottles = Math.max(0, f.stock.bottles - i.qty); }
+        else if (hasMl(f)) f.stock.ml = Math.max(0, r1(f.stock.ml - parseInt(i.size) * i.qty));
+      });
+    }
+    const { error } = await sb.from('orders').update(upd).eq('id', id);
+    if (error) { showToast('No se pudo actualizar el pedido', 3500); return; }
+    if (st === 'pagado') { saveLocalData(); renderCatalog(); await syncToGitHub(); }
+    showToast('Pedido actualizado ✓'); openOrders();
   }
   async function migrateToDatabase() {
     if (!isAdminLoggedIn) { showToast('Inicia sesión como propietario primero'); return; }
