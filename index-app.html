@@ -3458,7 +3458,7 @@
     const sub = items.reduce((a, i) => a + i.price * i.qty, 0);
     const envio = SHIPPING.base + (SHIPPING.cps.includes(c.cp) ? SHIPPING.extra : 0), total = sub + envio;
     const { data: num, error } = await sb.rpc('create_order', { p_customer: c, p_items: items, p_total: total, p_shipping: envio });
-    if (error) { console.warn(error); showToast('No se pudo registrar el pedido. Intenta de nuevo', 4000); return; }
+    if (error) { console.warn(error); showToast('No se pudo registrar el pedido (' + (error.code || error.message || '?') + '). Intenta de nuevo', 5000); return; }
     const clabe = BANK.clabe.replace(/(\d{3})(\d{3})(\d{4})(\d{4})(\d{4})/, '$1 $2 $3 $4 $5');
     const msg = 'Hola, ya hice mi transferencia del pedido ' + num + ' por ' + formatPrice(total) + '. Te envío mi comprobante.';
     document.getElementById('pay-body').innerHTML =
