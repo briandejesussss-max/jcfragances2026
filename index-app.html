@@ -1761,6 +1761,7 @@
                 <label class="px-2 py-0.5 rounded bg-amber-950/60 border border-gold text-gold font-extrabold text-[9px] cursor-pointer"><input type="checkbox" id="frag-bottle-ondemand"> 📦 BAJO PEDIDO</label>
               </div>
             </div>
+            <input id="frag-bottle-eta" placeholder="Si es bajo pedido: tiempo estimado (ej. 2 semanas)" class="w-full themed-input rounded-lg px-2 py-1 text-[10px]">
             <div class="flex items-center gap-1.5 text-[9px] font-bold flex-wrap">
               <span class="text-zinc-400 uppercase tracking-wider">Tipo de botella:</span>
               <label class="px-2 py-0.5 rounded border border-zinc-600 cursor-pointer"><input type="radio" name="frag-bottle-type" id="frag-bottle-type-linea" value="linea" checked> 🏷️ De línea</label>
@@ -2467,7 +2468,7 @@
       const p = f.prices?.[key] || { price: 0, inStock: key !== 'bottle' };
       if (key === 'bottle' && p.onDemand) {
         const pr = parseFloat(p.price) > 0 ? formatPrice(p.price) : 'Bajo Pedido';
-        return { ok: true, onDemand: true, label: pr, subtext: 'Bajo Pedido', reason: 'Disponible por encargo especial' };
+        return { ok: true, onDemand: true, label: pr, subtext: 'Bajo Pedido' + (p.eta ? ' · ' + p.eta : ''), reason: 'Disponible por encargo especial' };
       }
       if (!p.inStock || !(parseFloat(p.price) > 0)) {
         return { ok: false, label: key === 'bottle' ? 'N/D' : 'Agotado', reason: 'Opción no disponible' };
@@ -2496,7 +2497,7 @@
         const s = sizeState(f, k);
         if (k === 'bottle' && s.onDemand) {
           const btnTone = 'border border-gold bg-gold/15 text-gold font-bold';
-          return `<button onclick="orderBottleOnDemand('${f.id}')" title="Encargar botella bajo pedido vía WhatsApp" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl ${btnTone} transition flex flex-col items-center hover:brightness-125 cursor-pointer"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-extrabold text-gold">${isTesterBottle(f) ? '🧪 TESTER' : 'BOTELLA'}</span><span class="${pv ? 'text-xs' : 'text-[10px]'} font-bold leading-tight">${s.label === 'Bajo Pedido' ? 'BAJO PEDIDO' : s.label}</span></button>`;
+          return `<button onclick="${(sb && parseFloat(f.prices.bottle.price) > 0) ? `addToCart('${f.id}','bottle')` : `orderBottleOnDemand('${f.id}')`}" title="Botella bajo pedido${f.prices.bottle.eta ? ' · tiempo estimado ' + f.prices.bottle.eta : ''}" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl ${btnTone} transition flex flex-col items-center hover:brightness-125 cursor-pointer"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-extrabold text-gold">${isTesterBottle(f) ? '🧪 TESTER' : 'BOTELLA'}</span><span class="${pv ? 'text-xs' : 'text-[10px]'} font-bold leading-tight">${s.label === 'Bajo Pedido' ? 'BAJO PEDIDO' : s.label}</span></button>`;
         }
         return `<button ${s.ok ? `onclick="addToCart('${f.id}','${k}')"` : 'disabled'} title="${s.ok ? '' : esc(s.reason)}" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl border ${tone[k]} transition flex flex-col items-center ${s.ok ? 'hover:brightness-125 cursor-pointer' : 'opacity-30 cursor-not-allowed'}"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-bold tracking-wider ${k === '5ml' ? 'text-gold' : 'text-zinc-400'}">${l}</span><span class="${pv ? 'text-xs' : 'text-[11px]'} font-bold ${s.ok ? '' : 'text-zinc-500 line-through'}">${s.label}</span></button>`;
       }).join('');
@@ -2763,9 +2764,9 @@
       const st = sizeState(frag, size);
       if (!st.ok) { showToast(st.reason || 'Opción no disponible', 3000); refreshStockAreas(fragId); return; }
       const it = cart.find(i => i.fragId === fragId && i.size === size);
-      if (it) it.qty += 1; else cart.push({ fragId, name: frag.name, brand: frag.brand, size, price: frag.prices[size].price, qty: 1 });
+      if (it) it.qty += 1; else cart.push({ fragId, name: frag.name, brand: frag.brand, size, price: frag.prices[size].price, qty: 1, onDemand: size === 'bottle' && !!frag.prices.bottle.onDemand, eta: (size === 'bottle' && frag.prices.bottle.eta) || '' });
       updateCartUI(); refreshStockAreas(fragId);
-      showToast(`Agregado a la bolsa: ${frag.name} (${size === 'bottle' ? (isTesterBottle(frag) ? 'Botella Tester' : 'Botella Completa') : size})`);
+      showToast(`Agregado a la bolsa: ${frag.name} (${size === 'bottle' ? (isTesterBottle(frag) ? 'Botella Tester' : 'Botella Completa') : size})` + (size === 'bottle' && frag.prices.bottle.onDemand ? ' · BAJO PEDIDO' + (frag.prices.bottle.eta ? ' ~' + frag.prices.bottle.eta : '') : ''), 3500);
     }
 
     function removeFromCart(i) { const id = cart[i].fragId; cart.splice(i, 1); updateCartUI(); refreshStockAreas(id); }
@@ -2860,7 +2861,7 @@
       const need = {}, out = [];
       cart.forEach(i => {
         const n = need[i.fragId] || (need[i.fragId] = { ml: 0, pcs: 0, name: `${i.brand} ${i.name}` });
-        if (i.size === 'bottle') n.pcs += i.qty; else n.ml += parseInt(i.size) * i.qty;
+        if (i.size === 'bottle') { if (!i.onDemand) n.pcs += i.qty; } else n.ml += parseInt(i.size) * i.qty;
         const f = fragrances.find(x => x.id === i.fragId);
         if (f && !sizeState(f, i.size, false).ok) out.push(`${n.name} (${i.size === 'bottle' ? 'botella' : i.size}): ya no disponible`);
       });
@@ -2940,6 +2941,7 @@
         document.getElementById('form-edit-id').value = '';
         document.getElementById('modal-title').textContent = 'Agregar Fragancia';
         document.getElementById('frag-bottle-ondemand').checked = false;
+        document.getElementById('frag-bottle-eta').value = '';
         document.getElementById('frag-bottle-type-linea').checked = true;
         updateImagePreview('');
         pyLoad(null);
@@ -3040,7 +3042,7 @@
           "3ml": { price: p3, inStock: p3Avail },
           "5ml": { price: p5, inStock: p5Avail },
           "10ml": { price: p10, inStock: p10Avail },
-          "bottle": { price: pBottle, inStock: pBottleAvail, onDemand: pBottleOnDemand, type: pBottleType }
+          "bottle": { price: pBottle, inStock: pBottleAvail, onDemand: pBottleOnDemand, type: pBottleType, eta: (document.getElementById('frag-bottle-eta').value || '').trim() }
         }
       };
 
@@ -3086,6 +3088,7 @@
       document.getElementById('frag-price-bottle').value = pBottle.price || '';
       document.getElementById('frag-bottle-avail').checked = pBottle.inStock;
       document.getElementById('frag-bottle-ondemand').checked = !!pBottle.onDemand;
+      document.getElementById('frag-bottle-eta').value = pBottle.eta || '';
       document.getElementById('frag-bottle-type-tester').checked = pBottle.type === 'tester';
       document.getElementById('frag-bottle-type-linea').checked = pBottle.type !== 'tester';
 
@@ -3438,11 +3441,12 @@
   }
   const BANK = { clabe: '646195405600875512', holder: 'Jesus Sanchez', bank: 'STP' }; // datos para transferencia
   const SHIPPING = { base: 180, extra: 0, cps: [] }; // envío base; 'extra' y 'cps' = cargo y códigos postales de zona extendida
-  const STATUS = { pendiente_pago: 'Pendiente de pago', pagado: 'Pagado', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
+  const STATUS = { pendiente_pago: 'Pendiente de pago', pagado: 'Pagado', proveedor: 'Pedido con el proveedor', transito: 'En camino a México', recibido: 'Recibido en México', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
   const escH = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const closeM = id => document.getElementById(id).classList.add('hidden');
   const openM = id => document.getElementById(id).classList.remove('hidden');
-  const itemTxt = i => i.qty + 'x ' + i.brand + ' - ' + i.name + ' (' + (i.size === 'bottle' ? 'Botella' : i.size) + ')';
+  const itemTxt = i => i.qty + 'x ' + i.brand + ' - ' + i.name + ' (' + (i.size === 'bottle' ? 'Botella' : i.size) + ')' + (i.onDemand ? ' 📦 Bajo pedido' + (i.eta ? ' (~' + i.eta + ')' : '') : '');
+  const lastNote = o => { const e = (o.events || []).slice(-1)[0]; return e && e.note ? ' ' + e.note : ''; };
   const waLink = (phone, msg) => { let d = String(phone || '').replace(/\D/g, ''); if (d.length === 10) d = '52' + d; return 'https://wa.me/' + d + '?text=' + encodeURIComponent(msg); };
   async function placeOrder() {
     if (!sb) return sendOrderViaWhatsApp();
@@ -3454,7 +3458,7 @@
     showToast('Verificando disponibilidad...', 1500);
     await refreshFromRemote();
     if (stockIssues().length) { updateCartUI(); showToast('Algunas existencias cambiaron. Revisa tu bolsa.', 4000); return; }
-    const items = cart.map(i => ({ fragId: i.fragId, brand: i.brand, name: i.name, size: i.size, qty: i.qty, price: i.price }));
+    const items = cart.map(i => ({ fragId: i.fragId, brand: i.brand, name: i.name, size: i.size, qty: i.qty, price: i.price, onDemand: !!i.onDemand, eta: i.eta || '' }));
     const sub = items.reduce((a, i) => a + i.price * i.qty, 0);
     const envio = SHIPPING.base + (SHIPPING.cps.includes(c.cp) ? SHIPPING.extra : 0), total = sub + envio;
     const { data: num, error } = await sb.rpc('create_order', { p_customer: c, p_items: items, p_total: total, p_shipping: envio });
@@ -3463,6 +3467,7 @@
     const msg = 'Hola, ya hice mi transferencia del pedido ' + num + ' por ' + formatPrice(total) + '. Te envío mi comprobante.';
     document.getElementById('pay-body').innerHTML =
       '<p>Tu número de pedido es <b class="text-gold text-sm">' + escH(num) + '</b>. Guárdalo para rastrearlo.</p>' +
+      (items.some(i => i.onDemand) ? '<p class="text-gold">📦 Tu pedido incluye productos bajo pedido' + (items.find(i => i.onDemand && i.eta) ? ' (tiempo estimado: ' + escH(items.find(i => i.onDemand && i.eta).eta) + ')' : '') + '. Te avisamos cada etapa y puedes rastrearlo cuando quieras.</p>' : '') +
       '<div class="themed-subbox border rounded-xl p-3 space-y-1"><div class="font-bold uppercase text-[10px] text-gold">Transferencia</div>' +
       '<div>Productos: ' + escH(formatPrice(sub)) + ' · Envío: ' + escH(formatPrice(envio)) + '</div><div>Monto a transferir: <b>' + escH(formatPrice(total)) + '</b></div><div>CLABE: <b>' + clabe + '</b> <button onclick="navigator.clipboard.writeText(\'' + BANK.clabe + '\');showToast(\'CLABE copiada\')" class="underline ml-1">Copiar</button></div>' +
       '<div>Titular: <b>' + escH(BANK.holder) + '</b></div><div>Banco: <b>' + escH(BANK.bank) + '</b></div><div>Concepto: <b>' + escH(num) + '</b></div></div>' +
@@ -3476,9 +3481,10 @@
     const out = document.getElementById('trk-out');
     const { data, error } = await sb.rpc('track_order', { p_number: document.getElementById('trk-num').value, p_email: document.getElementById('trk-mail').value });
     if (error || !data || !data.length) { out.innerHTML = '<p class="text-red-400">No encontramos ese pedido. Revisa el número y el correo.</p>'; return; }
-    const o = data[0], steps = ['pendiente_pago', 'pagado', 'enviado', 'entregado'], at = steps.indexOf(o.status);
+    const o = data[0], steps = o.items.some(i => i.onDemand) ? ['pendiente_pago', 'pagado', 'proveedor', 'transito', 'recibido', 'enviado', 'entregado'] : ['pendiente_pago', 'pagado', 'enviado', 'entregado'], at = steps.indexOf(o.status);
     out.innerHTML = '<p class="font-bold mb-1">' + escH(o.number) + ' · ' + escH(STATUS[o.status]) + '</p>' +
       steps.map((k, i) => '<div class="' + (i <= at ? 'text-gold font-semibold' : 'text-zinc-500') + '">' + (i <= at ? '●' : '○') + ' ' + STATUS[k] + '</div>').join('') +
+      '<div class="mt-2 space-y-1">' + [...(o.events || [])].reverse().map(e => '<div class="text-zinc-400">' + new Date(e.at).toLocaleDateString('es-MX') + ' · <b class="text-white">' + escH(STATUS[e.status] || 'Actualización') + '</b>' + (e.note ? ' — ' + escH(e.note) : '') + '</div>').join('') + '</div>' +
       (o.tracking ? '<p class="mt-2">Paquetería: <b>' + escH(o.carrier) + '</b><br>Guía: <b>' + escH(o.tracking) + '</b>' + (/^https?:\/\//.test(o.tracking_url || '') ? '<br><a class="underline" target="_blank" rel="noopener" href="' + escH(o.tracking_url) + '">Rastrear paquete</a>' : '') + '</p>' : '') +
       '<p class="mt-2 text-zinc-400">' + o.items.map(i => escH(itemTxt(i))).join('<br>') + '<br>Envío: ' + escH(formatPrice(o.shipping || 0)) + '<br>Total: ' + escH(formatPrice(o.total)) + '</p>';
   }
@@ -3490,8 +3496,11 @@
     if (error) { box.innerHTML = '<p class="text-red-400">No se pudieron cargar los pedidos.</p>'; return; }
     if (!data.length) { box.innerHTML = '<p class="text-zinc-400">Aún no hay pedidos.</p>'; return; }
     box.innerHTML = data.map(o => {
-      const c = o.customer, btn = (st, t) => '<button onclick="setOrderStatus(\'' + o.id + '\',\'' + st + '\')" class="px-3 py-1 rounded-full bg-gold text-black font-bold">' + t + '</button>';
+      const c = o.customer, od = o.items.some(i => i.onDemand), btn = (st, t) => '<button onclick="setOrderStatus(\'' + o.id + '\',\'' + st + '\')" class="px-3 py-1 rounded-full bg-gold text-black font-bold">' + t + '</button>';
       const msgs = { pendiente_pago: 'Hola ' + c.name + ', sobre tu pedido ' + o.number + ': el envío para tu zona es de ' + formatPrice(o.shipping || 0) + '. Monto final a transferir: ' + formatPrice(o.total) + '. CLABE: ' + BANK.clabe + ' (' + BANK.holder + ', ' + BANK.bank + '). Concepto: ' + o.number + '.',
+        proveedor: 'Hola ' + c.name + ', tu pedido ' + o.number + ' ya fue realizado con nuestro proveedor 📦.' + lastNote(o) + ' Te avisamos en cada etapa.',
+        transito: 'Hola ' + c.name + ', tu pedido ' + o.number + ' ya va en camino a México ✈️.' + lastNote(o),
+        recibido: 'Hola ' + c.name + ', tu pedido ' + o.number + ' ya llegó a México ✅. Estamos preparando tu envío.' + lastNote(o),
         pagado: 'Hola ' + c.name + ', recibimos tu pago del pedido ' + o.number + ' ✅. Ya lo estamos preparando; te avisamos con tu guía de envío.',
         enviado: 'Hola ' + c.name + ', tu pedido ' + o.number + ' va en camino 📦. Paquetería: ' + o.carrier + '. Guía: ' + o.tracking + (o.tracking_url ? '. Rastreo: ' + o.tracking_url : ''),
         entregado: 'Hola ' + c.name + ', tu pedido ' + o.number + ' fue entregado con éxito 🎉. ¡Gracias por tu compra!' };
@@ -3501,8 +3510,12 @@
         '<div>' + o.items.map(i => escH(itemTxt(i))).join('<br>') + '</div><div>Envío: ' + escH(formatPrice(o.shipping || 0)) + '</div><div><b>Total: ' + escH(formatPrice(o.total)) + '</b></div>' +
         '<div class="flex flex-wrap gap-2 pt-1">' +
         (o.status === 'pendiente_pago' ? '<div class="w-full flex items-center gap-2">Envío $ <input id="env-' + o.id + '" type="number" min="0" value="' + (o.shipping || 0) + '" class="themed-input rounded-lg px-2 py-1 w-24"><button onclick="setOrderShipping(\'' + o.id + '\')" class="px-3 py-1 rounded-full border border-gold text-gold font-bold">Actualizar envío</button></div>' + btn('pagado', 'Marcar pagado') + btn('cancelado', 'Cancelar') : '') +
-        (o.status === 'pagado' ? '<input id="car-' + o.id + '" placeholder="Paquetería" class="themed-input rounded-lg px-2 py-1 w-28"><input id="gui-' + o.id + '" placeholder="No. de guía" class="themed-input rounded-lg px-2 py-1 w-32"><input id="url-' + o.id + '" placeholder="Link de rastreo (opcional)" class="themed-input rounded-lg px-2 py-1 w-full">' + btn('enviado', 'Marcar enviado') : '') +
+        ((o.status === 'recibido' || (o.status === 'pagado' && !od)) ? '<input id="car-' + o.id + '" placeholder="Paquetería" class="themed-input rounded-lg px-2 py-1 w-28"><input id="gui-' + o.id + '" placeholder="No. de guía" class="themed-input rounded-lg px-2 py-1 w-32"><input id="url-' + o.id + '" placeholder="Link de rastreo (opcional)" class="themed-input rounded-lg px-2 py-1 w-full">' + btn('enviado', 'Marcar enviado') : '') +
         (o.status === 'enviado' ? btn('entregado', 'Marcar entregado') : '') +
+        (o.status === 'pagado' && od ? btn('proveedor', 'Pedido realizado al proveedor') : '') +
+        (o.status === 'proveedor' ? btn('transito', 'En camino a México') : '') +
+        (o.status === 'transito' ? btn('recibido', 'Llegó a México') : '') +
+        (['pagado', 'proveedor', 'transito', 'recibido', 'enviado'].includes(o.status) ? '<input id="nota-' + o.id + '" placeholder="Nota para el cliente (opcional)" class="themed-input rounded-lg px-2 py-1 w-full"><button onclick="setOrderStatus(\'' + o.id + '\', null)" class="px-3 py-1 rounded-full border border-gold text-gold font-bold">Solo agregar nota</button>' : '') +
         (msgs[o.status] ? '<a target="_blank" rel="noopener" href="' + waLink(c.phone, msgs[o.status]) + '" class="px-3 py-1 rounded-full bg-[#25D366] text-black font-bold">Avisar por WhatsApp</a>' : '') +
         '</div></div>';
     }).join('');
@@ -3516,26 +3529,33 @@
     if (error) { showToast('No se pudo actualizar el envío', 3500); return; }
     showToast('Envío actualizado ✓ Avisa al cliente por WhatsApp', 3500); openOrders();
   }
-  async function setOrderStatus(id, st) {
+  async function setOrderStatus(id, st) { // st = null: solo agrega una nota al seguimiento
     const g = k => { const e = document.getElementById(k + '-' + id); return e ? e.value.trim() : ''; };
-    const now = new Date().toISOString(), upd = { status: st };
-    if (st === 'pagado') upd.paid_at = now;
-    if (st === 'entregado') upd.delivered_at = now;
-    if (st === 'enviado') {
-      if (!g('car') || !g('gui')) { showToast('Escribe la paquetería y el número de guía'); return; }
-      Object.assign(upd, { carrier: g('car'), tracking: g('gui'), tracking_url: g('url') || null, shipped_at: now });
+    const now = new Date().toISOString(), upd = {}; let note = g('nota');
+    const { data: o, error: e0 } = await sb.from('orders').select('items,events,status').eq('id', id).single();
+    if (e0 || !o) { showToast('No se pudo leer el pedido', 3500); return; }
+    if (st === null) { if (!note) { showToast('Escribe la nota'); return; } st = o.status; }
+    else {
+      upd.status = st;
+      if (st === 'pagado') upd.paid_at = now;
+      if (st === 'entregado') upd.delivered_at = now;
+      if (st === 'enviado') {
+        if (!g('car') || !g('gui')) { showToast('Escribe la paquetería y el número de guía'); return; }
+        Object.assign(upd, { carrier: g('car'), tracking: g('gui'), tracking_url: g('url') || null, shipped_at: now });
+        note = [note, g('car') + ' · guía ' + g('gui')].filter(Boolean).join(' — ');
+      }
     }
-    if (st === 'pagado') {
-      const { data: o } = await sb.from('orders').select('items').eq('id', id).single();
-      (o ? o.items : []).forEach(i => { // descuenta inventario solo al confirmar el pago
+    upd.events = [...(o.events || []), { at: now, status: st, note }];
+    if (upd.status === 'pagado') {
+      o.items.forEach(i => { // descuenta inventario solo al confirmar el pago (lo bajo pedido no descuenta)
         const f = fragrances.find(x => x.id === i.fragId); if (!f) return;
-        if (i.size === 'bottle') { if (hasPcs(f)) f.stock.bottles = Math.max(0, f.stock.bottles - i.qty); }
+        if (i.size === 'bottle') { if (!i.onDemand && hasPcs(f)) f.stock.bottles = Math.max(0, f.stock.bottles - i.qty); }
         else if (hasMl(f)) f.stock.ml = Math.max(0, r1(f.stock.ml - parseInt(i.size) * i.qty));
       });
     }
     const { error } = await sb.from('orders').update(upd).eq('id', id);
     if (error) { showToast('No se pudo actualizar el pedido', 3500); return; }
-    if (st === 'pagado') { saveLocalData(); renderCatalog(); await syncToGitHub(); }
+    if (upd.status === 'pagado') { saveLocalData(); renderCatalog(); await syncToGitHub(); }
     showToast('Pedido actualizado ✓'); openOrders();
   }
   async function migrateToDatabase() {
