@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JS Fragances · Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0b0b0e;--card:#16161b;--line:#2a2a33;--tx:#f2f2f5;--mut:#9a9aa6;--gold:#d4af37;--ok:#3ecf8e;--bad:#ff6b6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px system-ui,sans-serif}
+h1,h2{margin:0}button,input,select{font:inherit;color:inherit}
+input,select{background:#0f0f13;border:1px solid var(--line);border-radius:10px;padding:9px 10px;width:100%}
+button{background:var(--gold);color:#111;border:0;border-radius:999px;padding:9px 16px;font-weight:700;cursor:pointer}
+button.ghost{background:none;border:1px solid var(--line);color:var(--tx)}button.sm{padding:5px 11px;font-size:12px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:none;color:var(--mut);border:1px solid var(--line)}nav button.on{background:var(--gold);color:#111}
+main{max-width:980px;margin:0 auto;padding:16px}.box{max-width:340px;margin:12vh auto;padding:20px;display:grid;gap:10px}
+.bar-m{display:flex;align-items:center;gap:10px;margin-bottom:12px}.bar-m b{min-width:130px;text-align:center;text-transform:capitalize}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}.card.tap{cursor:pointer}
+.card small{color:var(--mut);display:block}.card strong{font-size:22px}.pos{color:var(--ok)}.neg{color:var(--bad)}
+.chart{display:flex;align-items:flex-end;gap:14px;height:150px;padding:10px 0;border-bottom:1px solid var(--line)}
+.col{flex:1;text-align:center}.pair{display:flex;gap:3px;align-items:flex-end;height:120px;justify-content:center}
+.pair i{width:40%;display:block;border-radius:4px 4px 0 0;min-height:2px}.i1{background:var(--ok)}.i2{background:var(--bad)}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--mut);font-weight:500}.r{text-align:right}.mut{color:var(--mut)}
+dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:16px;width:min(420px,94vw);padding:18px}dialog::backdrop{background:#000a}
+.f{display:grid;gap:10px}#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222;border:1px solid var(--gold);padding:10px 16px;border-radius:999px;display:none;z-index:9}
+@media(max-width:600px){.chart{gap:6px}main{padding:12px}}
+</style></head><body>
+<form id="login" class="box card" onsubmit="login(event)"><h2>JS Fragances</h2><span class="mut">Panel privado</span>
+<input id="em" type="email" placeholder="Correo" required autocomplete="username"><input id="pw" type="password" placeholder="Contraseña" required autocomplete="current-password"><button>Entrar</button></form>
+<div id="app" hidden>
+<header><h2>JS Fragances · Panel</h2><nav id="nav"></nav><button class="ghost sm" onclick="logout()">Cerrar sesión</button></header>
+<main id="view"></main></div>
+<dialog id="dlg"><form class="f" onsubmit="saveMov(event)"><h2 id="dt">Nuevo movimiento</h2>
+<select id="m-type" onchange="cats()"><option value="ingreso">Ingreso</option><option value="gasto">Gasto</option></select>
+<input id="m-date" type="date" required><input id="m-cat" list="catl" placeholder="Categoría"><datalist id="catl"></datalist>
+<input id="m-amount" type="number" step="0.01" min="0.01" placeholder="Monto (MXN)" required>
+<input id="m-method" placeholder="Método de pago (ej. Transferencia)"><input id="m-note" placeholder="Nota (opcional)">
+<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="ghost" onclick="dlg.close()">Cancelar</button><button>Guardar</button></div></form></dialog>
+<div id="toast"></div>
+<script>
+const SB_URL='https://knanyvwcnjgzpnkkbvgn.supabase.co',SB_KEY='sb_publishable_5PZ7bCjhZtojLBXbBsIBPA_Fzf8x6kv';
+const sb=supabase.createClient(SB_URL,SB_KEY);const $=id=>document.getElementById(id),dlg=$('dlg');
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/*<calc>*/
+const cents=n=>Math.round(Number(n)*100);
+function calc(rows,pct,base){let i=0,g=0;for(const r of rows){const c=cents(r.amount);if(r.type==='ingreso')i+=c;else g+=c}
+const b=i-g,basis=base==='ingresos'?i:b;return{i,g,b,reserve:Math.max(0,Math.round(basis*Number(pct||0)/100))}}
+function shift(m,d){const[y,mo]=m.split('-').map(Number),t=new Date(y,mo-1+d,1);return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')}
+/*</calc>*/
+const money=c=>(c/100).toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+const today=()=>new Date().toLocaleDateString('sv-SE',{timeZone:'America/Mexico_City'});
+const MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const label=m=>MES[+m.slice(5)-1]+' '+m.slice(0,4);
+const CATS={ingreso:['Venta','Servicio de guías','Otro ingreso'],gasto:['Compra de mercancía','Envío / paquetería','Empaque','Publicidad','Comisiones','Impuestos','Otro gasto']};
+let S={month:today().slice(0,7),rows:[],orders:[],set:{pct:0,base:'beneficio'},tab:'dash',type:'todos',edit:null};
+function toast(t,ms=3500){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',ms)}
+async function login(e){e.preventDefault();const{error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
+if(error)return toast('Correo o contraseña incorrectos');$('pw').value='';boot()}
+async function logout(){await sb.auth.signOut();S.rows=[];S.orders=[];boot()}
+async function boot(){const{data}=await sb.auth.getSession(),ok=!!(data&&data.session);$('login').hidden=ok;$('app').hidden=!ok;if(!ok)return;await loadAll();render()}
+async function loadAll(){
+const[m,o,s]=await Promise.all([sb.from('movements').select('*').order('date',{ascending:false}).limit(5000),sb.from('orders').select('status,total,items'),sb.from('app_settings').select('*').eq('id',1).maybeSingle()]);
+if(m.error){toast('No se pudieron cargar los movimientos ('+(m.error.code||m.error.message)+'). ¿Corriste el SQL de finanzas?',6000);S.rows=[]}else S.rows=m.data;
+S.orders=o.error?[]:o.data;if(s.data)S.set={pct:Number(s.data.tax_reserve_pct),base:s.data.tax_base}}
+function render(){$('nav').innerHTML=[['dash','Dashboard'],['mov','Movimientos'],['cfg','Configuración']].map(([k,t])=>`<button class="${S.tab===k?'on':''}" onclick="go('${k}')">${t}</button>`).join('');
+$('view').innerHTML=S.tab==='dash'?dash():S.tab==='mov'?mov():cfg()}
+function go(t,type){S.tab=t;if(type)S.type=type;render()}
+function nav(){return`<div class="bar-m"><button class="ghost sm" onclick="mm(-1)">‹</button><b>${label(S.month)}</b><button class="ghost sm" onclick="mm(1)">›</button></div>`}
+function mm(d){S.month=shift(S.month,d);render()}
+const inMonth=m=>S.rows.filter(r=>r.date.startsWith(m));
+function dash(){const k=calc(inMonth(S.month),S.set.pct,S.set.base),p=calc(inMonth(shift(S.month,-1)),S.set.pct,S.set.base);
+const dl=(a,b)=>b===0?'':` <small>${a-b>=0?'▲':'▼'} ${money(Math.abs(a-b))} vs mes anterior</small>`;
+const months=[-5,-4,-3,-2,-1,0].map(d=>shift(S.month,d)),data=months.map(m=>({m,...calc(inMonth(m),0,'beneficio')})),mx=Math.max(1,...data.map(d=>Math.max(d.i,d.g)));
+const pend=S.orders.filter(o=>o.status==='pendiente_pago'),road=S.orders.filter(o=>['proveedor','transito'].includes(o.status));
+const pendSum=pend.reduce((a,o)=>a+cents(o.total),0);
+return nav()+`<div class="cards">
+<div class="card tap" onclick="go('mov','ingreso')"><small>Ingresos</small><strong class="pos">${money(k.i)}</strong>${dl(k.i,p.i)}</div>
+<div class="card tap" onclick="go('mov','gasto')"><small>Gastos</small><strong class="neg">${money(k.g)}</strong>${dl(k.g,p.g)}</div>
+<div class="card"><small>Beneficio del mes</small><strong class="${k.b>=0?'pos':'neg'}">${money(k.b)}</strong>${dl(k.b,p.b)}</div>
+<div class="card tap" onclick="go('cfg')"><small>Reservar para impuestos (${S.set.pct}% de ${S.set.base})</small><strong>${money(k.reserve)}</strong>${S.set.pct>0?'':'<small>Define tu porcentaje en Configuración</small>'}</div></div>
+<div class="cards"><div class="card"><small>Pedidos por cobrar</small><strong>${pend.length}</strong> <span class="mut">${money(pendSum)}</span></div>
+<div class="card"><small>Bajo pedido en camino</small><strong>${road.length}</strong></div></div>
+<div class="card"><small>Ingresos <span class="pos">■</span> y gastos <span class="neg">■</span>, últimos 6 meses</small><div class="chart">${data.map(d=>`<div class="col"><div class="pair"><i class="i1" style="height:${d.i/mx*100}%" title="${money(d.i)}"></i><i class="i2" style="height:${d.g/mx*100}%" title="${money(d.g)}"></i></div><small class="mut">${MES[+d.m.slice(5)-1].slice(0,3)}</small></div>`).join('')}</div></div>`}
+function mov(){let rows=inMonth(S.month);if(S.type!=='todos')rows=rows.filter(r=>r.type===S.type);const k=calc(rows,0,'ingresos');
+return nav()+`<div class="bar-m" style="flex-wrap:wrap"><select style="width:auto" onchange="S.type=this.value;render()">${['todos','ingreso','gasto'].map(t=>`<option value="${t}" ${S.type===t?'selected':''}>${t==='todos'?'Todos':t==='ingreso'?'Ingresos':'Gastos'}</option>`).join('')}</select><button onclick="openMov()">+ Nuevo movimiento</button></div>
+<div class="card tw">${rows.length?`<table><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Nota</th><th class="r">Monto</th><th></th></tr>${rows.map(r=>`<tr><td>${esc(r.date)}</td><td class="${r.type==='ingreso'?'pos':'neg'}">${r.type==='ingreso'?'Ingreso':'Gasto'}</td><td>${esc(r.category)}</td><td class="mut">${esc(r.note)}</td><td class="r">${money(cents(r.amount))}</td><td class="r"><button class="ghost sm" onclick="openMov('${r.id}')">Editar</button> <button class="ghost sm" onclick="delMov('${r.id}')">Eliminar</button></td></tr>`).join('')}</table>
+<p class="r">Ingresos ${money(k.i)} · Gastos ${money(k.g)} · <b>Balance ${money(k.b)}</b></p>`:'<p class="mut">Aún no hay movimientos en este mes.</p>'}</div>`}
+function cfg(){return`<div class="card f" style="max-width:420px"><h2>Impuestos</h2><label>Porcentaje a reservar (%)<input id="c-pct" type="number" min="0" max="100" step="0.01" value="${S.set.pct}"></label>
+<label>Calcular sobre<select id="c-base"><option value="beneficio" ${S.set.base==='beneficio'?'selected':''}>Beneficio del mes</option><option value="ingresos" ${S.set.base==='ingresos'?'selected':''}>Ingresos del mes</option></select></label>
+<span class="mut">Confirma el porcentaje y la base con tu contador según tu régimen. Esta app no calcula impuestos oficiales: solo te ayuda a apartar dinero.</span><button onclick="saveCfg()">Guardar</button></div>`}
+async function saveCfg(){const pct=parseFloat($('c-pct').value);if(!isFinite(pct)||pct<0||pct>100)return toast('Escribe un porcentaje entre 0 y 100');
+const{error}=await sb.from('app_settings').upsert({id:1,tax_reserve_pct:pct,tax_base:$('c-base').value,updated_at:new Date().toISOString()});
+if(error)return toast('No se pudo guardar ('+(error.code||error.message)+')');S.set={pct,base:$('c-base').value};toast('Guardado ✓');render()}
+function cats(sel){$('catl').innerHTML=CATS[$('m-type').value].map(c=>`<option value="${c}">`).join('')}
+function openMov(id){const r=id?S.rows.find(x=>x.id===id):null;S.edit=r?r.id:null;$('dt').textContent=r?'Editar movimiento':'Nuevo movimiento';
+$('m-type').value=r?r.type:'ingreso';cats();$('m-date').value=r?r.date:today();$('m-cat').value=r?r.category:'';$('m-amount').value=r?r.amount:'';$('m-method').value=r?r.method:'';$('m-note').value=r?r.note:'';dlg.showModal()}
+async function saveMov(e){e.preventDefault();const amount=parseFloat($('m-amount').value);if(!isFinite(amount)||amount<=0)return toast('El monto debe ser mayor a 0');
+const row={type:$('m-type').value,date:$('m-date').value,category:$('m-cat').value.trim(),amount,method:$('m-method').value.trim(),note:$('m-note').value.trim()};
+const{error}=S.edit?await sb.from('movements').update(row).eq('id',S.edit):await sb.from('movements').insert(row);
+if(error)return toast('No se pudo guardar ('+(error.code||error.message)+')');dlg.close();S.month=row.date.slice(0,7);await loadAll();render();toast('Guardado ✓')}
+async function delMov(id){if(!confirm('¿Eliminar este movimiento? No se puede deshacer.'))return;const{error}=await sb.from('movements').delete().eq('id',id);
+if(error)return toast('No se pudo eliminar ('+(error.code||error.message)+')');await loadAll();render();toast('Eliminado')}
+boot();sb.auth.onAuthStateChange(()=>{});
+</script></body></html>
