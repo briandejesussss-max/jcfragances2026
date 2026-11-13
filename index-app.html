@@ -955,6 +955,7 @@
       #top-navbar h1{ font-size:14px !important; }
     }
   </style>
+<style>.fixed.inset-0.z-50 > div{max-height:94dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}</style>
 </head>
 <body class="flex flex-col antialiased selection:bg-[#FF8A00] selection:text-black min-h-screen w-full">
   <a href="#catalogo" class="skip-link no-print">Saltar al catálogo</a>
@@ -1121,12 +1122,7 @@
       <!-- Sección 3: Rendimiento de Decants -->
       <div class="p-3 rounded-2xl themed-subbox border space-y-1.5 text-center">
         <span class="text-[10px] uppercase tracking-luxury text-gold font-bold block">Rendimiento por Frasco</span>
-        <div class="grid grid-cols-4 gap-1 text-[10px] pt-1">
-          <div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">3 ml</span><strong>~45 sprays</strong></div>
-          <div class="p-1 rounded bg-zinc-800/50 border border-gold/40 text-gold"><span class="block">5 ml</span><strong>~75 sprays</strong></div>
-          <div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">10 ml</span><strong>~150 sprays</strong></div>
-          <div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">Botella</span><strong>Completa</strong></div>
-        </div>
+        <div id="yield-boxes" class="grid gap-1 text-[10px] pt-1" style="grid-template-columns:repeat(auto-fit,minmax(56px,1fr))"></div>
       </div>
 
       <!-- Sección 4: Ajustes Rápidos (Tema & Moneda) -->
@@ -1746,11 +1742,7 @@
 
         <div class="p-2.5 rounded-xl themed-subbox space-y-2">
           <span class="text-[9px] font-bold text-gold uppercase tracking-wider block">Precios de Decants &amp; Botella Completa</span>
-          <div class="grid grid-cols-3 gap-2">
-            <div class="p-1.5 rounded-lg themed-input border"><span class="font-bold text-[9px] block">3 ml</span><input type="number" id="frag-price-3ml" placeholder="$ 0" class="w-full themed-input rounded px-2 py-0.5 text-xs"><label class="text-[9px] text-zinc-400 mt-1 block"><input type="checkbox" id="frag-3ml-avail" checked> Stock</label></div>
-            <div class="p-1.5 rounded-lg themed-input border border-gold/40"><span class="font-bold text-gold text-[9px] block">5 ml</span><input type="number" id="frag-price-5ml" placeholder="$ 0" class="w-full themed-input rounded px-2 py-0.5 font-bold text-xs"><label class="text-[9px] text-zinc-400 mt-1 block"><input type="checkbox" id="frag-5ml-avail" checked> Stock</label></div>
-            <div class="p-1.5 rounded-lg themed-input border"><span class="font-bold text-[9px] block">10 ml</span><input type="number" id="frag-price-10ml" placeholder="$ 0" class="w-full themed-input rounded px-2 py-0.5 text-xs"><label class="text-[9px] text-zinc-400 mt-1 block"><input type="checkbox" id="frag-10ml-avail" checked> Stock</label></div>
-          </div>
+          <div id="frag-size-fields" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
 
           <!-- Botella completa y bajo pedido -->
           <div class="p-2.5 rounded-xl border border-gold/50 bg-gold/10 space-y-1.5">
@@ -1966,7 +1958,7 @@
 
   <!-- MODAL DATOS TIENDA -->
   <div id="store-modal" class="no-print fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-3 text-xs">
-    <div class="themed-modal-bg rounded-2xl w-full max-w-md p-5 relative border border-gold/40">
+    <div class="themed-modal-bg rounded-2xl w-full max-w-md p-5 relative border border-gold/40" style="max-height:92vh;overflow-y:auto">
       <button onclick="closeStoreConfigModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       <h3 class="font-editorial text-base font-bold mb-3">Ajustes de Tienda</h3>
       <form onsubmit="handleStoreConfigSubmit(event)" class="space-y-2.5">
@@ -1975,6 +1967,10 @@
         <input type="text" id="config-store-whatsapp" required placeholder="WhatsApp de Pedidos *" class="w-full themed-input rounded-xl px-3 py-1.5">
         <input type="text" id="config-store-instagram" placeholder="Instagram" class="w-full themed-input rounded-xl px-3 py-1.5">
         <input type="text" id="config-store-notes" placeholder="Notas Envíos" class="w-full themed-input rounded-xl px-3 py-1.5">
+        <div class="pt-1"><span class="text-[10px] uppercase text-gold font-bold">Presentaciones (decants y miniaturas)</span>
+          <div id="cfg-sizes" class="space-y-1.5 mt-1.5"></div>
+          <button type="button" onclick="addSizeRow()" class="mt-2 px-3 py-1 rounded-full border border-gold/60 text-gold text-[11px] font-bold">＋ Agregar presentación</button>
+          <p class="text-[10px] text-zinc-400 mt-1">Decant: se descuenta de tus ml. Miniatura: se vende por pieza con su propio stock. Los precios se capturan en cada fragancia.</p></div>
         <div class="pt-2 flex justify-end gap-2"><button type="submit" class="px-4 py-1.5 rounded-full bg-gold text-black font-bold">Guardar</button></div>
       </form>
     </div>
@@ -2308,7 +2304,7 @@
             <div class="pt-1.5 text-center">
               <span class="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-luxury block truncate">${esc(f.brand)}</span>
               <h4 class="font-editorial text-xs sm:text-sm font-semibold truncate text-zinc-100">${esc(f.name)}</h4>
-              <span class="text-[9px] sm:text-[10px] text-gold font-bold font-mono">${formatPrice(f.prices?.['5ml']?.price || f.prices?.['3ml']?.price || 0)}</span>
+              <span class="text-[9px] sm:text-[10px] text-gold font-bold font-mono">${formatPrice(minSizePrice(f))}</span>
             </div>
           </div>
         `;
@@ -2451,7 +2447,52 @@
       return `${getCurrencySymbol()}${num.toFixed(0)}`;
     }
 
-    const SIZES = [['3ml', '3 ml'], ['5ml', '5 ml'], ['10ml', '10 ml'], ['bottle', 'Botella']];
+    /*<sizes>*/
+    const SIZES = [];
+    const DEFAULT_SIZES = [{ key: '3ml', label: '3 ml', ml: 3, kind: 'decant' }, { key: '5ml', label: '5 ml', ml: 5, kind: 'decant' }, { key: '10ml', label: '10 ml', ml: 10, kind: 'decant' }];
+    const sizeCfg = () => (Array.isArray(storeConfig.sizes) && storeConfig.sizes.length) ? storeConfig.sizes : DEFAULT_SIZES;
+    const sizeInfo = k => sizeCfg().find(s => s.key === k) || (k === 'bottle' ? { key: 'bottle', label: 'Botella', kind: 'bottle', ml: 0 } : { key: k, label: k, ml: parseInt(k) || 0, kind: 'decant' });
+    const mlOf = k => Number(sizeInfo(k).ml) || 0;
+    const sizeLabel = k => k === 'bottle' ? 'Botella' : sizeInfo(k).label;
+    const isDecant = k => k !== 'bottle' && sizeInfo(k).kind !== 'pieza';
+    function rebuildSizes() { SIZES.length = 0; sizeCfg().forEach(s => SIZES.push([s.key, s.label])); SIZES.push(['bottle', 'Botella']); }
+    function deductItem(f, i) { // descuenta inventario de un renglón de pedido
+      if (i.size === 'bottle') { if (!i.onDemand && hasPcs(f)) f.stock.bottles = Math.max(0, f.stock.bottles - i.qty); }
+      else if ((i.kind || sizeInfo(i.size).kind) === 'pieza') { const n = f.stock && f.stock.pieces && f.stock.pieces[i.size]; if (Number.isFinite(n)) f.stock.pieces[i.size] = Math.max(0, n - i.qty); }
+      else if (hasMl(f)) f.stock.ml = Math.max(0, r1(f.stock.ml - (Number(i.ml) || mlOf(i.size)) * i.qty));
+    }
+    /*</sizes>*/
+    const cartPiece = (id, k) => cart.reduce((a, i) => a + (i.fragId === id && i.size === k ? i.qty : 0), 0);
+    const minSizePrice = f => { const v = sizeCfg().map(x => parseFloat(f.prices?.[x.key]?.price) || 0).filter(x => x > 0); return v.length ? Math.min(...v) : 0; };
+    function applySizeLabels() {
+      const cfg = sizeCfg();
+      document.querySelectorAll('.vial-size').forEach(b => { const k = b.dataset.size; if (k === 'bottle') return; const s = cfg.find(x => x.key === k); b.style.display = s ? '' : 'none'; if (s) b.textContent = s.label; });
+      const y = document.getElementById('yield-boxes');
+      if (y) y.innerHTML = cfg.map(s => `<div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">${esc(s.label)}</span><strong>${s.kind === 'pieza' ? 'Pieza' : '~' + Math.round(s.ml * 15) + ' sprays'}</strong></div>`).join('') + '<div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">Botella</span><strong>Completa</strong></div>';
+      ['3ml', '5ml', '10ml'].forEach(k => { const e = document.getElementById('inv-price-' + k); if (e) e.placeholder = sizeLabel(k) + ' $'; });
+    }
+    function renderSizeFields() {
+      const box = document.getElementById('frag-size-fields'); if (!box) return;
+      box.innerHTML = sizeCfg().map(s => `<div class="p-1.5 rounded-lg themed-input border ${s.kind === 'pieza' ? 'border-gold/40' : ''}"><span class="font-bold text-[9px] block">${esc(s.label)}${s.kind === 'pieza' ? ' · pieza' : ''}</span><input type="number" id="frag-price-${s.key}" placeholder="$ 0" class="w-full themed-input rounded px-2 py-0.5 text-xs">${s.kind === 'pieza' ? `<input type="number" min="0" id="frag-stock-${s.key}" placeholder="Piezas en stock" class="w-full themed-input rounded px-2 py-0.5 text-xs mt-1">` : ''}<label class="text-[9px] text-zinc-400 flex items-center gap-1 mt-1"><input type="checkbox" id="frag-${s.key}-avail" checked> Disponible</label></div>`).join('');
+    }
+    function fillSizeFields(frag) {
+      renderSizeFields();
+      sizeCfg().forEach(s => {
+        const p = frag.prices?.[s.key] || { price: 0, inStock: true };
+        document.getElementById('frag-price-' + s.key).value = p.price || '';
+        document.getElementById('frag-' + s.key + '-avail').checked = p.inStock !== false;
+        const st = document.getElementById('frag-stock-' + s.key);
+        if (st) { const n = frag.stock?.pieces?.[s.key]; st.value = Number.isFinite(n) ? n : ''; }
+      });
+    }
+    const sizeRowHtml = s => `<div data-size-row data-key="${esc(s.key)}" class="grid grid-cols-12 gap-1.5 items-center"><input data-f="label" value="${esc(s.label)}" placeholder="Nombre (ej. Miniatura 5 ml)" class="col-span-5 themed-input rounded-lg px-2 py-1"><input data-f="ml" type="number" min="0.5" step="0.5" value="${s.ml}" placeholder="ml" class="col-span-2 themed-input rounded-lg px-2 py-1"><select data-f="kind" class="col-span-3 themed-input rounded-lg px-1 py-1"><option value="decant" ${s.kind !== 'pieza' ? 'selected' : ''}>Decant</option><option value="pieza" ${s.kind === 'pieza' ? 'selected' : ''}>Miniatura</option></select><button type="button" onclick="this.closest('[data-size-row]').remove()" class="col-span-2 text-red-400 font-bold">✕</button></div>`;
+    function addSizeRow() { document.getElementById('cfg-sizes').insertAdjacentHTML('beforeend', sizeRowHtml({ key: 's' + Date.now().toString(36), label: '', ml: '', kind: 'decant' })); }
+    function readSizeRows() {
+      return [...document.querySelectorAll('#cfg-sizes [data-size-row]')].map(r => {
+        const g = f => r.querySelector('[data-f="' + f + '"]'), ml = parseFloat(g('ml').value) || 0;
+        return { key: r.dataset.key, label: g('label').value.trim() || (ml ? fmtMl(ml) + ' ml' : ''), ml, kind: g('kind').value };
+      }).filter(x => x.label && x.ml > 0);
+    }
     const isTesterBottle = f => (typeof f === 'string' ? fragrances.find(x => x.id === f) : f)?.prices?.bottle?.type === 'tester';
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const r1 = n => Math.round(n * 10) / 10;
@@ -2460,7 +2501,7 @@
     const hasMl = f => Number.isFinite(f.stock?.ml);
     const hasPcs = f => Number.isFinite(f.stock?.bottles);
     const getLow = () => storeConfig.lowMlThreshold ?? 15;
-    const cartMl = id => cart.reduce((a, i) => a + (i.fragId === id && i.size !== 'bottle' ? parseInt(i.size) * i.qty : 0), 0);
+    const cartMl = id => cart.reduce((a, i) => a + (i.fragId === id && isDecant(i.size) ? mlOf(i.size) * i.qty : 0), 0);
     const cartPcs = id => cart.reduce((a, i) => a + (i.fragId === id && i.size === 'bottle' ? i.qty : 0), 0);
     const availMl = (f, c = true) => hasMl(f) ? Math.max(0, r1(f.stock.ml - (c ? cartMl(f.id) : 0))) : Infinity;
 
@@ -2477,14 +2518,18 @@
         if (hasPcs(f) && f.stock.bottles - (useCart ? cartPcs(f.id) : 0) < 1) {
           return { ok: false, label: 'Agotado', reason: 'Sin piezas en stock' };
         }
+      } else if (sizeInfo(key).kind === 'pieza') {
+        const n = f.stock?.pieces?.[key];
+        if (Number.isFinite(n) && n - (useCart ? cartPiece(f.id, key) : 0) < 1) return { ok: false, label: 'Agotado', reason: 'Sin piezas en stock' };
       } else if (hasMl(f)) {
         const a = availMl(f, useCart);
-        if (a < parseInt(key)) return { ok: false, label: a <= 0 ? 'Agotado' : 'Sin ml', reason: a <= 0 ? 'Decants agotados' : `Solo quedan ${fmtMl(a)} ml` };
+        if (a < mlOf(key)) return { ok: false, label: a <= 0 ? 'Agotado' : 'Sin ml', reason: a <= 0 ? 'Decants agotados' : `Solo quedan ${fmtMl(a)} ml` };
       }
       return { ok: true, label: formatPrice(p.price) };
     }
 
     function stockAreaHtml(f, v) {
+      rebuildSizes();
       const pv = v === 'pv';
       const tone = {
         '3ml': 'border-zinc-700/60 hover:border-gold/60 bg-zinc-900/40',
@@ -2499,19 +2544,19 @@
           const btnTone = 'border border-gold bg-gold/15 text-gold font-bold';
           return `<button onclick="${(sb && parseFloat(f.prices.bottle.price) > 0) ? `addToCart('${f.id}','bottle')` : `orderBottleOnDemand('${f.id}')`}" title="Botella bajo pedido${f.prices.bottle.eta ? ' · tiempo estimado ' + f.prices.bottle.eta : ''}" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl ${btnTone} transition flex flex-col items-center hover:brightness-125 cursor-pointer"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-extrabold text-gold">${isTesterBottle(f) ? '🧪 TESTER' : 'BOTELLA'}</span><span class="${pv ? 'text-xs' : 'text-[10px]'} font-bold leading-tight">${s.label === 'Bajo Pedido' ? 'BAJO PEDIDO' : s.label}</span></button>`;
         }
-        return `<button ${s.ok ? `onclick="addToCart('${f.id}','${k}')"` : 'disabled'} title="${s.ok ? '' : esc(s.reason)}" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl border ${tone[k]} transition flex flex-col items-center ${s.ok ? 'hover:brightness-125 cursor-pointer' : 'opacity-30 cursor-not-allowed'}"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-bold tracking-wider ${k === '5ml' ? 'text-gold' : 'text-zinc-400'}">${l}</span><span class="${pv ? 'text-xs' : 'text-[11px]'} font-bold ${s.ok ? '' : 'text-zinc-500 line-through'}">${s.label}</span></button>`;
+        return `<button ${s.ok ? `onclick="addToCart('${f.id}','${k}')"` : 'disabled'} title="${s.ok ? '' : esc(s.reason)}" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl border ${tone[k] || tone['3ml']} transition flex flex-col items-center ${s.ok ? 'hover:brightness-125 cursor-pointer' : 'opacity-30 cursor-not-allowed'}"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-bold tracking-wider ${k === '5ml' ? 'text-gold' : 'text-zinc-400'}">${l}</span><span class="${pv ? 'text-xs' : 'text-[11px]'} font-bold ${s.ok ? '' : 'text-zinc-500 line-through'}">${s.label}</span></button>`;
       }).join('');
 
       const notes = [];
       if (isTesterBottle(f) && f.prices?.bottle?.price > 0) notes.push('🧪 La botella completa es versión tester (no de línea)');
-      if (hasMl(f) && ['3ml', '5ml', '10ml'].some(k => f.prices?.[k]?.price > 0)) {
+      if (hasMl(f) && SIZES.some(([k]) => isDecant(k) && f.prices?.[k]?.price > 0)) {
         const a = availMl(f);
         if (a <= 0) notes.push('🚫 Decants agotados');
         else if (a <= getLow()) notes.push(`⚠️ Pocos ml disponibles: solo ${fmtMl(a)} ml`);
       }
       if (hasPcs(f) && f.prices?.bottle?.inStock && f.stock.bottles - cartPcs(f.id) === 1) notes.push('⚠️ Última botella disponible');
       const adm = !pv && isAdminLoggedIn ? `<p class="no-print text-[10px] text-zinc-500 mt-1.5 font-mono">📦 Piezas: ${hasPcs(f) ? f.stock.bottles : '—'} &bull; 💧 ${hasMl(f) ? fmtMl(f.stock.ml) + ' ml' : '—'}</p>` : '';
-      return `<div class="grid ${pv ? 'grid-cols-2 sm:grid-cols-4 gap-2' : 'grid-cols-4 gap-1.5'} text-center">${btns}</div>${notes.map(n => `<p class="mt-2 px-2 py-0.5 rounded bg-red-950/30 border border-red-500/30 text-[10px] font-semibold text-red-300">${n}</p>`).join('')}${adm}`;
+      return `<div class="grid ${pv ? 'gap-2' : 'gap-1.5'} text-center" style="grid-template-columns:repeat(auto-fit,minmax(${pv ? 84 : 60}px,1fr))">${btns}</div>${notes.map(n => `<p class="mt-2 px-2 py-0.5 rounded bg-red-950/30 border border-red-500/30 text-[10px] font-semibold text-red-300">${n}</p>`).join('')}${adm}`;
     }
 
     function cardHtml(f) {
@@ -2552,6 +2597,7 @@
     }
 
     function renderCatalog() {
+      rebuildSizes(); applySizeLabels();
       const container = document.getElementById('catalog-sheet');
       const emptyState = document.getElementById('empty-state');
       const wrap = document.getElementById('load-more-wrap');
@@ -2764,9 +2810,9 @@
       const st = sizeState(frag, size);
       if (!st.ok) { showToast(st.reason || 'Opción no disponible', 3000); refreshStockAreas(fragId); return; }
       const it = cart.find(i => i.fragId === fragId && i.size === size);
-      if (it) it.qty += 1; else cart.push({ fragId, name: frag.name, brand: frag.brand, size, price: frag.prices[size].price, qty: 1, onDemand: size === 'bottle' && !!frag.prices.bottle.onDemand, eta: (size === 'bottle' && frag.prices.bottle.eta) || '' });
+      if (it) it.qty += 1; else cart.push({ fragId, name: frag.name, brand: frag.brand, size, price: frag.prices[size].price, qty: 1, label: sizeLabel(size), ml: size === 'bottle' ? 0 : mlOf(size), kind: size === 'bottle' ? 'bottle' : sizeInfo(size).kind, onDemand: size === 'bottle' && !!frag.prices.bottle.onDemand, eta: (size === 'bottle' && frag.prices.bottle.eta) || '' });
       updateCartUI(); refreshStockAreas(fragId);
-      showToast(`Agregado a la bolsa: ${frag.name} (${size === 'bottle' ? (isTesterBottle(frag) ? 'Botella Tester' : 'Botella Completa') : size})` + (size === 'bottle' && frag.prices.bottle.onDemand ? ' · BAJO PEDIDO' + (frag.prices.bottle.eta ? ' ~' + frag.prices.bottle.eta : '') : ''), 3500);
+      showToast(`Agregado a la bolsa: ${frag.name} (${size === 'bottle' ? (isTesterBottle(frag) ? 'Botella Tester' : 'Botella Completa') : sizeLabel(size)})` + (size === 'bottle' && frag.prices.bottle.onDemand ? ' · BAJO PEDIDO' + (frag.prices.bottle.eta ? ' ~' + frag.prices.bottle.eta : '') : ''), 3500);
     }
 
     function removeFromCart(i) { const id = cart[i].fragId; cart.splice(i, 1); updateCartUI(); refreshStockAreas(id); }
@@ -2782,7 +2828,7 @@
       const box = document.getElementById('cart-items-container'); let n = 0, total = 0;
       box.innerHTML = cart.length ? cart.map((it, idx) => {
         n += it.qty; total += it.price * it.qty;
-        return `<div class="p-2.5 rounded-xl themed-input border flex items-center justify-between gap-2"><div><span class="text-[8px] uppercase tracking-luxury text-gold font-bold block">${esc(it.brand)}</span><span class="text-xs font-semibold block truncate max-w-[140px]">${esc(it.name)}</span><span class="text-[10px] text-zinc-400">${it.size === 'bottle' ? (isTesterBottle(it.fragId) ? 'Botella Tester' : 'Botella') : it.size} (${formatPrice(it.price)})</span></div><div class="flex items-center gap-1"><button onclick="changeCartQty(${idx},-1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">&minus;</button><span class="text-xs font-bold w-3 text-center">${it.qty}</span><button onclick="changeCartQty(${idx},1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">+</button><span class="text-xs text-gold font-bold w-12 text-right font-mono">${formatPrice(it.price * it.qty)}</span><button onclick="removeFromCart(${idx})" class="p-1 text-zinc-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>`;
+        return `<div class="p-2.5 rounded-xl themed-input border flex items-center justify-between gap-2"><div><span class="text-[8px] uppercase tracking-luxury text-gold font-bold block">${esc(it.brand)}</span><span class="text-xs font-semibold block truncate max-w-[140px]">${esc(it.name)}</span><span class="text-[10px] text-zinc-400">${it.size === 'bottle' ? (isTesterBottle(it.fragId) ? 'Botella Tester' : 'Botella') : sizeLabel(it.size)} (${formatPrice(it.price)})</span></div><div class="flex items-center gap-1"><button onclick="changeCartQty(${idx},-1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">&minus;</button><span class="text-xs font-bold w-3 text-center">${it.qty}</span><button onclick="changeCartQty(${idx},1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">+</button><span class="text-xs text-gold font-bold w-12 text-right font-mono">${formatPrice(it.price * it.qty)}</span><button onclick="removeFromCart(${idx})" class="p-1 text-zinc-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>`;
       }).join('') : '<div class="py-8 text-center text-zinc-500"><div class="text-2xl mb-1 text-gold">✦</div><p>Tu bolsa de pedido está vacía</p></div>';
       document.getElementById('cart-count').textContent = n;
       document.getElementById('cart-total-price').textContent = total ? formatPrice(total) : getCurrencySymbol() + '0';
@@ -2825,7 +2871,7 @@
       cart.forEach((item) => {
         const subtotal = item.price * item.qty;
         total += subtotal;
-        const sizeTag = item.size === 'bottle' ? (isTesterBottle(item.fragId) ? 'BOTELLA TESTER' : 'BOTELLA COMPLETA') : item.size;
+        const sizeTag = item.size === 'bottle' ? (isTesterBottle(item.fragId) ? 'BOTELLA TESTER' : 'BOTELLA COMPLETA') : sizeLabel(item.size);
         orderListText += `▪ ${item.qty}x ${item.brand} - ${item.name} (${sizeTag}) -> ${formatPrice(subtotal)}\n`;
       });
 
@@ -2861,15 +2907,16 @@
       const need = {}, out = [];
       cart.forEach(i => {
         const n = need[i.fragId] || (need[i.fragId] = { ml: 0, pcs: 0, name: `${i.brand} ${i.name}` });
-        if (i.size === 'bottle') { if (!i.onDemand) n.pcs += i.qty; } else n.ml += parseInt(i.size) * i.qty;
+        if (i.size === 'bottle') { if (!i.onDemand) n.pcs += i.qty; } else if (sizeInfo(i.size).kind === 'pieza') { (n.pz = n.pz || {})[i.size] = (n.pz[i.size] || 0) + i.qty; } else n.ml += mlOf(i.size) * i.qty;
         const f = fragrances.find(x => x.id === i.fragId);
-        if (f && !sizeState(f, i.size, false).ok) out.push(`${n.name} (${i.size === 'bottle' ? 'botella' : i.size}): ya no disponible`);
+        if (f && !sizeState(f, i.size, false).ok) out.push(`${n.name} (${i.size === 'bottle' ? 'botella' : sizeLabel(i.size)}): ya no disponible`);
       });
       for (const id in need) {
         const n = need[id], f = fragrances.find(x => x.id === id);
         if (!f) { out.push(`${n.name}: no disponible`); continue; }
         if (hasMl(f) && n.ml > f.stock.ml) out.push(`${n.name}: pides ${fmtMl(n.ml)} ml y quedan ${fmtMl(f.stock.ml)} ml`);
         if (hasPcs(f) && n.pcs > f.stock.bottles) out.push(`${n.name}: pides ${n.pcs} pieza(s) y quedan ${f.stock.bottles}`);
+        for (const k in (n.pz || {})) { const have = f.stock?.pieces?.[k]; if (Number.isFinite(have) && n.pz[k] > have) out.push(`${n.name}: pides ${n.pz[k]} ${sizeLabel(k)} y quedan ${have}`); }
       }
       return out;
     }
@@ -2878,8 +2925,7 @@
       cart.forEach(i => {
         const f = fragrances.find(x => x.id === i.fragId);
         if (!f) return;
-        if (i.size === 'bottle') { if (hasPcs(f)) f.stock.bottles = Math.max(0, f.stock.bottles - i.qty); }
-        else if (hasMl(f)) f.stock.ml = Math.max(0, r1(f.stock.ml - parseInt(i.size) * i.qty));
+        deductItem(f, i);
       });
     }
 
@@ -2936,6 +2982,7 @@
     function openFragranceModal(isEdit = false) {
       if (!isAdminLoggedIn) return toggleAuthModal();
       document.getElementById('fragrance-modal').classList.remove('hidden');
+      renderSizeFields();
       if (!isEdit) {
         document.getElementById('fragrance-form').reset();
         document.getElementById('form-edit-id').value = '';
@@ -3022,12 +3069,14 @@
       const newComposed = pyCompose(pyramid);
       if (!notes || (oldComposed && notes === oldComposed)) notes = newComposed;
 
-      const p3 = parseFloat(document.getElementById('frag-price-3ml').value) || 0;
-      const p3Avail = document.getElementById('frag-3ml-avail').checked;
-      const p5 = parseFloat(document.getElementById('frag-price-5ml').value) || 0;
-      const p5Avail = document.getElementById('frag-5ml-avail').checked;
-      const p10 = parseFloat(document.getElementById('frag-price-10ml').value) || 0;
-      const p10Avail = document.getElementById('frag-10ml-avail').checked;
+      const prevFrag = fragrances.find(f => f.id === editId);
+      const sizePrices = { ...(prevFrag?.prices || {}) };
+      let newStock = prevFrag?.stock;
+      sizeCfg().forEach(sz => {
+        sizePrices[sz.key] = { price: parseFloat(document.getElementById('frag-price-' + sz.key).value) || 0, inStock: document.getElementById('frag-' + sz.key + '-avail').checked };
+        const stEl = document.getElementById('frag-stock-' + sz.key);
+        if (stEl && stEl.value !== '') newStock = { ...(newStock || {}), pieces: { ...((newStock || {}).pieces || {}), [sz.key]: Math.max(0, Math.round(+stEl.value)) } };
+      });
       const pBottle = parseFloat(document.getElementById('frag-price-bottle').value) || 0;
       const pBottleAvail = document.getElementById('frag-bottle-avail').checked;
       const pBottleOnDemand = document.getElementById('frag-bottle-ondemand').checked;
@@ -3037,11 +3086,9 @@
         id: editId || 'frag-' + Date.now(),
         name, brand, concentration, gender, image, notes,
         pyramid: newComposed ? pyramid : undefined,
-        stock: fragrances.find(f => f.id === editId)?.stock,
+        stock: newStock,
         prices: {
-          "3ml": { price: p3, inStock: p3Avail },
-          "5ml": { price: p5, inStock: p5Avail },
-          "10ml": { price: p10, inStock: p10Avail },
+          ...sizePrices,
           "bottle": { price: pBottle, inStock: pBottleAvail, onDemand: pBottleOnDemand, type: pBottleType, eta: (document.getElementById('frag-bottle-eta').value || '').trim() }
         }
       };
@@ -3074,17 +3121,9 @@
       document.getElementById('frag-image-url').value = frag.image || '';
       document.getElementById('frag-notes').value = frag.notes || '';
 
-      const p3 = frag.prices?.['3ml'] || { price: 0, inStock: true };
-      const p5 = frag.prices?.['5ml'] || { price: 0, inStock: true };
-      const p10 = frag.prices?.['10ml'] || { price: 0, inStock: true };
+      fillSizeFields(frag);
       const pBottle = frag.prices?.['bottle'] || { price: 0, inStock: false };
 
-      document.getElementById('frag-price-3ml').value = p3.price || '';
-      document.getElementById('frag-3ml-avail').checked = p3.inStock;
-      document.getElementById('frag-price-5ml').value = p5.price || '';
-      document.getElementById('frag-5ml-avail').checked = p5.inStock;
-      document.getElementById('frag-price-10ml').value = p10.price || '';
-      document.getElementById('frag-10ml-avail').checked = p10.inStock;
       document.getElementById('frag-price-bottle').value = pBottle.price || '';
       document.getElementById('frag-bottle-avail').checked = pBottle.inStock;
       document.getElementById('frag-bottle-ondemand').checked = !!pBottle.onDemand;
@@ -3132,6 +3171,7 @@
       document.getElementById('config-store-whatsapp').value = storeConfig.whatsapp;
       document.getElementById('config-store-instagram').value = storeConfig.instagram;
       document.getElementById('config-store-notes').value = storeConfig.notes;
+      document.getElementById('cfg-sizes').innerHTML = sizeCfg().map(sizeRowHtml).join('');
       document.getElementById('store-modal').classList.remove('hidden');
     }
     function closeStoreConfigModal() { document.getElementById('store-modal').classList.add('hidden'); }
@@ -3143,10 +3183,14 @@
       storeConfig.whatsapp = document.getElementById('config-store-whatsapp').value.trim();
       storeConfig.instagram = document.getElementById('config-store-instagram').value.trim();
       storeConfig.notes = document.getElementById('config-store-notes').value.trim();
+      const newSizes = readSizeRows();
+      if (!newSizes.length) return showToast('Deja al menos una presentación con nombre y ml', 3500);
+      storeConfig.sizes = newSizes;
 
       saveLocalData();
       closeStoreConfigModal();
       updateStoreBrandHeader();
+      rebuildSizes(); applySizeLabels(); renderCatalog();
       await syncToGitHub();
       showToast('Datos de tienda actualizados');
     }
@@ -3445,7 +3489,7 @@
   const escH = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const closeM = id => document.getElementById(id).classList.add('hidden');
   const openM = id => document.getElementById(id).classList.remove('hidden');
-  const itemTxt = i => i.qty + 'x ' + i.brand + ' - ' + i.name + ' (' + (i.size === 'bottle' ? 'Botella' : i.size) + ')' + (i.onDemand ? ' 📦 Bajo pedido' + (i.eta ? ' (~' + i.eta + ')' : '') : '');
+  const itemTxt = i => i.qty + 'x ' + i.brand + ' - ' + i.name + ' (' + (i.size === 'bottle' ? 'Botella' : (i.label || i.size)) + ')' + (i.onDemand ? ' 📦 Bajo pedido' + (i.eta ? ' (~' + i.eta + ')' : '') : '');
   const lastNote = o => { const e = (o.events || []).slice(-1)[0]; return e && e.note ? ' ' + e.note : ''; };
   const waLink = (phone, msg) => { let d = String(phone || '').replace(/\D/g, ''); if (d.length === 10) d = '52' + d; return 'https://wa.me/' + d + '?text=' + encodeURIComponent(msg); };
   async function placeOrder() {
@@ -3458,7 +3502,7 @@
     showToast('Verificando disponibilidad...', 1500);
     await refreshFromRemote();
     if (stockIssues().length) { updateCartUI(); showToast('Algunas existencias cambiaron. Revisa tu bolsa.', 4000); return; }
-    const items = cart.map(i => ({ fragId: i.fragId, brand: i.brand, name: i.name, size: i.size, qty: i.qty, price: i.price, onDemand: !!i.onDemand, eta: i.eta || '' }));
+    const items = cart.map(i => ({ fragId: i.fragId, brand: i.brand, name: i.name, size: i.size, label: i.label || sizeLabel(i.size), ml: i.ml || (i.size === 'bottle' ? 0 : mlOf(i.size)), kind: i.kind || (i.size === 'bottle' ? 'bottle' : sizeInfo(i.size).kind), qty: i.qty, price: i.price, onDemand: !!i.onDemand, eta: i.eta || '' }));
     const sub = items.reduce((a, i) => a + i.price * i.qty, 0);
     const envio = SHIPPING.base + (SHIPPING.cps.includes(c.cp) ? SHIPPING.extra : 0), total = sub + envio;
     const { data: num, error } = await sb.rpc('create_order', { p_customer: c, p_items: items, p_total: total, p_shipping: envio });
@@ -3549,8 +3593,7 @@
     if (upd.status === 'pagado') {
       o.items.forEach(i => { // descuenta inventario solo al confirmar el pago (lo bajo pedido no descuenta)
         const f = fragrances.find(x => x.id === i.fragId); if (!f) return;
-        if (i.size === 'bottle') { if (!i.onDemand && hasPcs(f)) f.stock.bottles = Math.max(0, f.stock.bottles - i.qty); }
-        else if (hasMl(f)) f.stock.ml = Math.max(0, r1(f.stock.ml - parseInt(i.size) * i.qty));
+        deductItem(f, i);
       });
     }
     const { error } = await sb.from('orders').update(upd).eq('id', id);
