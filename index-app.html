@@ -1806,9 +1806,14 @@ html.pv-open,html.pv-open body{overflow:hidden}
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="mb-3">
-        <span class="text-[9px] tracking-luxury text-gold uppercase font-bold">Catálogo de Fragancias</span>
-        <h3 id="modal-title" class="font-editorial text-base font-bold mt-0.5">Editar Fragancia</h3>
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-2 pr-6">
+        <div>
+          <span class="text-[9px] tracking-luxury text-gold uppercase font-bold">Catálogo de Fragancias</span>
+          <h3 id="modal-title" class="font-editorial text-base font-bold mt-0.5">Editar Fragancia</h3>
+        </div>
+        <label class="px-2.5 py-1 rounded-full bg-amber-950/60 border border-gold text-gold font-extrabold text-[10px] cursor-pointer flex items-center gap-1.5 select-none">
+          <input type="checkbox" id="frag-coming-soon"> ⏳ PRÓXIMAMENTE
+        </label>
       </div>
 
       <form id="fragrance-form" onsubmit="handleFragranceSubmit(event)" class="space-y-3">
@@ -2434,7 +2439,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
             <div class="pt-1.5 text-center">
               <span class="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-luxury block truncate">${esc(f.brand)}</span>
               <h4 class="font-editorial text-xs sm:text-sm font-semibold truncate text-zinc-100">${esc(f.name)}</h4>
-              <span class="text-[9px] sm:text-[10px] text-gold font-bold font-mono">${formatPrice(minSizePrice(f))}</span>
+              <span class="text-[9px] sm:text-[10px] text-gold font-bold font-mono">${f.comingSoon ? '⏳ Próximamente' : formatPrice(minSizePrice(f))}</span>
             </div>
           </div>
         `;
@@ -2716,9 +2721,31 @@ html.pv-open,html.pv-open body{overflow:hidden}
       return { ok: true, label: formatPrice(p.price) };
     }
 
+    function notifyComingSoon(fragId) {
+      const f = fragrances.find(x => x.id === fragId);
+      if (!f) return;
+      const cleanPhone = storeConfig.whatsapp.replace(/[^0-9]/g, '');
+      const text = `¡Hola! 👋 Vi que pronto llegará *${f.brand} - ${f.name}* a ${storeConfig.name}. ¿Me podrías avisar cuando ya esté disponible? ⏳✨`;
+      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+      showToast('Abriendo WhatsApp para apartar aviso...', 2500);
+    }
+
     function stockAreaHtml(f, v) {
       rebuildSizes();
       const pv = v === 'pv';
+      if (f.comingSoon) {
+        return `
+          <div class="p-2.5 rounded-xl border border-gold/50 bg-gold/10 text-center space-y-1.5">
+            <span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-gold">
+              ⏳ Próximamente en catálogo
+            </span>
+            <p class="text-[10px] text-zinc-400 leading-tight">Aún en camino. Aparta tu aviso para ser de los primeros.</p>
+            <button type="button" onclick="event.stopPropagation(); notifyComingSoon('${f.id}')" class="w-full py-1.5 px-3 rounded-full bg-gold text-black font-bold text-[10px] uppercase tracking-wider hover:brightness-110 transition">
+              📲 Avísame cuando llegue
+            </button>
+          </div>
+        `;
+      }
       const tone = {
         '3ml': 'border-zinc-700/60 hover:border-gold/60 bg-zinc-900/40',
         '5ml': 'border-gold/50 bg-gold/10 hover:border-gold',
@@ -2756,6 +2783,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
               <img src="${imgOf(f)}" alt="${esc(f.name)}" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]">
               
               <div class="absolute top-2.5 left-2.5 flex flex-wrap gap-1">
+                ${f.comingSoon ? `<span class="bg-gold text-black font-extrabold text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full shadow">⏳ PRÓXIMAMENTE</span>` : ''}
                 <span class="themed-subbox border text-zinc-300 font-semibold text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full">${esc(f.concentration || 'EDP')}</span>
                 ${f.gender ? `<span class="border border-gold/40 text-gold font-semibold text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full">${esc(f.gender)}</span>` : ''}
               </div>
@@ -3176,6 +3204,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
         document.getElementById('fragrance-form').reset();
         document.getElementById('form-edit-id').value = '';
         document.getElementById('modal-title').textContent = 'Agregar Fragancia';
+        document.getElementById('frag-coming-soon').checked = false;
         document.getElementById('frag-bottle-ondemand').checked = false;
         document.getElementById('frag-bottle-eta').value = '';
         document.getElementById('frag-bottle-type-linea').checked = true;
@@ -3271,9 +3300,11 @@ html.pv-open,html.pv-open body{overflow:hidden}
       const pBottleOnDemand = document.getElementById('frag-bottle-ondemand').checked;
       const pBottleType = document.getElementById('frag-bottle-type-tester').checked ? 'tester' : 'linea';
 
+      const comingSoon = document.getElementById('frag-coming-soon').checked;
+
       const itemData = {
         id: editId || 'frag-' + Date.now(),
-        name, brand, concentration, gender, image, notes,
+        name, brand, concentration, gender, image, notes, comingSoon,
         profile: readProfile(), bgImage: (document.getElementById('frag-bg').value || '').trim() || undefined,
         pyramid: newComposed ? pyramid : undefined,
         stock: newStock,
@@ -3304,6 +3335,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
       if (!frag) return;
 
       document.getElementById('form-edit-id').value = frag.id;
+      document.getElementById('frag-coming-soon').checked = !!frag.comingSoon;
       document.getElementById('frag-name').value = frag.name || '';
       document.getElementById('frag-brand').value = frag.brand || '';
       document.getElementById('frag-concentration').value = frag.concentration || 'Eau de Parfum';
@@ -4340,7 +4372,7 @@ async function downloadPerfumeCardImage() {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#F5E6C8';
     ctx.font = '700 22px "Space Grotesk", monospace';
-    ctx.fillText(priceList || 'Consulta disponibilidad y precios por WhatsApp', W / 2, footY + 40);
+    ctx.fillText(frag.comingSoon ? '⏳ PRÓXIMAMENTE EN CATÁLOGO — APARTA TU AVISO' : (priceList || 'Consulta disponibilidad y precios por WhatsApp'), W / 2, footY + 40);
 
     ctx.fillStyle = '#D4AF37';
     ctx.font = '600 17px "Plus Jakarta Sans", sans-serif';
