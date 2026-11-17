@@ -974,6 +974,12 @@ html.pv-open,html.pv-open body{overflow:hidden}
 }
 @media(prefers-reduced-motion:reduce){.hero-bg img{animation:none}}
 </style>
+<style>
+.stage-bottle.has-photo{background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.8) 100%),var(--pv-photo) center/cover no-repeat !important;min-height:clamp(420px,80vw,560px);display:flex;align-items:flex-end}
+.stage-bottle.has-photo>div{width:100%}
+.stage-bottle.has-photo>div>div:first-child{display:none}
+.stage-bottle.has-photo #pv-name,.stage-bottle.has-photo #pv-short-desc{color:#fff !important;text-shadow:0 2px 16px rgba(0,0,0,.65)}
+</style>
 </head>
 <body class="flex flex-col antialiased selection:bg-[#FF8A00] selection:text-black min-h-screen w-full">
   <a href="#catalogo" class="skip-link no-print">Saltar al catálogo</a>
@@ -1323,7 +1329,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
       </button>
 
       <!-- HERO PERFUME SILLORIA -->
-      <div class="stage-bottle p-5 sm:p-8 relative overflow-hidden border-b border-white/10">
+      <div id="pv-stage" class="stage-bottle p-5 sm:p-8 relative overflow-hidden border-b border-white/10">
         <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-6 relative z-10">
           <div class="w-36 h-48 sm:w-44 sm:h-56 flex items-center justify-center shrink-0">
             <img id="pv-img" src="" alt="Perfume" class="max-h-full max-w-full object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.7)]">
@@ -1793,12 +1799,17 @@ html.pv-open,html.pv-open body{overflow:hidden}
           </div>
           <textarea id="frag-fuertes" rows="2" placeholder="Puntos fuertes (uno por línea)" class="w-full themed-input rounded-xl px-2.5 py-1.5"></textarea>
           <textarea id="frag-considerar" rows="2" placeholder="A considerar (uno por línea)" class="w-full themed-input rounded-xl px-2.5 py-1.5"></textarea>
-          <input id="frag-bg" placeholder="Fondo de la ficha: URL de imagen (opcional)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+          <div class="flex items-center gap-2">
+            <input id="frag-bg" placeholder="Foto de fondo de la ficha (URL o sube una)" oninput="bgPreview(this.value)" class="flex-1 min-w-0 themed-input rounded-xl px-2.5 py-1.5">
+            <label class="cursor-pointer px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-600 text-[10px] shrink-0"><span>Subir foto</span><input type="file" accept="image/*" class="hidden" onchange="handleBgUpload(event)"></label>
+            <button type="button" onclick="document.getElementById('frag-bg').value='';bgPreview('')" class="text-red-400 text-xs px-1">✕</button>
+          </div>
+          <img id="frag-bg-preview" src="" alt="" class="hidden w-full max-h-40 object-cover rounded-xl border border-zinc-700">
           <datalist id="dl-estela"><option value="Suave"><option value="Moderada"><option value="Fuerte"><option value="Enorme"></datalist>
           <datalist id="dl-audiencia"><option value="Masculino"><option value="Femenino"><option value="Unisex"></datalist>
           <datalist id="dl-clima"><option value="Primavera/Verano"><option value="Otoño/Invierno"><option value="Todo el año"></datalist>
           <datalist id="dl-ocasion"><option value="Diario"><option value="Oficina"><option value="Citas"><option value="Noche"><option value="Fiesta"><option value="Formal"></datalist>
-          <p class="text-[10px] text-zinc-400">Lo que dejes vacío muestra el texto general de siempre. Sin fondo propio, la ficha usa la foto del frasco difuminada.</p>
+          <p class="text-[10px] text-zinc-400">Lo que dejes vacío muestra el texto general de siempre. Con foto de fondo, la ficha se abre con esa foto grande arriba (frasco con ingredientes) en lugar del frasco suelto. Sin foto, usa tu foto del frasco difuminada.</p>
         </div>
 
         <div class="space-y-2">
@@ -2510,17 +2521,36 @@ html.pv-open,html.pv-open body{overflow:hidden}
     const newestWithImage = (list, n) => list.filter(f => f.image).sort((a, b) => (parseInt(String(b.id).replace(/\D/g, '')) || 0) - (parseInt(String(a.id).replace(/\D/g, '')) || 0)).slice(0, n);
     /*</perfil>*/
     function readProfile() { const p = {}; PF.forEach(k => { const v = (document.getElementById('frag-' + k).value || '').trim(); if (v) p[k] = v; }); return Object.keys(p).length ? p : undefined; }
-    function fillProfile(frag) { PF.forEach(k => { document.getElementById('frag-' + k).value = (frag.profile && frag.profile[k]) || ''; }); document.getElementById('frag-bg').value = frag.bgImage || ''; }
+    function bgPreview(u) { const i = document.getElementById('frag-bg-preview'); if (!i) return; if (u && u.trim()) { i.src = u; i.classList.remove('hidden'); } else { i.src = ''; i.classList.add('hidden'); } }
+    function handleBgUpload(ev) {
+      const file = ev.target.files[0]; if (!file) return;
+      const rd = new FileReader();
+      rd.onload = e => {
+        const im = new Image();
+        im.onload = () => {
+          const k = Math.min(1, 1400 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+          c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+          const out = c.toDataURL('image/jpeg', 0.82);
+          document.getElementById('frag-bg').value = out; bgPreview(out); showToast('Foto de fondo lista ✓', 2500);
+        };
+        im.onerror = () => showToast('No se pudo leer esa imagen');
+        im.src = e.target.result;
+      };
+      rd.readAsDataURL(file); ev.target.value = '';
+    }
+    function fillProfile(frag) { PF.forEach(k => { document.getElementById('frag-' + k).value = (frag.profile && frag.profile[k]) || ''; }); document.getElementById('frag-bg').value = frag.bgImage || ''; bgPreview(frag.bgImage || ''); }
     function paintProfile(frag) {
       const p = profileOf(frag), set = (id, h) => { const e = document.getElementById(id); if (e) e.innerHTML = h; };
       set('pv-estela', _esc(p.estela)); set('pv-estela-chip', _esc(p.estela)); set('pv-audiencia', _esc(p.audiencia)); set('pv-clima', _esc(p.clima));
       set('pv-ocasion', ocasionHtml(p.ocasion)); set('pv-fuertes', bulletsHtml(p.fuertes)); set('pv-considerar', bulletsHtml(p.considerar));
     }
     function paintBg(frag) {
-      const el = document.getElementById('pv-bg'); if (!el) return;
-      const custom = (frag.bgImage || '').trim(), src = custom || frag.image || '';
-      el.className = 'pv-bg' + (custom ? ' custom' : '');
-      el.style.backgroundImage = src ? 'url("' + src.replace(/"/g, '%22').replace(/\)/g, '%29') + '")' : '';
+      const el = document.getElementById('pv-bg'), st = document.getElementById('pv-stage');
+      const q = u => 'url("' + String(u).replace(/"/g, '%22').replace(/\)/g, '%29') + '")';
+      const custom = (frag.bgImage || '').trim();
+      if (st) { if (custom) { st.classList.add('has-photo'); st.style.setProperty('--pv-photo', q(custom)); } else { st.classList.remove('has-photo'); st.style.removeProperty('--pv-photo'); } }
+      if (el) { el.className = 'pv-bg'; el.style.backgroundImage = (!custom && frag.image) ? q(frag.image) : ''; }
     }
     function renderHeroBg() {
       const box = document.getElementById('hero-bg'); if (!box) return;
@@ -3053,8 +3083,8 @@ html.pv-open,html.pv-open body{overflow:hidden}
     function openFragranceModal(isEdit = false) {
       if (!isAdminLoggedIn) return toggleAuthModal();
       document.getElementById('fragrance-modal').classList.remove('hidden');
-      renderSizeFields(); fillProfile({});
       if (!isEdit) {
+        renderSizeFields(); fillProfile({});
         document.getElementById('fragrance-form').reset();
         document.getElementById('form-edit-id').value = '';
         document.getElementById('modal-title').textContent = 'Agregar Fragancia';
@@ -3167,7 +3197,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
 
       if (editId) {
         const index = fragrances.findIndex(f => f.id === editId);
-        if (index !== -1) fragrances[index] = itemData;
+        if (index !== -1) fragrances[index] = { ...fragrances[index], ...itemData };
       } else {
         fragrances.unshift(itemData);
       }
@@ -3541,6 +3571,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
       for (let i = 0; i < fragrances.length; i++) {
         const f = fragrances[i];
         if (f.image && f.image.startsWith('data:')) f.image = await uploadImg(f.image, f.id);
+        if (f.bgImage && f.bgImage.startsWith('data:')) f.bgImage = await uploadImg(f.bgImage, f.id + '-fondo');
         if (savedSnap[f.id] !== JSON.stringify(f) + '|' + i) rows.push({ id: f.id, position: i, data: f, updated_at: now });
       }
       if (rows.length) { const r = await sb.from('fragrances').upsert(rows); if (r.error) throw r.error; }
