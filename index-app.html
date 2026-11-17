@@ -975,7 +975,10 @@ html.pv-open,html.pv-open body{overflow:hidden}
 @media(prefers-reduced-motion:reduce){.hero-bg img{animation:none}}
 </style>
 <style>
-.stage-bottle.has-photo{background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.8) 100%),var(--pv-photo) center/cover no-repeat !important;min-height:clamp(420px,80vw,560px);display:flex;align-items:flex-end}
+.pv-photo{display:none;position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;background-repeat:no-repeat}
+.pv-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.8) 100%)}
+.stage-bottle.has-photo .pv-photo{display:block}
+.stage-bottle.has-photo{min-height:clamp(420px,80vw,560px);align-items:flex-end}
 .stage-bottle.has-photo>div{width:100%}
 .stage-bottle.has-photo>div>div:first-child{display:none}
 .stage-bottle.has-photo #pv-name,.stage-bottle.has-photo #pv-short-desc{color:#fff !important;text-shadow:0 2px 16px rgba(0,0,0,.65)}
@@ -1330,6 +1333,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
 
       <!-- HERO PERFUME SILLORIA -->
       <div id="pv-stage" class="stage-bottle p-5 sm:p-8 relative overflow-hidden border-b border-white/10">
+        <div id="pv-photo" class="pv-photo" aria-hidden="true"></div>
         <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-6 relative z-10">
           <div class="w-36 h-48 sm:w-44 sm:h-56 flex items-center justify-center shrink-0">
             <img id="pv-img" src="" alt="Perfume" class="max-h-full max-w-full object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.7)]">
@@ -2546,11 +2550,17 @@ html.pv-open,html.pv-open body{overflow:hidden}
       set('pv-ocasion', ocasionHtml(p.ocasion)); set('pv-fuertes', bulletsHtml(p.fuertes)); set('pv-considerar', bulletsHtml(p.considerar));
     }
     function paintBg(frag) {
-      const el = document.getElementById('pv-bg'), st = document.getElementById('pv-stage');
+      const el = document.getElementById('pv-bg'), st = document.getElementById('pv-stage'), ph = document.getElementById('pv-photo');
       const q = u => 'url("' + String(u).replace(/"/g, '%22').replace(/\)/g, '%29') + '")';
       const custom = (frag.bgImage || '').trim();
-      if (st) { if (custom) { st.classList.add('has-photo'); st.style.setProperty('--pv-photo', q(custom)); } else { st.classList.remove('has-photo'); st.style.removeProperty('--pv-photo'); } }
+      if (st) { st.classList.remove('has-photo'); st.dataset.photo = custom; }
+      if (ph) ph.style.backgroundImage = '';
       if (el) { el.className = 'pv-bg'; el.style.backgroundImage = (!custom && frag.image) ? q(frag.image) : ''; }
+      if (!custom || !st) return;
+      const im = new Image(); // solo se activa la foto grande si realmente carga; si no, queda el frasco (nunca un espacio negro)
+      im.onload = () => { if (st.dataset.photo !== custom) return; if (ph) ph.style.backgroundImage = q(custom); st.classList.add('has-photo'); };
+      im.onerror = () => { if (st.dataset.photo !== custom) return; if (el) el.style.backgroundImage = frag.image ? q(frag.image) : ''; if (typeof isAdminLoggedIn !== 'undefined' && isAdminLoggedIn) showToast('La foto de fondo de esta fragancia no carga. Súbela como archivo en lugar de usar un link.', 6000); };
+      im.src = custom;
     }
     function renderHeroBg() {
       const box = document.getElementById('hero-bg'); if (!box) return;
