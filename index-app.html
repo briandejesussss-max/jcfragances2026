@@ -954,6 +954,68 @@
       #top-navbar#top-navbar button[onclick*="toggleCartDrawer"]{ padding-left:.7rem !important; padding-right:.7rem !important; }
       #top-navbar h1{ font-size:14px !important; }
     }
+
+/* ===== TARJETAS DE NOTAS TIPO FRAGRANTICA ===== */
+.frag-note-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+.frag-note-card {
+  position: relative;
+  aspect-ratio: 1 / 1.08;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(145deg, #24202b, #141219);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.frag-note-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ap-pblue, #D4AF37);
+}
+.frag-note-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.frag-note-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.02) 30%, rgba(0,0,0,0.85) 100%);
+  z-index: 1;
+}
+.frag-note-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  padding-bottom: 14px;
+  z-index: 0;
+}
+.frag-note-label {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.15;
+  padding: 4px 5px 6px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  word-break: break-word;
+}
   </style>
 <style>.fixed.inset-0.z-50 > div{max-height:94dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}</style>
 <style>
@@ -1345,13 +1407,13 @@ html.pv-open,html.pv-open body{overflow:hidden}
             
             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 pt-1 font-mono text-[10px]">
               <span class="px-2.5 py-1 rounded-full bg-zinc-900/80 border border-zinc-700 text-zinc-300 flex items-center gap-1">
-                <i data-lucide="clock" class="w-3 h-3 text-gold"></i> 8-10 horas
+                <i data-lucide="clock" class="w-3 h-3 text-gold"></i> <span id="pv-duracion">8-10 horas</span>
               </span>
               <span class="px-2.5 py-1 rounded-full bg-zinc-900/80 border border-zinc-700 text-zinc-300 flex items-center gap-1">
                 <i data-lucide="wind" class="w-3 h-3 text-gold"></i> Estela <span id="pv-estela-chip">Fuerte</span>
               </span>
               <span class="px-2.5 py-1 rounded-full bg-zinc-900/80 border border-zinc-700 text-gold flex items-center gap-1 font-bold">
-                <i data-lucide="star" class="w-3 h-3 fill-gold text-gold"></i> 4.8
+                <i data-lucide="star" class="w-3 h-3 fill-gold text-gold"></i> <span id="pv-rating">4.8</span>
               </span>
               <span id="pv-concentration" class="px-2.5 py-1 rounded-full border border-gold/40 text-gold font-bold">EDP</span>
             </div>
@@ -1373,19 +1435,19 @@ html.pv-open,html.pv-open body{overflow:hidden}
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
             <div class="p-3 rounded-xl themed-subbox border space-y-1">
               <span class="text-[8px] uppercase tracking-luxury text-zinc-400 font-bold block">Salida</span>
-              <div id="pv-notes-top" class="flex flex-wrap gap-1">
+              <div id="pv-notes-top" class="frag-note-grid">
                 <span class="px-2 py-0.5 rounded-md bg-zinc-800/80 border border-zinc-700 text-zinc-200">🌿 Canela especiada</span>
               </div>
             </div>
             <div class="p-3 rounded-xl themed-subbox border space-y-1">
               <span class="text-[8px] uppercase tracking-luxury text-zinc-400 font-bold block">Corazón</span>
-              <div id="pv-notes-mid" class="flex flex-wrap gap-1">
+              <div id="pv-notes-mid" class="frag-note-grid">
                 <span class="px-2 py-0.5 rounded-md bg-zinc-800/80 border border-zinc-700 text-gold">🍦 Vainilla Bourbon</span>
               </div>
             </div>
             <div class="p-3 rounded-xl themed-subbox border space-y-1">
               <span class="text-[8px] uppercase tracking-luxury text-zinc-400 font-bold block">Fondo</span>
-              <div id="pv-notes-base" class="flex flex-wrap gap-1">
+              <div id="pv-notes-base" class="frag-note-grid">
                 <span class="px-2 py-0.5 rounded-md bg-zinc-800/80 border border-zinc-700 text-zinc-200">🌰 Praliné caramelizado</span>
               </div>
             </div>
@@ -1433,10 +1495,17 @@ html.pv-open,html.pv-open body{overflow:hidden}
             <span>Pedir Asesoría Directa por WhatsApp</span>
           </button>
 
-          <button type="button" id="pv-share-btn" onclick="sharePerfumeLink()" class="w-full py-3 rounded-full border border-gold/60 text-gold font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition hover:bg-gold hover:text-black mt-2">
-            <i data-lucide="share-2" class="w-4 h-4"></i>
-            <span>Compartir link de este perfume</span>
-          </button>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+            <button type="button" id="pv-download-card-btn" onclick="downloadPerfumeCardImage()" class="w-full py-3 rounded-full bg-gold text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow transition hover:brightness-110">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Descargar Ficha (Imagen)</span>
+            </button>
+
+            <button type="button" id="pv-share-btn" onclick="sharePerfumeLink()" class="w-full py-3 rounded-full border border-gold/60 text-gold font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition hover:bg-gold hover:text-black">
+              <i data-lucide="share-2" class="w-4 h-4"></i>
+              <span>Compartir link</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -1796,6 +1865,8 @@ html.pv-open,html.pv-open body{overflow:hidden}
         <div class="p-3 rounded-2xl themed-subbox border space-y-2">
           <span class="block font-bold text-[10px] uppercase text-gold">Radiografía olfativa (se muestra en la ficha)</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input id="frag-duracion" placeholder="Duración (ej. 8-10 horas)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
+            <input id="frag-rating" type="number" step="0.1" min="1" max="5" placeholder="Calificación (ej. 4.8)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
             <input id="frag-estela" list="dl-estela" placeholder="Estela (ej. Fuerte)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
             <input id="frag-audiencia" list="dl-audiencia" placeholder="Audiencia (ej. Unisex)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
             <input id="frag-clima" list="dl-clima" placeholder="Clima (ej. Otoño/Invierno)" class="w-full themed-input rounded-xl px-2.5 py-1.5">
@@ -1823,28 +1894,34 @@ html.pv-open,html.pv-open body{overflow:hidden}
           <div class="p-2 rounded-xl themed-subbox border space-y-1.5">
             <span class="text-[9px] font-bold text-gold uppercase tracking-wider block">☀️ Notas de salida</span>
             <div id="py-list-top" class="flex flex-wrap gap-1 min-h-[1.5rem]"></div>
-            <div class="flex gap-1.5">
-              <input type="text" id="py-emoji-top" maxlength="8" placeholder="🙂" onfocus="pyFocus('top')" class="w-12 text-center themed-input rounded-lg px-1 py-1">
+            <div class="flex gap-1.5 items-center">
+              <input type="text" id="py-emoji-top" maxlength="8" placeholder="🙂" onfocus="pyFocus('top')" class="w-10 text-center themed-input rounded-lg px-1 py-1">
               <input type="text" id="py-text-top" placeholder="Ej. Bergamota" onfocus="pyFocus('top')" onkeydown="if(event.key==='Enter'){event.preventDefault();pyAdd('top')}" class="flex-1 min-w-0 themed-input rounded-lg px-2 py-1">
-              <button type="button" onclick="pyAdd('top')" class="px-3 rounded-lg bg-gold text-black font-bold">+</button>
+              <input type="text" id="py-img-top" placeholder="URL foto (opcional)" onfocus="pyFocus('top')" class="w-24 sm:w-32 themed-input rounded-lg px-2 py-1 text-[10px]">
+              <label class="cursor-pointer px-2 py-1 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-200 text-[10px]" title="Subir foto">📷<input type="file" accept="image/*" class="hidden" onchange="pyUploadImg(event,'top')"></label>
+              <button type="button" onclick="pyAdd('top')" class="px-3 py-1 rounded-lg bg-gold text-black font-bold">+</button>
             </div>
           </div>
           <div class="p-2 rounded-xl themed-subbox border space-y-1.5">
             <span class="text-[9px] font-bold text-gold uppercase tracking-wider block">💐 Notas de corazón</span>
             <div id="py-list-mid" class="flex flex-wrap gap-1 min-h-[1.5rem]"></div>
-            <div class="flex gap-1.5">
-              <input type="text" id="py-emoji-mid" maxlength="8" placeholder="🙂" onfocus="pyFocus('mid')" class="w-12 text-center themed-input rounded-lg px-1 py-1">
+            <div class="flex gap-1.5 items-center">
+              <input type="text" id="py-emoji-mid" maxlength="8" placeholder="🙂" onfocus="pyFocus('mid')" class="w-10 text-center themed-input rounded-lg px-1 py-1">
               <input type="text" id="py-text-mid" placeholder="Ej. Jazmín" onfocus="pyFocus('mid')" onkeydown="if(event.key==='Enter'){event.preventDefault();pyAdd('mid')}" class="flex-1 min-w-0 themed-input rounded-lg px-2 py-1">
-              <button type="button" onclick="pyAdd('mid')" class="px-3 rounded-lg bg-gold text-black font-bold">+</button>
+              <input type="text" id="py-img-mid" placeholder="URL foto (opcional)" onfocus="pyFocus('mid')" class="w-24 sm:w-32 themed-input rounded-lg px-2 py-1 text-[10px]">
+              <label class="cursor-pointer px-2 py-1 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-200 text-[10px]" title="Subir foto">📷<input type="file" accept="image/*" class="hidden" onchange="pyUploadImg(event,'mid')"></label>
+              <button type="button" onclick="pyAdd('mid')" class="px-3 py-1 rounded-lg bg-gold text-black font-bold">+</button>
             </div>
           </div>
           <div class="p-2 rounded-xl themed-subbox border space-y-1.5">
             <span class="text-[9px] font-bold text-gold uppercase tracking-wider block">🪵 Notas de fondo</span>
             <div id="py-list-base" class="flex flex-wrap gap-1 min-h-[1.5rem]"></div>
-            <div class="flex gap-1.5">
-              <input type="text" id="py-emoji-base" maxlength="8" placeholder="🙂" onfocus="pyFocus('base')" class="w-12 text-center themed-input rounded-lg px-1 py-1">
+            <div class="flex gap-1.5 items-center">
+              <input type="text" id="py-emoji-base" maxlength="8" placeholder="🙂" onfocus="pyFocus('base')" class="w-10 text-center themed-input rounded-lg px-1 py-1">
               <input type="text" id="py-text-base" placeholder="Ej. Ámbar" onfocus="pyFocus('base')" onkeydown="if(event.key==='Enter'){event.preventDefault();pyAdd('base')}" class="flex-1 min-w-0 themed-input rounded-lg px-2 py-1">
-              <button type="button" onclick="pyAdd('base')" class="px-3 rounded-lg bg-gold text-black font-bold">+</button>
+              <input type="text" id="py-img-base" placeholder="URL foto (opcional)" onfocus="pyFocus('base')" class="w-24 sm:w-32 themed-input rounded-lg px-2 py-1 text-[10px]">
+              <label class="cursor-pointer px-2 py-1 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-200 text-[10px]" title="Subir foto">📷<input type="file" accept="image/*" class="hidden" onchange="pyUploadImg(event,'base')"></label>
+              <button type="button" onclick="pyAdd('base')" class="px-3 py-1 rounded-lg bg-gold text-black font-bold">+</button>
             </div>
           </div>
         </div>
@@ -2516,8 +2593,8 @@ html.pv-open,html.pv-open body{overflow:hidden}
     }
     /*</sizes>*/
     /*<perfil>*/
-    const PF = ['estela', 'audiencia', 'clima', 'ocasion', 'fuertes', 'considerar'];
-    const PROFILE_DEFAULT = { estela: 'Fuerte', audiencia: 'Unisex', clima: 'Otoño/Invierno', ocasion: 'Citas, Noche', fuertes: 'Duración sobresaliente y estela memorable.', considerar: 'Salida potente; esperar unos minutos para el secado.' };
+    const PF = ['duracion', 'rating', 'estela', 'audiencia', 'clima', 'ocasion', 'fuertes', 'considerar'];
+    const PROFILE_DEFAULT = { duracion: '8-10 horas', rating: '4.8', estela: 'Fuerte', audiencia: 'Unisex', clima: 'Otoño/Invierno', ocasion: 'Citas, Noche', fuertes: 'Duración sobresaliente y estela memorable.', considerar: 'Salida potente; esperar unos minutos para el secado.' };
     const _esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const profileOf = f => ({ ...PROFILE_DEFAULT, ...Object.fromEntries(Object.entries((f && f.profile) || {}).filter(([, v]) => String(v).trim())) });
     const ocasionHtml = t => String(t).split(',').map(x => _esc(x.trim())).filter(Boolean).join(' &bull; ');
@@ -2546,6 +2623,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
     function fillProfile(frag) { PF.forEach(k => { document.getElementById('frag-' + k).value = (frag.profile && frag.profile[k]) || ''; }); document.getElementById('frag-bg').value = frag.bgImage || ''; bgPreview(frag.bgImage || ''); }
     function paintProfile(frag) {
       const p = profileOf(frag), set = (id, h) => { const e = document.getElementById(id); if (e) e.innerHTML = h; };
+      set('pv-duracion', _esc(p.duracion)); set('pv-rating', _esc(p.rating));
       set('pv-estela', _esc(p.estela)); set('pv-estela-chip', _esc(p.estela)); set('pv-audiencia', _esc(p.audiencia)); set('pv-clima', _esc(p.clima));
       set('pv-ocasion', ocasionHtml(p.ocasion)); set('pv-fuertes', bulletsHtml(p.fuertes)); set('pv-considerar', bulletsHtml(p.considerar));
     }
@@ -2696,7 +2774,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
             <div class="p-3 sm:p-4 pb-2 cursor-pointer" onclick="openProductView('${f.id}')">
               <div class="flex items-center justify-between text-[9px] sm:text-[10px] uppercase tracking-luxury text-gold font-bold">
                 <span class="truncate">${esc(f.brand)}</span>
-                <span class="font-mono text-[9px] text-zinc-400 shrink-0">★ 4.8</span>
+                <span class="font-mono text-[9px] text-zinc-400 shrink-0">★ ${esc(profileOf(f).rating)}</span>
               </div>
               <h4 class="font-editorial text-base sm:text-lg text-zinc-900 dark:text-zinc-100 font-normal mt-0.5 leading-snug truncate">${esc(f.name)}</h4>
               <p class="text-[10px] sm:text-[11px] text-zinc-500 mt-1 line-clamp-2 font-light leading-relaxed"><span class="text-zinc-400 font-medium">Notas:</span> ${esc(f.notes || 'Toca para abrir la pirámide y radiografía olfativa.')}</p>
@@ -3792,9 +3870,34 @@ html.pv-open,html.pv-open body{overflow:hidden}
 </script>
 
 <script>
-/* ===== Pirámide olfativa (editor de notas con emojis) ===== */
+/* ===== Pirámide olfativa tipo Fragrantica (imágenes + fallback visual) ===== */
 const PY_SECTIONS = ['top', 'mid', 'base'];
 const PY_DEFAULT = { top: '🌿', mid: '🌸', base: '🪵' };
+const PY_IMG_BANK = [
+  [/bergamota|lim[oó]n|lima\b|yuzu|c[ií]trico/i, 'https://images.unsplash.com/photo-1590502593747-42a996133562?w=240&q=75'],
+  [/naranja|mandarina|neroli|toronja|pomelo/i, 'https://images.unsplash.com/photo-1547514701-42782101795e?w=240&q=75'],
+  [/manzana/i, 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=240&q=75'],
+  [/pi[ñn]a|mango|maracuy/i, 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=240&q=75'],
+  [/cereza|fresa|frambuesa|frutos rojos|grosella/i, 'https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=240&q=75'],
+  [/durazno|melocot/i, 'https://images.unsplash.com/photo-1629828874514-c1e5103f2150?w=240&q=75'],
+  [/lavanda|violeta|iris/i, 'https://images.unsplash.com/photo-1528750997573-59b89d56f4f7?w=240&q=75'],
+  [/rosa\b|rosas/i, 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=240&q=75'],
+  [/jazm[ií]n|azahar|tuberosa|flor|peon[ií]a|lirio|magnolia/i, 'https://images.unsplash.com/photo-1508784411316-02b8cd4d3a3a?w=240&q=75'],
+  [/vainilla/i, 'https://images.unsplash.com/photo-1631209121750-a9f656d28f46?w=240&q=75'],
+  [/canela|especia|cardamomo|clavo|nuez moscada/i, 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=240&q=75'],
+  [/caf[eé]/i, 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=240&q=75'],
+  [/cacao|chocolate|pralin/i, 'https://images.unsplash.com/photo-1548907040-4baa42d10919?w=240&q=75'],
+  [/miel|caramelo/i, 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=240&q=75'],
+  [/coco\b/i, 'https://images.unsplash.com/photo-1580984969071-a8da5656c2fb?w=240&q=75'],
+  [/almendra|avellana|nuez|pistache|tonka/i, 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=240&q=75'],
+  [/s[aá]ndalo|cedro|madera|oud|vetiver|pachul[ií]|roble/i, 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=240&q=75'],
+  [/[aá]mbar|ambroxan|resina|incienso|mirra/i, 'https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=240&q=75'],
+  [/tabaco|cuero|gamuza/i, 'https://images.unsplash.com/photo-1527195575508-5b138d14a35b?w=240&q=75'],
+  [/menta|albahaca|romero|salvia|hoja|t[eé]|musgo/i, 'https://images.unsplash.com/photo-1628556270448-4d4e4148e1b1?w=240&q=75'],
+  [/pimienta|jengibre/i, 'https://images.unsplash.com/photo-1599909533681-74046c648d7e?w=240&q=75'],
+  [/marin|agua|acu[aá]tic|sal\b|brisa/i, 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=240&q=75'],
+  [/almizcle|musk/i, 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=240&q=75']
+];
 const PY_EMO = [
   [/bergamota|lim[oó]n|lima\b|c[ií]trico|yuzu|toronja|pomelo/i, '🍋'], [/naranja|mandarina|neroli/i, '🍊'],
   [/manzana/i, '🍎'], [/pi[ñn]a|mango|maracuy/i, '🍍'], [/pera\b/i, '🍐'], [/durazno|melocot|albaricoque/i, '🍑'],
@@ -3812,19 +3915,39 @@ let pyDraft = { top: [], mid: [], base: [] };
 let pyActive = 'top';
 
 function pyGuess(text, sec) { for (const [re, e] of PY_EMO) if (re.test(text)) return e; return PY_DEFAULT[sec]; }
+function pyGuessImg(text) { for (const [re, url] of PY_IMG_BANK) if (re.test(text)) return url; return ''; }
 function pyFocus(s) { pyActive = s; }
 function pyQuick(e) { const el = document.getElementById('py-emoji-' + pyActive); if (el) { el.value = e; const t = document.getElementById('py-text-' + pyActive); if (t) t.focus(); } }
+function pyUploadImg(ev, s) {
+  const file = ev.target.files[0]; if (!file) return;
+  const rd = new FileReader();
+  rd.onload = e => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 260 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      const inp = document.getElementById('py-img-' + s);
+      if (inp) inp.value = c.toDataURL('image/jpeg', 0.8);
+      showToast('Imagen de nota lista ✓', 2000);
+    };
+    im.src = e.target.result;
+  };
+  rd.readAsDataURL(file); ev.target.value = '';
+}
 function pyLoad(py) {
   pyDraft = { top: [], mid: [], base: [] };
-  if (py) PY_SECTIONS.forEach(s => { pyDraft[s] = (py[s] || []).map(n => ({ e: n.e || PY_DEFAULT[s], t: n.t })); });
-  PY_SECTIONS.forEach(s => { const a = document.getElementById('py-emoji-' + s), b = document.getElementById('py-text-' + s); if (a) a.value = ''; if (b) b.value = ''; });
+  if (py) PY_SECTIONS.forEach(s => { pyDraft[s] = (py[s] || []).map(n => ({ e: n.e || PY_DEFAULT[s], t: n.t, img: n.img || '' })); });
+  PY_SECTIONS.forEach(s => { ['emoji', 'text', 'img'].forEach(f => { const el = document.getElementById(`py-${f}-${s}`); if (el) el.value = ''; }); });
   pyRender();
 }
 function pyAdd(s) {
-  const te = document.getElementById('py-text-' + s), ee = document.getElementById('py-emoji-' + s);
+  const te = document.getElementById('py-text-' + s), ee = document.getElementById('py-emoji-' + s), ie = document.getElementById('py-img-' + s);
   const t = te.value.trim(); if (!t) { te.focus(); return; }
-  pyDraft[s].push({ e: ee.value.trim() || pyGuess(t, s), t });
-  te.value = ''; ee.value = ''; pyRender(); te.focus();
+  const img = (ie && ie.value.trim()) || pyGuessImg(t);
+  pyDraft[s].push({ e: ee.value.trim() || pyGuess(t, s), t, img });
+  te.value = ''; ee.value = ''; if (ie) ie.value = '';
+  pyRender(); te.focus();
 }
 function pyRemove(s, i) { pyDraft[s].splice(i, 1); pyRender(); }
 function pyMove(s, i, d) { const a = pyDraft[s], j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; pyRender(); }
@@ -3832,15 +3955,24 @@ function pyRender() {
   PY_SECTIONS.forEach(s => {
     const box = document.getElementById('py-list-' + s); if (!box) return;
     const n = pyDraft[s].length;
-    box.innerHTML = n ? pyDraft[s].map((x, i) => `<span class="inline-flex items-center gap-1 pl-1.5 pr-1 py-0.5 rounded-md themed-input border"><span>${esc(x.e)}</span><span>${esc(x.t)}</span>` +
-      (n > 1 ? `<button type="button" onclick="pyMove('${s}',${i},-1)" class="px-0.5 text-zinc-400 hover:text-gold" aria-label="Mover antes">‹</button><button type="button" onclick="pyMove('${s}',${i},1)" class="px-0.5 text-zinc-400 hover:text-gold" aria-label="Mover después">›</button>` : '') +
-      `<button type="button" onclick="pyRemove('${s}',${i})" class="px-0.5 text-red-400 hover:text-red-300" aria-label="Quitar">×</button></span>`).join('')
-      : '<span class="text-[10px] text-zinc-500">Sin notas todavía</span>';
+    box.innerHTML = n ? pyDraft[s].map((x, i) => {
+      const thumb = x.img ? `<img src="${esc(x.img)}" class="w-4 h-4 rounded object-cover shrink-0">` : `<span>${esc(x.e)}</span>`;
+      return `<span class="inline-flex items-center gap-1 pl-1 pr-1 py-0.5 rounded-md themed-input border">${thumb}<span>${esc(x.t)}</span>` +
+        (n > 1 ? `<button type="button" onclick="pyMove('${s}',${i},-1)" class="px-0.5 text-zinc-400 hover:text-gold" aria-label="Mover antes">‹</button><button type="button" onclick="pyMove('${s}',${i},1)" class="px-0.5 text-zinc-400 hover:text-gold" aria-label="Mover después">›</button>` : '') +
+        `<button type="button" onclick="pyRemove('${s}',${i})" class="px-0.5 text-red-400 hover:text-red-300" aria-label="Quitar">×</button></span>`;
+    }).join('') : '<span class="text-[10px] text-zinc-500">Sin notas todavía</span>';
   });
 }
 function pyCollect() {
   PY_SECTIONS.forEach(s => { const te = document.getElementById('py-text-' + s); if (te && te.value.trim()) pyAdd(s); });
-  const out = {}; PY_SECTIONS.forEach(s => { out[s] = pyDraft[s].map(n => ({ e: n.e, t: n.t })); });
+  const out = {};
+  PY_SECTIONS.forEach(s => {
+    out[s] = pyDraft[s].map(n => {
+      const item = { e: n.e, t: n.t };
+      if (n.img) item.img = n.img;
+      return item;
+    });
+  });
   return out;
 }
 function pyCompose(py) {
@@ -3851,7 +3983,8 @@ function pvPyramidFor(frag, asDraftOnly) {
   const py = frag.pyramid;
   if (py && PY_SECTIONS.some(s => (py[s] || []).length)) return { top: py.top || [], mid: py.mid || [], base: py.base || [] };
   const text = (frag.notes || '').trim();
-  const toNotes = (str, s) => str.split(/[,;•\n]/).map(x => x.trim().replace(/[.\s]+$/, '')).filter(Boolean).map(t => ({ e: pyGuess(t, s), t }));
+  const toNotes = (str, s) => str.split(/[,;•\n]/).map(x => x.trim().replace(/[.\s]+$/, '')).filter(Boolean)
+    .map(t => ({ e: pyGuess(t, s), t, img: pyGuessImg(t) }));
   const out = { top: [], mid: [], base: [] };
   const re = /(salida|cabeza|coraz[oó]n|fondo|base)\s*[:\-–]\s*([\s\S]*?)(?=(?:salida|cabeza|coraz[oó]n|fondo|base)\s*[:\-–]|$)/gi;
   let m, found = false;
@@ -3864,14 +3997,347 @@ function pvPyramidFor(frag, asDraftOnly) {
   const parts = text ? toNotes(text, 'top') : [];
   const n = parts.length;
   if (n === 0) return out;
-  if (n < 3) { out.top = parts.slice(0, 1).map(p => ({ e: pyGuess(p.t, 'top'), t: p.t })); out.mid = parts.slice(1, 2).map(p => ({ e: pyGuess(p.t, 'mid'), t: p.t })); return out; }
+  if (n < 3) {
+    out.top = parts.slice(0, 1).map(p => ({ ...p, e: pyGuess(p.t, 'top') }));
+    out.mid = parts.slice(1, 2).map(p => ({ ...p, e: pyGuess(p.t, 'mid') }));
+    return out;
+  }
   const a = Math.ceil(n / 3), b = Math.ceil((n - a) / 2);
-  out.top = parts.slice(0, a); out.mid = parts.slice(a, a + b).map(p => ({ e: pyGuess(p.t, 'mid'), t: p.t })); out.base = parts.slice(a + b).map(p => ({ e: pyGuess(p.t, 'base'), t: p.t }));
+  out.top = parts.slice(0, a);
+  out.mid = parts.slice(a, a + b).map(p => ({ ...p, e: pyGuess(p.t, 'mid') }));
+  out.base = parts.slice(a + b).map(p => ({ ...p, e: pyGuess(p.t, 'base') }));
   return out;
 }
 function pvChips(list, cls, fallbackEmoji) {
-  if (!list || !list.length) return '<span class="text-zinc-500">—</span>';
-  return list.map(n => `<span class="px-2 py-0.5 rounded-md bg-zinc-800/80 border border-zinc-700 ${cls}">${esc(n.e || fallbackEmoji)} ${esc(n.t)}</span>`).join('');
+  if (!list || !list.length) return '<span class="text-zinc-500 text-[10px]">—</span>';
+  return list.map(n => {
+    const imgUrl = n.img || pyGuessImg(n.t);
+    const emo = esc(n.e || fallbackEmoji);
+    return `
+      <div class="frag-note-card" title="${esc(n.t)}">
+        <div class="frag-note-fallback">${emo}</div>
+        ${imgUrl ? `<img src="${esc(imgUrl)}" alt="${esc(n.t)}" loading="lazy" onerror="this.remove()">` : ''}
+        <span class="frag-note-label">${esc(n.t)}</span>
+      </div>`;
+  }).join('');
+}
+
+
+/* ===== GENERADOR DE FICHA TÉCNICA DESCARGABLE EN IMAGEN (ESTILO FRAGRANTICA) ===== */
+function loadImageSafe(src) {
+  return new Promise(resolve => {
+    if (!src) return resolve(null);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      const img2 = new Image();
+      img2.onload = () => resolve(img2);
+      img2.onerror = () => resolve(null);
+      img2.src = src;
+    };
+    img.src = src;
+  });
+}
+
+function drawRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function wrapCanvasText(ctx, text, maxWidth) {
+  const words = String(text || '').split(/\s+/);
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+async function downloadPerfumeCardImage() {
+  const id = document.getElementById('pv-prices-container')?.dataset.fragId;
+  const frag = fragrances.find(x => x.id === id);
+  if (!frag) return;
+
+  const btn = document.getElementById('pv-download-card-btn');
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Generando imagen...</span>';
+  }
+  showToast('Creando ficha visual tipo Fragrantica...', 2500);
+
+  try {
+    const W = 1080, H = 1350;
+    const cv = document.createElement('canvas');
+    cv.width = W;
+    cv.height = H;
+    const ctx = cv.getContext('2d');
+
+    const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+    bgGrad.addColorStop(0, '#110E17');
+    bgGrad.addColorStop(0.5, '#0A080E');
+    bgGrad.addColorStop(1, '#17121E');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    const glow = ctx.createRadialGradient(270, 340, 20, 270, 340, 340);
+    glow.addColorStop(0, 'rgba(212, 175, 55, 0.24)');
+    glow.addColorStop(0.6, 'rgba(255, 138, 0, 0.08)');
+    glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, 700);
+
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
+    ctx.lineWidth = 2;
+    drawRoundRect(ctx, 32, 32, W - 64, H - 64, 34);
+    ctx.stroke();
+
+    ctx.fillStyle = '#D4AF37';
+    ctx.font = '700 22px "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText((storeConfig.name || 'JS FRAGANCES').toUpperCase(), 72, 92);
+
+    ctx.fillStyle = '#A1A1AA';
+    ctx.font = '600 18px "Space Grotesk", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('FICHA OLFATIVA • DECANTS & BOTELLAS', W - 72, 92);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(72, 118);
+    ctx.lineTo(W - 72, 118);
+    ctx.stroke();
+
+    const bottleImg = await loadImageSafe(imgOf(frag));
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    drawRoundRect(ctx, 72, 150, 370, 420, 28);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.22)';
+    ctx.stroke();
+
+    if (bottleImg) {
+      const pad = 28;
+      const boxW = 370 - pad * 2, boxH = 420 - pad * 2;
+      const ratio = Math.min(boxW / bottleImg.width, boxH / bottleImg.height);
+      const dw = bottleImg.width * ratio, dh = bottleImg.height * ratio;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.75)';
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 14;
+      ctx.drawImage(bottleImg, 72 + (370 - dw) / 2, 150 + (420 - dh) / 2, dw, dh);
+      ctx.restore();
+    }
+
+    const rx = 475, rw = W - rx - 72;
+    const prof = profileOf(frag);
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#D4AF37';
+    ctx.font = '700 22px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText((frag.brand || 'CASA OLFATIVA').toUpperCase(), rx, 195);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '700 44px "Playfair Display", Georgia, serif';
+    const titleLines = wrapCanvasText(ctx, frag.name || 'Fragancia', rw).slice(0, 3);
+    let ty = 250;
+    titleLines.forEach(line => {
+      ctx.fillText(line, rx, ty);
+      ty += 52;
+    });
+
+    ty += 8;
+    const badges = [frag.concentration || 'EDP', frag.gender || 'Unisex'];
+    let bx = rx;
+    ctx.font = '700 18px "Plus Jakarta Sans", sans-serif';
+    badges.forEach(b => {
+      const bw = ctx.measureText(b).width + 32;
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.14)';
+      drawRoundRect(ctx, bx, ty, bw, 38, 19);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
+      ctx.stroke();
+      ctx.fillStyle = '#F5E6C8';
+      ctx.fillText(b, bx + 16, ty + 25);
+      bx += bw + 12;
+    });
+
+    ty += 62;
+    const stats = [
+      { k: 'DURACIÓN', v: prof.duracion },
+      { k: 'ESTELA', v: prof.estela },
+      { k: 'RATING', v: '★ ' + prof.rating + ' / 5' }
+    ];
+    const colW = (rw - 20) / 3;
+    stats.forEach((st, idx) => {
+      const sx = rx + idx * (colW + 10);
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      drawRoundRect(ctx, sx, ty, colW, 84, 16);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.stroke();
+
+      ctx.fillStyle = '#A1A1AA';
+      ctx.font = '700 13px "Space Grotesk", monospace';
+      ctx.fillText(st.k, sx + 14, ty + 28);
+
+      ctx.fillStyle = idx === 2 ? '#D4AF37' : '#FFFFFF';
+      ctx.font = '700 20px "Plus Jakarta Sans", sans-serif';
+      const valText = String(st.v || '');
+      ctx.fillText(valText.length > 13 ? valText.slice(0, 12) + '…' : valText, sx + 14, ty + 62);
+    });
+
+    ty += 108;
+    ctx.fillStyle = '#D4D4D8';
+    ctx.font = '500 19px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`🌤️ Clima: ${prof.clima}   •   ✨ Ocasión: ${prof.ocasion.split(',')[0]}`, rx, ty);
+
+    let pyY = 610;
+    ctx.fillStyle = '#D4AF37';
+    ctx.font = '700 20px "Space Grotesk", monospace';
+    ctx.fillText('PIRÁMIDE OLFATIVA', 72, pyY);
+
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
+    ctx.beginPath();
+    ctx.moveTo(295, pyY - 7);
+    ctx.lineTo(W - 72, pyY - 7);
+    ctx.stroke();
+
+    const pyr = pvPyramidFor(frag);
+    const levels = [
+      { label: 'NOTAS DE SALIDA', notes: pyr.top || [], emo: '🌿' },
+      { label: 'NOTAS DE CORAZÓN', notes: pyr.mid || [], emo: '🌸' },
+      { label: 'NOTAS DE FONDO', notes: pyr.base || [], emo: '🪵' }
+    ];
+
+    pyY += 24;
+    for (const lvl of levels) {
+      ctx.fillStyle = 'rgba(255,255,255,0.025)';
+      drawRoundRect(ctx, 72, pyY, W - 144, 165, 22);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.stroke();
+
+      ctx.fillStyle = '#A1A1AA';
+      ctx.font = '700 14px "Space Grotesk", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(lvl.label, 96, pyY + 28);
+
+      const shownNotes = lvl.notes.slice(0, 6);
+      if (!shownNotes.length) {
+        ctx.fillStyle = '#71717A';
+        ctx.font = '500 18px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText('Acordes equilibrados de la casa', 96, pyY + 95);
+      } else {
+        const cardW = 132, cardH = 112, gap = 14;
+        const totalW = shownNotes.length * cardW + (shownNotes.length - 1) * gap;
+        let nx = Math.max(96, (W - totalW) / 2);
+        const ny = pyY + 40;
+
+        for (const note of shownNotes) {
+          const nImgUrl = note.img || pyGuessImg(note.t);
+          const nImg = await loadImageSafe(nImgUrl);
+
+          ctx.save();
+          drawRoundRect(ctx, nx, ny, cardW, cardH, 16);
+          ctx.clip();
+
+          ctx.fillStyle = '#1E1A26';
+          ctx.fillRect(nx, ny, cardW, cardH);
+
+          if (nImg) {
+            const sc = Math.max(cardW / nImg.width, cardH / nImg.height);
+            const iw = nImg.width * sc, ih = nImg.height * sc;
+            ctx.drawImage(nImg, nx + (cardW - iw) / 2, ny + (cardH - ih) / 2, iw, ih);
+          } else {
+            ctx.font = '42px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(note.e || lvl.emo, nx + cardW / 2, ny + 62);
+          }
+
+          const ov = ctx.createLinearGradient(0, ny + 30, 0, ny + cardH);
+          ov.addColorStop(0, 'rgba(0,0,0,0)');
+          ov.addColorStop(1, 'rgba(0,0,0,0.88)');
+          ctx.fillStyle = ov;
+          ctx.fillRect(nx, ny, cardW, cardH);
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = '700 15px "Plus Jakarta Sans", sans-serif';
+          ctx.textAlign = 'center';
+          const lbl = note.t.length > 15 ? note.t.slice(0, 14) + '…' : note.t;
+          ctx.fillText(lbl, nx + cardW / 2, ny + cardH - 12);
+          ctx.restore();
+
+          ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+          ctx.lineWidth = 1.2;
+          drawRoundRect(ctx, nx, ny, cardW, cardH, 16);
+          ctx.stroke();
+
+          nx += cardW + gap;
+        }
+      }
+      pyY += 180;
+    }
+
+    const footY = H - 155;
+    ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
+    drawRoundRect(ctx, 72, footY, W - 144, 92, 22);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+    ctx.stroke();
+
+    rebuildSizes();
+    const priceList = SIZES
+      .map(([k, lbl]) => {
+        const p = frag.prices?.[k];
+        if (!p || !(parseFloat(p.price) > 0)) return null;
+        return `${lbl}: ${formatPrice(p.price)}`;
+      })
+      .filter(Boolean)
+      .slice(0, 4)
+      .join('   •   ');
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#F5E6C8';
+    ctx.font = '700 22px "Space Grotesk", monospace';
+    ctx.fillText(priceList || 'Consulta disponibilidad y precios por WhatsApp', W / 2, footY + 40);
+
+    ctx.fillStyle = '#D4AF37';
+    ctx.font = '600 17px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`📲 Pedidos WhatsApp: ${storeConfig.whatsapp || ''}   •   IG: ${storeConfig.instagram || '@JSFRAGANCES2026'}`, W / 2, footY + 72);
+
+    const dataUrl = cv.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.download = `Ficha-${fragSlug(frag) || 'perfume'}.png`;
+    a.href = dataUrl;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showToast('¡Ficha descargada en imagen! 📸', 3000);
+  } catch (err) {
+    console.error('Error generando ficha:', err);
+    showToast('No se pudo generar la imagen. Intenta de nuevo.', 3500);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+      lucide.createIcons();
+    }
+  }
 }
 
 /* ===== Calculadora de costo de decants (solo administrador) ===== */
