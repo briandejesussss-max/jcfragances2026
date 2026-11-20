@@ -2105,7 +2105,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
         <div class="pt-1"><span class="text-[10px] uppercase text-gold font-bold">Presentaciones (decants y miniaturas)</span>
           <div id="cfg-sizes" class="space-y-1.5 mt-1.5"></div>
           <button type="button" onclick="addSizeRow()" class="mt-2 px-3 py-1 rounded-full border border-gold/60 text-gold text-[11px] font-bold">＋ Agregar presentación</button>
-          <p class="text-[10px] text-zinc-400 mt-1">Decant: se descuenta de tus ml. Miniatura: se vende por pieza con su propio stock. Los precios se capturan en cada fragancia.</p></div>
+          <p class="text-[10px] text-zinc-400 mt-1">Decant: se descuenta de tus ml. Miniatura: se vende por pieza con su propio stock. Marca <b>Parcial</b> si es una botella ya usada que vendes con los ml que le quedan (en cada fragancia capturas esos ml, el precio y si está disponible). Los precios se capturan en cada fragancia.</p></div>
         <div class="pt-2 flex justify-end gap-2"><button type="submit" class="px-4 py-1.5 rounded-full bg-gold text-black font-bold">Guardar</button></div>
       </form>
     </div>
@@ -2589,11 +2589,13 @@ html.pv-open,html.pv-open body{overflow:hidden}
     const sizeInfo = k => sizeCfg().find(s => s.key === k) || (k === 'bottle' ? { key: 'bottle', label: 'Botella', kind: 'bottle', ml: 0 } : { key: k, label: k, ml: parseInt(k) || 0, kind: 'decant' });
     const mlOf = k => Number(sizeInfo(k).ml) || 0;
     const sizeLabel = k => k === 'bottle' ? 'Botella' : sizeInfo(k).label;
-    const isDecant = k => k !== 'bottle' && sizeInfo(k).kind !== 'pieza';
+    const isUnitKind = kd => kd === 'pieza' || kd === 'parcial';
+    const isDecant = k => k !== 'bottle' && !isUnitKind(sizeInfo(k).kind);
+    const partialLabel = (f, k) => (k !== 'bottle' && sizeInfo(k).kind === 'parcial' && Number(f.prices?.[k]?.ml) > 0) ? sizeLabel(k) + ' · ' + fmtMl(Number(f.prices[k].ml)) + ' ml' : sizeLabel(k);
     function rebuildSizes() { SIZES.length = 0; sizeCfg().forEach(s => SIZES.push([s.key, s.label])); SIZES.push(['bottle', 'Botella']); }
     function deductItem(f, i) { // descuenta inventario de un renglón de pedido
       if (i.size === 'bottle') { if (!i.onDemand && hasPcs(f)) f.stock.bottles = Math.max(0, f.stock.bottles - i.qty); }
-      else if ((i.kind || sizeInfo(i.size).kind) === 'pieza') { const n = f.stock && f.stock.pieces && f.stock.pieces[i.size]; if (Number.isFinite(n)) f.stock.pieces[i.size] = Math.max(0, n - i.qty); }
+      else if (isUnitKind(i.kind || sizeInfo(i.size).kind)) { const n = f.stock && f.stock.pieces && f.stock.pieces[i.size]; if (Number.isFinite(n)) f.stock.pieces[i.size] = Math.max(0, n - i.qty); }
       else if (hasMl(f)) f.stock.ml = Math.max(0, r1(f.stock.ml - (Number(i.ml) || mlOf(i.size)) * i.qty));
     }
     /*</sizes>*/
@@ -2661,12 +2663,15 @@ html.pv-open,html.pv-open body{overflow:hidden}
       const cfg = sizeCfg();
       document.querySelectorAll('.vial-size').forEach(b => { const k = b.dataset.size; if (k === 'bottle') return; const s = cfg.find(x => x.key === k); b.style.display = s ? '' : 'none'; if (s) b.textContent = s.label; });
       const y = document.getElementById('yield-boxes');
-      if (y) y.innerHTML = cfg.map(s => `<div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">${esc(s.label)}</span><strong>${s.kind === 'pieza' ? 'Pieza' : '~' + Math.round(s.ml * 15) + ' sprays'}</strong></div>`).join('') + '<div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">Botella</span><strong>Completa</strong></div>';
+      if (y) y.innerHTML = cfg.map(s => `<div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">${esc(s.label)}</span><strong>${s.kind === 'parcial' ? 'Parcial' : s.kind === 'pieza' ? 'Pieza' : '~' + Math.round(s.ml * 15) + ' sprays'}</strong></div>`).join('') + '<div class="p-1 rounded bg-zinc-800/50"><span class="block text-zinc-400">Botella</span><strong>Completa</strong></div>';
       ['3ml', '5ml', '10ml'].forEach(k => { const e = document.getElementById('inv-price-' + k); if (e) e.placeholder = sizeLabel(k) + ' $'; });
     }
     function renderSizeFields() {
       const box = document.getElementById('frag-size-fields'); if (!box) return;
-      box.innerHTML = sizeCfg().map(s => `<div class="p-1.5 rounded-lg themed-input border ${s.kind === 'pieza' ? 'border-gold/40' : ''}"><span class="font-bold text-[9px] block">${esc(s.label)}${s.kind === 'pieza' ? ' · pieza' : ''}</span><input type="number" id="frag-price-${s.key}" placeholder="$ 0" class="w-full themed-input rounded px-2 py-0.5 text-xs">${s.kind === 'pieza' ? `<input type="number" min="0" id="frag-stock-${s.key}" placeholder="Piezas en stock" class="w-full themed-input rounded px-2 py-0.5 text-xs mt-1">` : ''}<label class="text-[9px] text-zinc-400 flex items-center gap-1 mt-1"><input type="checkbox" id="frag-${s.key}-avail" checked> Disponible</label></div>`).join('');
+      box.innerHTML = sizeCfg().map(s => {
+        const un = isUnitKind(s.kind), pa = s.kind === 'parcial';
+        return `<div class="p-1.5 rounded-lg themed-input border ${un ? 'border-gold/40' : ''}"><span class="font-bold text-[9px] block">${esc(s.label)}${pa ? ' · parcial (usada)' : (un ? ' · pieza' : '')}</span><input type="number" id="frag-price-${s.key}" placeholder="$ 0" class="w-full themed-input rounded px-2 py-0.5 text-xs">${pa ? `<input type="number" min="0" step="0.5" id="frag-pml-${s.key}" placeholder="ml que le quedan" class="w-full themed-input rounded px-2 py-0.5 text-xs mt-1">` : ''}${un ? `<input type="number" min="0" id="frag-stock-${s.key}" placeholder="${pa ? 'Piezas (1 = una botella)' : 'Piezas en stock'}" class="w-full themed-input rounded px-2 py-0.5 text-xs mt-1">` : ''}<label class="text-[9px] text-zinc-400 flex items-center gap-1 mt-1"><input type="checkbox" id="frag-${s.key}-avail" checked> Disponible</label></div>`;
+      }).join('');
     }
     function fillSizeFields(frag) {
       renderSizeFields();
@@ -2674,17 +2679,19 @@ html.pv-open,html.pv-open body{overflow:hidden}
         const p = frag.prices?.[s.key] || { price: 0, inStock: true };
         document.getElementById('frag-price-' + s.key).value = p.price || '';
         document.getElementById('frag-' + s.key + '-avail').checked = p.inStock !== false;
+        const pm = document.getElementById('frag-pml-' + s.key); if (pm) pm.value = p.ml || '';
         const st = document.getElementById('frag-stock-' + s.key);
         if (st) { const n = frag.stock?.pieces?.[s.key]; st.value = Number.isFinite(n) ? n : ''; }
       });
     }
-    const sizeRowHtml = s => `<div data-size-row data-key="${esc(s.key)}" class="grid grid-cols-12 gap-1.5 items-center"><input data-f="label" value="${esc(s.label)}" placeholder="Nombre (ej. Miniatura 5 ml)" class="col-span-5 themed-input rounded-lg px-2 py-1"><input data-f="ml" type="number" min="0.5" step="0.5" value="${s.ml}" placeholder="ml" class="col-span-2 themed-input rounded-lg px-2 py-1"><select data-f="kind" class="col-span-3 themed-input rounded-lg px-1 py-1"><option value="decant" ${s.kind !== 'pieza' ? 'selected' : ''}>Decant</option><option value="pieza" ${s.kind === 'pieza' ? 'selected' : ''}>Miniatura</option></select><button type="button" onclick="this.closest('[data-size-row]').remove()" class="col-span-2 text-red-400 font-bold">✕</button></div>`;
+    const sizeRowHtml = s => `<div data-size-row data-key="${esc(s.key)}"><div class="grid grid-cols-12 gap-1.5 items-center"><input data-f="label" value="${esc(s.label)}" placeholder="Nombre (ej. Miniatura 5 ml)" class="col-span-5 themed-input rounded-lg px-2 py-1"><input data-f="ml" type="number" min="0.5" step="0.5" value="${s.ml}" placeholder="ml" class="col-span-2 themed-input rounded-lg px-2 py-1"><select data-f="kind" onchange="syncPartial(this)" class="col-span-3 themed-input rounded-lg px-1 py-1"><option value="decant" ${(s.kind !== 'pieza' && s.kind !== 'parcial') ? 'selected' : ''}>Decant</option><option value="pieza" ${s.kind === 'pieza' ? 'selected' : ''}>Miniatura</option><option value="parcial" ${s.kind === 'parcial' ? 'selected' : ''}>Botella parcial</option></select><button type="button" onclick="this.closest('[data-size-row]').remove()" class="col-span-2 text-red-400 font-bold">✕</button></div><label class="flex items-center gap-1.5 mt-1 text-[10px] text-zinc-300 cursor-pointer"><input type="checkbox" data-f="partial" ${s.kind === 'parcial' ? 'checked' : ''} onchange="syncPartial(this)"> <b>Parcial</b> <span class="text-zinc-500">(botella usada: se vende con los ml que le quedan)</span></label></div>`;
+    function syncPartial(el) { const r = el.closest('[data-size-row]'), sel = r.querySelector('[data-f="kind"]'), chk = r.querySelector('[data-f="partial"]'); if (el === chk) sel.value = chk.checked ? 'parcial' : 'decant'; else chk.checked = sel.value === 'parcial'; }
     function addSizeRow() { document.getElementById('cfg-sizes').insertAdjacentHTML('beforeend', sizeRowHtml({ key: 's' + Date.now().toString(36), label: '', ml: '', kind: 'decant' })); }
     function readSizeRows() {
       return [...document.querySelectorAll('#cfg-sizes [data-size-row]')].map(r => {
         const g = f => r.querySelector('[data-f="' + f + '"]'), ml = parseFloat(g('ml').value) || 0;
-        return { key: r.dataset.key, label: g('label').value.trim() || (ml ? fmtMl(ml) + ' ml' : ''), ml, kind: g('kind').value };
-      }).filter(x => x.label && x.ml > 0);
+        return { key: r.dataset.key, label: g('label').value.trim() || (g('kind').value === 'parcial' ? 'Botella parcial' : (ml ? fmtMl(ml) + ' ml' : '')), ml, kind: g('kind').value, partial: g('kind').value === 'parcial' };
+      }).filter(x => x.label && (x.ml > 0 || x.kind === 'parcial'));
     }
     const isTesterBottle = f => (typeof f === 'string' ? fragrances.find(x => x.id === f) : f)?.prices?.bottle?.type === 'tester';
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -2711,7 +2718,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
         if (hasPcs(f) && f.stock.bottles - (useCart ? cartPcs(f.id) : 0) < 1) {
           return { ok: false, label: 'Agotado', reason: 'Sin piezas en stock' };
         }
-      } else if (sizeInfo(key).kind === 'pieza') {
+      } else if (isUnitKind(sizeInfo(key).kind)) {
         const n = f.stock?.pieces?.[key];
         if (Number.isFinite(n) && n - (useCart ? cartPiece(f.id, key) : 0) < 1) return { ok: false, label: 'Agotado', reason: 'Sin piezas en stock' };
       } else if (hasMl(f)) {
@@ -2753,8 +2760,10 @@ html.pv-open,html.pv-open body{overflow:hidden}
         'bottle': 'border-zinc-700/60 hover:border-gold/60 bg-zinc-900/40'
       };
       const btns = SIZES.map(([k, l0]) => {
-        const l = (k === 'bottle' && isTesterBottle(f)) ? (pv ? 'Botella Tester' : '🧪 Tester') : l0;
+        const isPar = k !== 'bottle' && sizeInfo(k).kind === 'parcial';
+        const l = (k === 'bottle' && isTesterBottle(f)) ? (pv ? 'Botella Tester' : '🧪 Tester') : (isPar ? partialLabel(f, k) : l0);
         const s = sizeState(f, k);
+        if (isPar && !s.ok) return '';
         if (k === 'bottle' && s.onDemand) {
           const btnTone = 'border border-gold bg-gold/15 text-gold font-bold';
           return `<button onclick="${(sb && parseFloat(f.prices.bottle.price) > 0) ? `addToCart('${f.id}','bottle')` : `orderBottleOnDemand('${f.id}')`}" title="Botella bajo pedido${f.prices.bottle.eta ? ' · tiempo estimado ' + f.prices.bottle.eta : ''}" class="${pv ? 'p-2.5' : 'p-1.5'} rounded-xl ${btnTone} transition flex flex-col items-center hover:brightness-125 cursor-pointer"><span class="${pv ? 'text-[9px]' : 'text-[8px]'} uppercase font-extrabold text-gold">${isTesterBottle(f) ? '🧪 TESTER' : 'BOTELLA'}</span><span class="${pv ? 'text-xs' : 'text-[10px]'} font-bold leading-tight">${s.label === 'Bajo Pedido' ? 'BAJO PEDIDO' : s.label}</span></button>`;
@@ -3027,9 +3036,9 @@ html.pv-open,html.pv-open body{overflow:hidden}
       const st = sizeState(frag, size);
       if (!st.ok) { showToast(st.reason || 'Opción no disponible', 3000); refreshStockAreas(fragId); return; }
       const it = cart.find(i => i.fragId === fragId && i.size === size);
-      if (it) it.qty += 1; else cart.push({ fragId, name: frag.name, brand: frag.brand, size, price: frag.prices[size].price, qty: 1, label: sizeLabel(size), ml: size === 'bottle' ? 0 : mlOf(size), kind: size === 'bottle' ? 'bottle' : sizeInfo(size).kind, onDemand: size === 'bottle' && !!frag.prices.bottle.onDemand, eta: (size === 'bottle' && frag.prices.bottle.eta) || '' });
+      if (it) it.qty += 1; else cart.push({ fragId, name: frag.name, brand: frag.brand, size, price: frag.prices[size].price, qty: 1, label: partialLabel(frag, size), ml: size === 'bottle' ? 0 : mlOf(size), kind: size === 'bottle' ? 'bottle' : sizeInfo(size).kind, onDemand: size === 'bottle' && !!frag.prices.bottle.onDemand, eta: (size === 'bottle' && frag.prices.bottle.eta) || '' });
       updateCartUI(); refreshStockAreas(fragId);
-      showToast(`Agregado a la bolsa: ${frag.name} (${size === 'bottle' ? (isTesterBottle(frag) ? 'Botella Tester' : 'Botella Completa') : sizeLabel(size)})` + (size === 'bottle' && frag.prices.bottle.onDemand ? ' · BAJO PEDIDO' + (frag.prices.bottle.eta ? ' ~' + frag.prices.bottle.eta : '') : ''), 3500);
+      showToast(`Agregado a la bolsa: ${frag.name} (${size === 'bottle' ? (isTesterBottle(frag) ? 'Botella Tester' : 'Botella Completa') : partialLabel(frag, size)})` + (size === 'bottle' && frag.prices.bottle.onDemand ? ' · BAJO PEDIDO' + (frag.prices.bottle.eta ? ' ~' + frag.prices.bottle.eta : '') : ''), 3500);
     }
 
     function removeFromCart(i) { const id = cart[i].fragId; cart.splice(i, 1); updateCartUI(); refreshStockAreas(id); }
@@ -3045,7 +3054,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
       const box = document.getElementById('cart-items-container'); let n = 0, total = 0;
       box.innerHTML = cart.length ? cart.map((it, idx) => {
         n += it.qty; total += it.price * it.qty;
-        return `<div class="p-2.5 rounded-xl themed-input border flex items-center justify-between gap-2"><div><span class="text-[8px] uppercase tracking-luxury text-gold font-bold block">${esc(it.brand)}</span><span class="text-xs font-semibold block truncate max-w-[140px]">${esc(it.name)}</span><span class="text-[10px] text-zinc-400">${it.size === 'bottle' ? (isTesterBottle(it.fragId) ? 'Botella Tester' : 'Botella') : sizeLabel(it.size)} (${formatPrice(it.price)})</span></div><div class="flex items-center gap-1"><button onclick="changeCartQty(${idx},-1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">&minus;</button><span class="text-xs font-bold w-3 text-center">${it.qty}</span><button onclick="changeCartQty(${idx},1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">+</button><span class="text-xs text-gold font-bold w-12 text-right font-mono">${formatPrice(it.price * it.qty)}</span><button onclick="removeFromCart(${idx})" class="p-1 text-zinc-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>`;
+        return `<div class="p-2.5 rounded-xl themed-input border flex items-center justify-between gap-2"><div><span class="text-[8px] uppercase tracking-luxury text-gold font-bold block">${esc(it.brand)}</span><span class="text-xs font-semibold block truncate max-w-[140px]">${esc(it.name)}</span><span class="text-[10px] text-zinc-400">${it.size === 'bottle' ? (isTesterBottle(it.fragId) ? 'Botella Tester' : 'Botella') : (it.label || sizeLabel(it.size))} (${formatPrice(it.price)})</span></div><div class="flex items-center gap-1"><button onclick="changeCartQty(${idx},-1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">&minus;</button><span class="text-xs font-bold w-3 text-center">${it.qty}</span><button onclick="changeCartQty(${idx},1)" class="w-5 h-5 rounded bg-zinc-800 text-white font-bold">+</button><span class="text-xs text-gold font-bold w-12 text-right font-mono">${formatPrice(it.price * it.qty)}</span><button onclick="removeFromCart(${idx})" class="p-1 text-zinc-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>`;
       }).join('') : '<div class="py-8 text-center text-zinc-500"><div class="text-2xl mb-1 text-gold">✦</div><p>Tu bolsa de pedido está vacía</p></div>';
       document.getElementById('cart-count').textContent = n;
       document.getElementById('cart-total-price').textContent = total ? formatPrice(total) : getCurrencySymbol() + '0';
@@ -3088,7 +3097,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
       cart.forEach((item) => {
         const subtotal = item.price * item.qty;
         total += subtotal;
-        const sizeTag = item.size === 'bottle' ? (isTesterBottle(item.fragId) ? 'BOTELLA TESTER' : 'BOTELLA COMPLETA') : sizeLabel(item.size);
+        const sizeTag = item.size === 'bottle' ? (isTesterBottle(item.fragId) ? 'BOTELLA TESTER' : 'BOTELLA COMPLETA') : (item.label || sizeLabel(item.size));
         orderListText += `▪ ${item.qty}x ${item.brand} - ${item.name} (${sizeTag}) -> ${formatPrice(subtotal)}\n`;
       });
 
@@ -3124,7 +3133,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
       const need = {}, out = [];
       cart.forEach(i => {
         const n = need[i.fragId] || (need[i.fragId] = { ml: 0, pcs: 0, name: `${i.brand} ${i.name}` });
-        if (i.size === 'bottle') { if (!i.onDemand) n.pcs += i.qty; } else if (sizeInfo(i.size).kind === 'pieza') { (n.pz = n.pz || {})[i.size] = (n.pz[i.size] || 0) + i.qty; } else n.ml += mlOf(i.size) * i.qty;
+        if (i.size === 'bottle') { if (!i.onDemand) n.pcs += i.qty; } else if (isUnitKind(sizeInfo(i.size).kind)) { (n.pz = n.pz || {})[i.size] = (n.pz[i.size] || 0) + i.qty; } else n.ml += mlOf(i.size) * i.qty;
         const f = fragrances.find(x => x.id === i.fragId);
         if (f && !sizeState(f, i.size, false).ok) out.push(`${n.name} (${i.size === 'bottle' ? 'botella' : sizeLabel(i.size)}): ya no disponible`);
       });
@@ -3291,9 +3300,11 @@ html.pv-open,html.pv-open body{overflow:hidden}
       const sizePrices = { ...(prevFrag?.prices || {}) };
       let newStock = prevFrag?.stock;
       sizeCfg().forEach(sz => {
-        sizePrices[sz.key] = { price: parseFloat(document.getElementById('frag-price-' + sz.key).value) || 0, inStock: document.getElementById('frag-' + sz.key + '-avail').checked };
+        const prVal = parseFloat(document.getElementById('frag-price-' + sz.key).value) || 0, pmEl = document.getElementById('frag-pml-' + sz.key);
+        sizePrices[sz.key] = { price: prVal, inStock: document.getElementById('frag-' + sz.key + '-avail').checked, ...(pmEl ? { ml: parseFloat(pmEl.value) || 0 } : {}) };
         const stEl = document.getElementById('frag-stock-' + sz.key);
-        if (stEl && stEl.value !== '') newStock = { ...(newStock || {}), pieces: { ...((newStock || {}).pieces || {}), [sz.key]: Math.max(0, Math.round(+stEl.value)) } };
+        if (stEl && stEl.value === '' && sz.kind === 'parcial' && prVal > 0) newStock = { ...(newStock || {}), pieces: { ...((newStock || {}).pieces || {}), [sz.key]: 1 } }; // botella usada = 1 pieza
+        else if (stEl && stEl.value !== '') newStock = { ...(newStock || {}), pieces: { ...((newStock || {}).pieces || {}), [sz.key]: Math.max(0, Math.round(+stEl.value)) } };
       });
       const pBottle = parseFloat(document.getElementById('frag-price-bottle').value) || 0;
       const pBottleAvail = document.getElementById('frag-bottle-avail').checked;
