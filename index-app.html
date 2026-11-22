@@ -3446,6 +3446,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
         (o.status === 'pendiente_pago' ? '<div class="w-full flex items-center gap-2">Envío $ <input id="env-' + o.id + '" type="number" min="0" value="' + (o.shipping || 0) + '" class="themed-input rounded-lg px-2 py-1 w-24"><button onclick="setOrderShipping(\'' + o.id + '\')" class="px-3 py-1 rounded-full border border-gold text-gold font-bold">Actualizar envío</button></div>' + '<div class="w-full flex items-center gap-2">Descuento $ <input id="dsc-' + o.id + '" type="number" min="0" value="' + (Number(o.discount) || 0) + '" class="themed-input rounded-lg px-2 py-1 w-24"><button onclick="setOrderDiscount(\'' + o.id + '\')" class="px-3 py-1 rounded-full border border-gold text-gold font-bold">Aplicar descuento</button></div>' + btn('pagado', 'Marcar pagado') + btn('cancelado', 'Cancelar') : '') +
         ((o.status === 'recibido' || (o.status === 'pagado' && !od)) ? '<input id="car-' + o.id + '" placeholder="Paquetería" class="themed-input rounded-lg px-2 py-1 w-28"><input id="gui-' + o.id + '" placeholder="No. de guía" class="themed-input rounded-lg px-2 py-1 w-32"><input id="url-' + o.id + '" placeholder="Link de rastreo (opcional)" class="themed-input rounded-lg px-2 py-1 w-full">' + btn('enviado', 'Marcar enviado') : '') +
         (o.status === 'enviado' ? btn('entregado', 'Marcar entregado') : '') +
+        (['pagado', 'proveedor', 'transito', 'recibido'].includes(o.status) ? '<button onclick="if(confirm(\'¿Cancelar el pedido ' + o.number + '? Si ya estaba pagado, el ingreso y el inventario no se revierten solos.\'))setOrderStatus(\'' + o.id + '\',\'cancelado\')" class="px-3 py-1 rounded-full border border-gold text-gold font-bold">Cancelar pedido</button>' : '') +
         (o.status === 'pagado' && od ? btn('proveedor', 'Pedido realizado al proveedor') : '') +
         (o.status === 'proveedor' ? btn('transito', 'En camino a México') : '') +
         (o.status === 'transito' ? btn('recibido', 'Llegó a México') : '') +
@@ -5075,6 +5076,14 @@ html:root .hero-btn-ghost, html:root .hero-btn-ghost.themed-subbox{
 html:root .hero-btn-ghost:hover, html:root .hero-btn-primary:hover{ background:#382416 !important; transform:none !important; filter:none !important; }
 html:root .border-gold, html:root .border-gold\/30, html:root .border-gold\/40, html:root .border-gold\/50, html:root .border-gold\/60{ border-color:#40372e !important; }
 html:root .hero-btn{ border-radius:36px !important; padding:.8rem 1.4rem !important; }
+
+/* Botones rellenos sobre superficies bark: crema con texto oscuro (si no, se confunden con el fondo) */
+html:root .themed-modal-bg .bg-gold, html:root .themed-subbox .bg-gold, html:root .card-silloria .bg-gold, html:root .faq details .bg-gold, html:root .px-news .bg-gold,
+html:root .themed-modal-bg .hero-btn-primary, html:root .themed-subbox .hero-btn-primary, html:root .faq details .hero-btn-primary{
+  background:#ffedd7 !important; color:#100904 !important; }
+html:root .themed-modal-bg .bg-gold *, html:root .themed-subbox .bg-gold *, html:root .card-silloria .bg-gold *, html:root .faq details .hero-btn-primary *{ color:#100904 !important; }
+html:root .themed-modal-bg button.border-gold, html:root .themed-subbox button.border-gold{ border:1px solid #ffedd7 !important; background:transparent !important; color:#ffedd7 !important; }
+html:root .themed-modal-bg button.border-gold:hover, html:root .themed-subbox button.border-gold:hover{ background:#100904 !important; }
 
 /* Navegación fija translúcida */
 html:root #top-navbar{ background:rgba(16,9,4,.72) !important; -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-bottom:1px dashed #40372e !important; }
