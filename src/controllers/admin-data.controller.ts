@@ -4,6 +4,7 @@ import { requireAdminPage } from '@/lib/auth/session';
 import { getAppSettings, listMovements } from '@/models/repositories/finance.repository';
 import { getFragrance, listFragranceSummaries } from '@/models/repositories/fragrance.repository';
 import { listOrders, listOrderTotals } from '@/models/repositories/order.repository';
+import { listCustomers } from '@/models/repositories/customer.repository';
 import { getProfilesByIds } from '@/models/repositories/profile.repository';
 import { getStoreConfig } from '@/models/repositories/store-config.repository';
 
@@ -42,4 +43,9 @@ export async function loadFinance() {
   const { db } = await requireAdminPage();
   const [movements, orders, settings] = await Promise.all([listMovements(db), listOrderTotals(db), getAppSettings(db)]);
   return { movements, orders, settings };
+}
+
+export async function loadCustomers(query: string) {
+  const { db } = await requireAdminPage();
+  return listCustomers(db, query.slice(0, 80));
 }

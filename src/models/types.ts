@@ -199,6 +199,17 @@ export interface CustomerProfile {
   notifyEmail: boolean;
 }
 
+/** Cliente con cuenta, como lo ve el panel. */
+export interface CustomerAccount {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  createdAt: string;
+  lastSignInAt: string | null;
+  ordersCount: number;
+}
+
 /** Línea del carrito guardada en el navegador: el precio se vuelve a calcular en el servidor. */
 export interface CartLine {
   fragId: string;
