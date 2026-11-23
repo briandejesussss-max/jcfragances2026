@@ -1042,6 +1042,7 @@ html.pv-open,html.pv-open body{overflow:hidden}
 .stage-bottle.has-photo>div>div:first-child{display:none}
 .stage-bottle.has-photo #pv-name,.stage-bottle.has-photo #pv-short-desc{color:#fff !important;text-shadow:0 2px 16px rgba(0,0,0,.65)}
 </style>
+<script>try{var _p=localStorage.getItem('jf26_palette');if(_p)document.documentElement.setAttribute('data-palette',_p)}catch(e){}</script>
 </head>
 <body class="flex flex-col antialiased selection:bg-[#FF8A00] selection:text-black min-h-screen w-full">
   <a href="#catalogo" class="skip-link no-print">Saltar al catálogo</a>
@@ -5032,20 +5033,19 @@ acWire();
 <style id="oryzo-theme">
 /* ===== ORYZO · Madera cálida (capa final de diseño) ===== */
 html:root, html.dark:root, html:not(.dark):root{
-  --cream:#ffedd7; --walnut:#100904; --bark:#382416; --cork:#40372e; --drift:#6c5f51; --ember:#dc5000;
-  --ap-white:#100904; --ap-mist:#382416; --ap-frost:#1a0f08; --ap-hair:#40372e; --ap-ctrl:#382416;
-  --ap-ink:#ffedd7; --ap-slate:#c8b8a2; --ap-steel:#6c5f51; --ap-blue:#ffedd7; --ap-pblue:#382416; --ap-orange:#dc5000;
-  --ink-gold:#ffedd7; --px-a:#dc5000; --px-b:#ffedd7; --px-g:#382416;
+  --ap-white:var(--o-bg); --ap-mist:var(--o-surf); --ap-frost:var(--o-surf2); --ap-hair:var(--o-line); --ap-ctrl:var(--o-surf);
+  --ap-ink:var(--o-tx); --ap-slate:var(--o-mut); --ap-steel:var(--o-dim); --ap-blue:var(--o-tx); --ap-pblue:var(--o-surf); --ap-orange:var(--o-acc);
+  --ink-gold:var(--o-tx); --px-a:var(--o-acc); --px-b:var(--o-tx); --px-g:var(--o-surf);
   --ap-font:'Halyard Display','Inter','Helvetica Neue',Arial,sans-serif;
   color-scheme:dark;
 }
-html:root, html:root body{ background:#100904 !important; color:#ffedd7 !important; font-family:var(--ap-font) !important; font-weight:400 !important; letter-spacing:0 !important; }
+html:root, html:root body{ background:var(--o-bg) !important; color:var(--o-tx) !important; font-family:var(--ap-font) !important; font-weight:400 !important; letter-spacing:0 !important; }
 html:root body *{ box-shadow:none !important; text-shadow:none !important; }
 html:root .hero-glow, html:root .hero::before, html:root .hero::after, html:root .hero-btn-primary::after, html:root #top-navbar::after, html:root .px-title::after, html:root .hero-title::after{ display:none !important; }
 html:root .hw-moon, html:root .hw-bat, html:root .hw-web{ display:none !important; }
 
 html:root .ap-orb, html:root .ap-stars, html:root .ap-aura, html:root .ap-spark, html:root .ap-fly{ display:none !important; }
-html:root #ap-splash{ background:#100904 !important; color:#ffedd7 !important; }
+html:root #ap-splash{ background:var(--o-bg) !important; color:var(--o-tx) !important; }
 html:root #top-navbar *, html:root .fab{ filter:none !important; }
 /* Tipografía: UI en mayúsculas peso 500; descripciones en minúsculas peso 400 */
 html:root h1, html:root h2, html:root h3, html:root .hero-title, html:root .px-title, html:root .font-editorial, html:root .cc-name{
@@ -5056,72 +5056,104 @@ html:root button, html:root label, html:root summary, html:root th, html:root .h
   text-transform:uppercase !important; font-weight:500 !important; letter-spacing:.04em !important; }
 html:root b, html:root strong, html:root .font-bold, html:root .font-extrabold, html:root .font-semibold, html:root .font-black{ font-weight:500 !important; }
 html:root p, html:root .hero-sub, html:root .faq p{ text-transform:none; font-weight:400 !important; }
-html:root .hero-sub{ font-size:clamp(1rem,3.4vw,1.35rem) !important; line-height:1.3 !important; color:#ffedd7 !important; opacity:.9; max-width:34rem; }
+html:root .hero-sub{ font-size:clamp(1rem,3.4vw,1.35rem) !important; line-height:1.3 !important; color:var(--o-tx) !important; opacity:.9; max-width:34rem; }
 
 /* Acentos editoriales en ember (nunca en botones) */
-html:root .hero-title .ap-w:nth-last-child(-n+4){ background:none !important; color:#dc5000 !important; -webkit-text-fill-color:#dc5000 !important; }
-html:root #curated-shelf-section h3, html:root #catalogo > .text-center h2{ background:none !important; -webkit-text-fill-color:currentColor !important; color:#ffedd7 !important; }
-html:root .px-cap em, html:root .hero-steps b, html:root .hero-trust-list svg, html:root .card-silloria:hover h4{ color:#dc5000 !important; }
-html:root .text-gold, html:root .text-gold *{ color:#ffedd7 !important; }
-html:root .hero-trust-list svg{ color:#dc5000 !important; }
-html:root .text-zinc-400, html:root .text-zinc-500, html:root .text-zinc-300{ color:#c8b8a2 !important; }
-html:root .text-white, html:root .text-zinc-200, html:root .text-black.bg-gold{ color:#ffedd7 !important; }
+html:root .hero-title .ap-w:nth-last-child(-n+4){ background:none !important; color:var(--o-acc) !important; -webkit-text-fill-color:var(--o-acc) !important; }
+html:root #curated-shelf-section h3, html:root #catalogo > .text-center h2{ background:none !important; -webkit-text-fill-color:currentColor !important; color:var(--o-tx) !important; }
+html:root .px-cap em, html:root .hero-steps b, html:root .hero-trust-list svg, html:root .card-silloria:hover h4{ color:var(--o-acc) !important; }
+html:root .text-gold, html:root .text-gold *{ color:var(--o-tx) !important; }
+html:root .hero-trust-list svg{ color:var(--o-acc) !important; }
+html:root .text-zinc-400, html:root .text-zinc-500, html:root .text-zinc-300{ color:var(--o-mut) !important; }
+html:root .text-white, html:root .text-zinc-200, html:root .text-black.bg-gold{ color:var(--o-tx) !important; }
 
 /* Botones: un solo relleno bark, el resto contorno fantasma */
 html:root .bg-gold, html:root .hero-btn-primary, html:root #top-navbar button[onclick*="toggleCartDrawer"], html:root .fab, html:root .hover\:bg-gold:hover{
-  background:#382416 !important; background-image:none !important; color:#ffedd7 !important; border:0 !important; border-radius:36px !important; }
-html:root .bg-gold *, html:root .hero-btn-primary *{ color:#ffedd7 !important; }
+  background:var(--o-surf) !important; background-image:none !important; color:var(--o-tx) !important; border:0 !important; border-radius:36px !important; }
+html:root .bg-gold *, html:root .hero-btn-primary *{ color:var(--o-tx) !important; }
 html:root .hero-btn-ghost, html:root .hero-btn-ghost.themed-subbox{
-  background:transparent !important; color:#ffedd7 !important; border:1px solid #ffedd7 !important; border-radius:23px !important; }
-html:root .hero-btn-ghost:hover, html:root .hero-btn-primary:hover{ background:#382416 !important; transform:none !important; filter:none !important; }
-html:root .border-gold, html:root .border-gold\/30, html:root .border-gold\/40, html:root .border-gold\/50, html:root .border-gold\/60{ border-color:#40372e !important; }
+  background:transparent !important; color:var(--o-tx) !important; border:1px solid var(--o-tx) !important; border-radius:23px !important; }
+html:root .hero-btn-ghost:hover, html:root .hero-btn-primary:hover{ background:var(--o-surf) !important; transform:none !important; filter:none !important; }
+html:root .border-gold, html:root .border-gold\/30, html:root .border-gold\/40, html:root .border-gold\/50, html:root .border-gold\/60{ border-color:var(--o-line) !important; }
 html:root .hero-btn{ border-radius:36px !important; padding:.8rem 1.4rem !important; }
 
 /* Botones rellenos sobre superficies bark: crema con texto oscuro (si no, se confunden con el fondo) */
 html:root .themed-modal-bg .bg-gold, html:root .themed-subbox .bg-gold, html:root .card-silloria .bg-gold, html:root .faq details .bg-gold, html:root .px-news .bg-gold,
 html:root .themed-modal-bg .hero-btn-primary, html:root .themed-subbox .hero-btn-primary, html:root .faq details .hero-btn-primary{
-  background:#ffedd7 !important; color:#100904 !important; }
-html:root .themed-modal-bg .bg-gold *, html:root .themed-subbox .bg-gold *, html:root .card-silloria .bg-gold *, html:root .faq details .hero-btn-primary *{ color:#100904 !important; }
-html:root .themed-modal-bg button.border-gold, html:root .themed-subbox button.border-gold{ border:1px solid #ffedd7 !important; background:transparent !important; color:#ffedd7 !important; }
-html:root .themed-modal-bg button.border-gold:hover, html:root .themed-subbox button.border-gold:hover{ background:#100904 !important; }
+  background:var(--o-tx) !important; color:var(--o-bg) !important; }
+html:root .themed-modal-bg .bg-gold *, html:root .themed-subbox .bg-gold *, html:root .card-silloria .bg-gold *, html:root .faq details .hero-btn-primary *{ color:var(--o-bg) !important; }
+html:root .themed-modal-bg button.border-gold, html:root .themed-subbox button.border-gold{ border:1px solid var(--o-tx) !important; background:transparent !important; color:var(--o-tx) !important; }
+html:root .themed-modal-bg button.border-gold:hover, html:root .themed-subbox button.border-gold:hover{ background:var(--o-bg) !important; }
 
 /* Navegación fija translúcida */
-html:root #top-navbar{ background:rgba(16,9,4,.72) !important; -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-bottom:1px dashed #40372e !important; }
+html:root #top-navbar{ background:color-mix(in srgb,var(--o-bg) 72%,transparent) !important; -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-bottom:1px dashed var(--o-line) !important; }
 html:root #top-navbar button, html:root #top-navbar input{ border-radius:36px !important; }
-html:root #scroll-progress{ background:#40372e !important; height:2px !important; }
-html:root #scroll-progress + div, html:root body > div.no-print:first-of-type{ background:#382416 !important; color:#ffedd7 !important; border:0 !important; }
-html:root .px-nav a{ color:#ffedd7 !important; font-size:12px; }
-html:root .px-nav a:hover{ color:#dc5000 !important; }
-html:root #theme-toggle-btn, html:root button[onclick="toggleTheme()"]{ display:none !important; }
+html:root #scroll-progress{ background:var(--o-line) !important; height:2px !important; }
+html:root #scroll-progress + div, html:root body > div.no-print:first-of-type{ background:var(--o-surf) !important; color:var(--o-tx) !important; border:0 !important; }
+html:root .px-nav a{ color:var(--o-tx) !important; font-size:12px; }
+html:root .px-nav a:hover{ color:var(--o-acc) !important; }
 
 /* Secciones a sangre y separadores punteados */
-html:root .hero{ background:#100904 !important; background-image:none !important; border-radius:0 !important; }
-html:root .marquee{ background:#100904 !important; color:#ffedd7 !important; border:0 !important; border-top:1px dashed #40372e !important; border-bottom:1px dashed #40372e !important; font-weight:500 !important; font-size:.72rem !important; letter-spacing:.14em !important; }
-html:root .marquee-track span:nth-child(even){ color:#ffedd7 !important; opacity:.55; }
-html:root hr, html:root .border-b, html:root .border-t, html:root .border-white\/5, html:root .border-white\/10{ border-style:dashed !important; border-color:#40372e !important; }
-html:root footer, html:root #contact-footer{ background:#100904 !important; border-top:1px dashed #40372e !important; }
+html:root .hero{ background:var(--o-bg) !important; background-image:none !important; border-radius:0 !important; }
+html:root .marquee{ background:var(--o-bg) !important; color:var(--o-tx) !important; border:0 !important; border-top:1px dashed var(--o-line) !important; border-bottom:1px dashed var(--o-line) !important; font-weight:500 !important; font-size:.72rem !important; letter-spacing:.14em !important; }
+html:root .marquee-track span:nth-child(even){ color:var(--o-tx) !important; opacity:.55; }
+html:root hr, html:root .border-b, html:root .border-t, html:root .border-white\/5, html:root .border-white\/10{ border-style:dashed !important; border-color:var(--o-line) !important; }
+html:root footer, html:root #contact-footer{ background:var(--o-bg) !important; border-top:1px dashed var(--o-line) !important; }
 
 /* Tarjetas y superficies: bark sobre walnut, radio 12, sin sombras */
 html:root .card-silloria, html:root #catalogo .card-silloria, html:root .px-coll, html:root .hero-vial-card, html:root .hero-steps li, html:root .cauldron-inner,
 html:root .themed-modal-bg, html:root .themed-subbox, html:root .faq details, html:root .px-about-img, html:root .px-news, html:root .pc-total, html:root #catalogo .rounded-2xl, html:root #catalogo .rounded-xl{
-  background:#382416 !important; background-image:none !important; border:0 !important; border-radius:12px !important; color:#ffedd7 !important; }
-html:root .themed-modal-bg{ border:1px dashed #40372e !important; }
-html:root .faq details[open], html:root .faq details:hover, html:root .px-coll:hover, html:root #catalogo .card-silloria:hover{ transform:none !important; background:#382416 !important; }
-html:root .px-cap{ background:rgba(16,9,4,.78) !important; border:0 !important; border-radius:12px !important; }
-html:root .stage-bottle, html:root .pv-stage{ background:#100904 !important; background-image:none !important; }
-html:root .px-coll{ background:#382416 !important; }
-html:root .bg-zinc-900\/40, html:root .bg-zinc-900\/80, html:root .bg-zinc-800\/50, html:root .bg-zinc-800\/60, html:root .bg-zinc-800\/80{ background:#100904 !important; border-color:#40372e !important; }
-html:root .bg-black\/85, html:root .bg-black\/70, html:root .bg-black\/80{ background:rgba(16,9,4,.88) !important; }
+  background:var(--o-surf) !important; background-image:none !important; border:0 !important; border-radius:12px !important; color:var(--o-tx) !important; }
+html:root .themed-modal-bg{ border:1px dashed var(--o-line) !important; }
+html:root .faq details[open], html:root .faq details:hover, html:root .px-coll:hover, html:root #catalogo .card-silloria:hover{ transform:none !important; background:var(--o-surf) !important; }
+html:root .px-cap{ background:color-mix(in srgb,var(--o-bg) 78%,transparent) !important; border:0 !important; border-radius:12px !important; }
+html:root .stage-bottle, html:root .pv-stage{ background:var(--o-bg) !important; background-image:none !important; }
+html:root .px-coll{ background:var(--o-surf) !important; }
+html:root .bg-zinc-900\/40, html:root .bg-zinc-900\/80, html:root .bg-zinc-800\/50, html:root .bg-zinc-800\/60, html:root .bg-zinc-800\/80{ background:var(--o-bg) !important; border-color:var(--o-line) !important; }
+html:root .bg-black\/85, html:root .bg-black\/70, html:root .bg-black\/80{ background:color-mix(in srgb,var(--o-bg) 88%,transparent) !important; }
 html:root .rounded-full:not(button):not(.hero-btn){ border-radius:36px !important; }
 
 /* Campos: sin radio, solo línea inferior */
 html:root input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), html:root select, html:root textarea, html:root .themed-input{
-  background:transparent !important; color:#ffedd7 !important; border:0 !important; border-bottom:1px solid #40372e !important; border-radius:0 !important; text-transform:none; }
-html:root input:focus, html:root select:focus, html:root textarea:focus{ border-bottom-color:#ffedd7 !important; outline:0 !important; }
-html:root ::placeholder{ color:#6c5f51 !important; text-transform:uppercase; letter-spacing:.04em; }
-html:root select option{ background:#382416; color:#ffedd7; }
-html:root :focus-visible{ outline:1px dashed #ffedd7 !important; outline-offset:2px; }
-html:root ::selection{ background:#dc5000 !important; color:#ffedd7 !important; }
+  background:transparent !important; color:var(--o-tx) !important; border:0 !important; border-bottom:1px solid var(--o-line) !important; border-radius:0 !important; text-transform:none; }
+html:root input:focus, html:root select:focus, html:root textarea:focus{ border-bottom-color:var(--o-tx) !important; outline:0 !important; }
+html:root ::placeholder{ color:var(--o-dim) !important; text-transform:uppercase; letter-spacing:.04em; }
+html:root select option{ background:var(--o-surf); color:var(--o-tx); }
+html:root :focus-visible{ outline:1px dashed var(--o-tx) !important; outline-offset:2px; }
+html:root ::selection{ background:var(--o-acc) !important; color:var(--o-tx) !important; }
+
+/* ===== Paletas ===== */
+html:root{ --o-bg:#000000; --o-surf:#121212; --o-surf2:#0a0a0a; --o-line:#2a2a2a; --o-tx:#f5f5f5; --o-mut:#b0b0b0; --o-dim:#6e6e6e; --o-acc:#ff6a1a; }
+html[data-palette="medianoche"]:root{ --o-bg:#0a1128; --o-surf:#16213f; --o-surf2:#0e1733; --o-line:#2a3a63; --o-tx:#e8eefc; --o-mut:#a9b6d6; --o-dim:#6b7aa3; --o-acc:#6ea8ff; }
+html[data-palette="blanco"]:root{ --o-bg:#f6f4ef; --o-surf:#e9e5dc; --o-surf2:#efece5; --o-line:#cfc9bc; --o-tx:#17140f; --o-mut:#5c564b; --o-dim:#8a8374; --o-acc:#c2410c; color-scheme:light; }
+html[data-palette="grafito"]:root{ --o-bg:#121316; --o-surf:#202228; --o-surf2:#181a1f; --o-line:#33363f; --o-tx:#eceef2; --o-mut:#a6abb7; --o-dim:#6b7080; --o-acc:#e0a82e; }
+html[data-palette="cafe"]:root{ --o-bg:#100904; --o-surf:#382416; --o-surf2:#1a0f08; --o-line:#40372e; --o-tx:#ffedd7; --o-mut:#c8b8a2; --o-dim:#6c5f51; --o-acc:#dc5000; }
+html:root #theme-toggle-btn, html:root button[onclick="toggleTheme()"]{ display:inline-flex !important; }
+html[data-palette="blanco"]:root .hero-vial-card svg, html[data-palette="blanco"]:root .stage-bottle img{ filter:none; }
+html[data-palette="blanco"]:root .stage-bottle.has-photo #pv-name, html[data-palette="blanco"]:root .stage-bottle.has-photo #pv-short-desc{ color:#fff !important; }
+html:root #top-navbar button::before, html:root #top-navbar button::after{ display:none !important; }
+#pal-menu{ position:fixed; z-index:99999; right:12px; top:64px; background:var(--o-surf); border:1px dashed var(--o-line); border-radius:12px; padding:10px; display:none; flex-direction:column; gap:6px; min-width:190px; }
+#pal-menu.on{ display:flex; }
+#pal-menu button{ display:flex; align-items:center; gap:10px; background:transparent !important; border:1px solid var(--o-line) !important; color:var(--o-tx) !important; border-radius:23px !important; padding:7px 12px !important; font-size:12px; text-transform:uppercase; letter-spacing:.04em; cursor:pointer; }
+#pal-menu button.sel{ border-color:var(--o-tx) !important; }
+#pal-menu i{ width:16px; height:16px; border-radius:50%; border:1px solid var(--o-line); display:inline-block; }
 </style>
+<script>
+(function(){
+  var P=[['oled','OLED negro','#000000'],['medianoche','Azul medianoche','#0a1128'],['blanco','Blanco','#f6f4ef'],['grafito','Grafito','#121316'],['cafe','Café','#382416']];
+  function cur(){var a=document.documentElement.getAttribute('data-palette');return a||'oled'}
+  function apply(k){
+    if(k==='oled') document.documentElement.removeAttribute('data-palette'); else document.documentElement.setAttribute('data-palette',k);
+    try{localStorage.setItem('jf26_palette',k)}catch(e){}
+    var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content',(P.find(function(x){return x[0]===k})||P[0])[2]);
+    render();
+  }
+  function render(){var m=document.getElementById('pal-menu'); if(!m) return; var c=cur();
+    m.innerHTML=P.map(function(p){return '<button data-k="'+p[0]+'" class="'+(c===p[0]?'sel':'')+'"><i style="background:'+p[2]+'"></i>'+p[1]+'</button>'}).join('');
+    Array.prototype.forEach.call(m.querySelectorAll('button'),function(b){b.onclick=function(e){e.stopPropagation();apply(b.getAttribute('data-k'));m.classList.remove('on')}});}
+  window.toggleTheme=function(){var m=document.getElementById('pal-menu'); if(!m){m=document.createElement('div');m.id='pal-menu';document.body.appendChild(m)} render(); m.classList.toggle('on');};
+  document.addEventListener('click',function(e){var m=document.getElementById('pal-menu'); if(m&&m.classList.contains('on')&&!e.target.closest('#pal-menu')&&!e.target.closest('[onclick="toggleTheme()"]')) m.classList.remove('on')});
+})();
+</script>
 </body>
 </html>
