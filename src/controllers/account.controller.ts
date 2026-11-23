@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { requireCustomerAction } from '@/lib/auth/session';
+import { getSessionUser, requireCustomerAction } from '@/lib/auth/session';
 import { siteUrl } from '@/lib/services/email';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { claimOrder, getProfile, saveProfile } from '@/models/repositories/profile.repository';
@@ -155,11 +155,11 @@ export async function saveProfileAction(input: Pick<CustomerProfile, 'name' | 'p
 
 /** Datos para precargar el formulario de compra cuando el cliente tiene sesión. */
 export async function getCheckoutDefaultsAction(): Promise<Partial<Customer> | null> {
+  const user = await getSessionUser();
+  if (!user) return null;
   const db = await createSupabaseServerClient();
-  const { data } = await db.auth.getUser();
-  if (!data.user) return null;
-  const p = await getProfile(db, data.user.id).catch(() => null);
-  return { ...(p?.address ?? {}), name: p?.name || '', phone: p?.phone || '', email: data.user.email ?? '' };
+  const p = await getProfile(db, user.id).catch(() => null);
+  return { ...(p?.address ?? {}), name: p?.name || '', phone: p?.phone || '', email: user.email };
 }
 
 /** "Agregar un pedido que hice sin cuenta": número de pedido + correo con el que se compró. */
