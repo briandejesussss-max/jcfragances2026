@@ -128,3 +128,58 @@ export function pyramidFor(f: Pick<Fragrance, 'pyramid' | 'notes'>, strict = fal
   out.base = parts.slice(a + b).map((p) => ({ ...p, e: guessEmoji(p.t, 'base') }));
   return out;
 }
+
+export interface CompactNotesSection {
+  /** Nombre de la sección (Salida, Corazón, Fondo…) o vacío si el texto no trae secciones */
+  title: string;
+  /** Notas de la sección, ya separadas */
+  notes: string[];
+}
+
+const SECTION_LINE = /^(?:[^\p{L}]*)(notas?\s+de\s+)?(salida|cabeza|coraz[oó]n|fondo|base)\b[\s:.\-–]*(?:\([^)]*\))?[\s:.\-–]*$/iu;
+const sectionTitle = (s: string) => {
+  const k = s.toLowerCase();
+  if (/salida|cabeza/.test(k)) return 'Salida';
+  if (/coraz/.test(k)) return 'Corazón';
+  return 'Fondo';
+};
+
+/**
+ * Convierte el texto libre de notas (un renglón por nota, viñetas, "·"…) en secciones con notas
+ * separadas, para mostrarlo compacto con comas en pantallas chicas.
+ */
+export function compactNotes(text: string): CompactNotesSection[] {
+  const out: CompactNotesSection[] = [];
+  let current: CompactNotesSection = { title: '', notes: [] };
+  const push = () => current.notes.length && out.push(current);
+
+  // Varias secciones en un solo renglón ("Salida: … Corazón: …"): se separan en renglones.
+  const normalized = String(text ?? '').replace(/[.;,]?\s*((?:notas?\s+de\s+)?(?:salida|cabeza|coraz[oó]n|fondo|base)\s*[:\-–])/giu, '\n$1');
+  for (const raw of normalized.split(/\n+/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const header = line.match(SECTION_LINE);
+    // "Notas de salida: a, b" en un solo renglón
+    const inline = header ? null : line.match(/^(?:[^\p{L}]*)(?:notas?\s+de\s+)?(salida|cabeza|coraz[oó]n|fondo|base)\s*[:\-–]\s*(.+)$/iu);
+    if (header || inline) {
+      push();
+      current = { title: sectionTitle(header ? header[2] : (inline as RegExpMatchArray)[1]), notes: [] };
+      if (!inline) continue;
+    }
+    const body = inline ? inline[2] : line;
+    for (const part of body.split(/\s*[·•,;]\s*/)) {
+      const note = part.replace(/^[-*–\s]+/, '').replace(/[.\s]+$/, '').trim();
+      if (note && /\p{L}/u.test(note)) current.notes.push(note);
+    }
+  }
+  push();
+
+  // Secciones repetidas (texto pegado dos veces): se juntan y se quitan notas duplicadas.
+  const merged: CompactNotesSection[] = [];
+  for (const sec of out) {
+    const same = merged.find((m) => m.title === sec.title);
+    const target = same ?? (merged.push({ title: sec.title, notes: [] }), merged[merged.length - 1]);
+    for (const n of sec.notes) if (!target.notes.includes(n)) target.notes.push(n);
+  }
+  return merged;
+}
