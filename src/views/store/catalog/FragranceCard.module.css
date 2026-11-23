@@ -1,0 +1,32 @@
+/* Tarjeta de fragancia: escenario del frasco y realce al pasar el cursor. */
+.card {
+  position: relative;
+  isolation: isolate;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--color-drift);
+  transform: translateY(-2px);
+}
+
+.card:hover .name {
+  color: var(--color-ember);
+}
+
+.stage {
+  background: radial-gradient(circle at 50% 70%, rgb(56 36 22 / 0.9), transparent 70%);
+}
+
+.bottle {
+  filter: drop-shadow(0 12px 24px rgb(0 0 0 / 0.55));
+  transition: transform 0.4s ease;
+}
+
+.card:hover .bottle {
+  transform: scale(1.04);
+}
+
+.name {
+  transition: color 0.2s ease;
+}

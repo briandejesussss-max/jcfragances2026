@@ -1,0 +1,40 @@
+import 'server-only';
+
+import { requireAdminPage } from '@/lib/auth/session';
+import { getAppSettings, listMovements } from '@/models/repositories/finance.repository';
+import { getFragrance, listFragranceSummaries } from '@/models/repositories/fragrance.repository';
+import { listOrders, listOrderTotals } from '@/models/repositories/order.repository';
+import { getStoreConfig } from '@/models/repositories/store-config.repository';
+
+/**
+ * Cargadores de datos del panel. Siempre leen datos frescos con la sesión del propietario
+ * (sin caché) y redirigen al login si no hay sesión.
+ */
+
+export async function loadAdminCatalog() {
+  const { db } = await requireAdminPage();
+  const [config, fragrances] = await Promise.all([getStoreConfig(db), listFragranceSummaries(db)]);
+  return { config, fragrances };
+}
+
+export async function loadAdminFragrance(id: string) {
+  const { db } = await requireAdminPage();
+  const [config, fragrance] = await Promise.all([getStoreConfig(db), getFragrance(db, id)]);
+  return { config, fragrance };
+}
+
+export async function loadAdminStoreConfig() {
+  const { db } = await requireAdminPage();
+  return getStoreConfig(db);
+}
+
+export async function loadAdminOrders() {
+  const { db } = await requireAdminPage();
+  return listOrders(db, 100);
+}
+
+export async function loadFinance() {
+  const { db } = await requireAdminPage();
+  const [movements, orders, settings] = await Promise.all([listMovements(db), listOrderTotals(db), getAppSettings(db)]);
+  return { movements, orders, settings };
+}

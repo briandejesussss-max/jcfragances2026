@@ -1,0 +1,38 @@
+/* Portada: título editorial y collage de las fragancias más nuevas. */
+.title {
+  font-size: clamp(2.3rem, 8.5vw, 3.6rem);
+  line-height: 0.9;
+}
+
+.accent {
+  color: var(--color-ember);
+}
+
+.collage {
+  mask-image: linear-gradient(to bottom, black 60%, transparent);
+}
+
+.collage img {
+  transition: transform 0.5s ease;
+}
+
+.collage a:hover img {
+  transform: translateY(-6px) scale(1.03);
+}
+
+.marquee {
+  border-top: 1px dashed var(--color-cork);
+  border-bottom: 1px dashed var(--color-cork);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
