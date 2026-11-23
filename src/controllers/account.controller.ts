@@ -1,11 +1,12 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { requireCustomerAction } from '@/lib/auth/session';
 import { siteUrl } from '@/lib/services/email';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { getProfile, saveProfile } from '@/models/repositories/profile.repository';
+import { claimOrder, getProfile, saveProfile } from '@/models/repositories/profile.repository';
 import type { ActionResult, Customer, CustomerProfile } from '@/models/types';
 import { runAction, UserError } from './action-result';
 
@@ -57,7 +58,8 @@ export async function signUpAction(_prev: FormState, fd: FormData): Promise<Form
     options: { emailRedirectTo: await callbackUrl('/cuenta/bienvenida'), data: { name, notify_email: notify } },
   });
   if (error) return { error: authMessage(error.message) };
-  if (data.session) redirect('/cuenta/bienvenida');
+  const order = str(fd, 'order').toUpperCase();
+  if (data.session) redirect(`/cuenta/bienvenida${/^[A-Z]{1,4}-\d{1,8}$/.test(order) ? `?pedido=${order}` : ''}`);
   redirect(`/cuenta/revisa-tu-correo?email=${encodeURIComponent(email)}`);
 }
 
@@ -158,4 +160,25 @@ export async function getCheckoutDefaultsAction(): Promise<Partial<Customer> | n
   if (!data.user) return null;
   const p = await getProfile(db, data.user.id).catch(() => null);
   return { ...(p?.address ?? {}), name: p?.name || '', phone: p?.phone || '', email: data.user.email ?? '' };
+}
+
+/** "Agregar un pedido que hice sin cuenta": número de pedido + correo con el que se compró. */
+export async function claimOrderAction(_prev: FormState, fd: FormData): Promise<FormState> {
+  const number = str(fd, 'number').toUpperCase();
+  const email = str(fd, 'email').toLowerCase();
+  if (!number || !isEmail(email)) return { error: 'Escribe el número de pedido y el correo con el que compraste' };
+  let db;
+  try {
+    ({ db } = await requireCustomerAction());
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Vuelve a entrar a tu cuenta' };
+  }
+  const res = await claimOrder(db, number, email);
+  if (!res.ok) {
+    if (res.reason === 'not_found') return { error: 'No encontramos ese pedido con ese correo. Revisa los datos.' };
+    if (res.reason === 'taken') return { error: 'Ese pedido ya está en otra cuenta. Si es tuyo, escríbenos por WhatsApp.' };
+    return { error: 'No se pudo agregar el pedido. Intenta de nuevo.' };
+  }
+  revalidatePath('/cuenta');
+  return { message: `Pedido ${res.number} agregado a tu cuenta ✓` };
 }

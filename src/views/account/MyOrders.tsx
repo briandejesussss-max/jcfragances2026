@@ -5,13 +5,14 @@ import type { Order } from '@/models/types';
 import { buttonClass } from '@/views/shared/Button';
 import { Alert } from '@/views/shared/Alert';
 import { lastNote } from './order-progress';
+import { AddOrderForm } from './AddOrderForm';
 import { OrderProgress } from './OrderProgress';
 import { OrderStatusBadge } from './OrderStatusBadge';
 
 const isActive = (o: Order) => !['entregado', 'cancelado'].includes(o.status);
 
 /** "Mi cuenta": pedidos del cliente con su avance. */
-export function MyOrders({ name, orders, passwordChanged }: { name: string; orders: Order[]; passwordChanged?: boolean }) {
+export function MyOrders({ name, email, orders, passwordChanged }: { name: string; email: string; orders: Order[]; passwordChanged?: boolean }) {
   return (
     <div className="mx-auto max-w-2xl space-y-5 px-4 py-10">
       <div className="flex items-end justify-between gap-3">
@@ -28,7 +29,6 @@ export function MyOrders({ name, orders, passwordChanged }: { name: string; orde
       {orders.length === 0 ? (
         <div className="space-y-3 rounded-3xl border border-dashed border-cork p-6 text-center text-sm text-sand">
           <p>Aún no tienes pedidos en tu cuenta.</p>
-          <p className="text-xs">Si compraste antes con otro correo, escríbenos por WhatsApp y lo agregamos.</p>
           <Link href="/#catalogo" className={buttonClass('ghost', 'md')}>
             Ver catálogo
           </Link>
@@ -58,6 +58,8 @@ export function MyOrders({ name, orders, passwordChanged }: { name: string; orde
           );
         })
       )}
+
+      <AddOrderForm defaultEmail={email} compact={orders.length > 0} />
 
       <form action={customerLogoutAction} className="pt-4 text-center">
         <button type="submit" className="text-xs text-sand underline underline-offset-4">

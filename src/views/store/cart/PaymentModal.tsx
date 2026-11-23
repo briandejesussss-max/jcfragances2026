@@ -71,7 +71,7 @@ export function PaymentModal({ order, onClose }: { order: (PlacedOrder & { email
         ) : (
           <div className="space-y-2 rounded-2xl border border-dashed border-cork p-3 text-xs text-sand">
             <p>¿Quieres seguir tu pedido desde tu perfil?</p>
-            <Link href={`/cuenta/registro${order.email ? `?email=${encodeURIComponent(order.email)}` : ''}`} className={buttonClass('ghost', 'sm', 'w-full')} onClick={onClose}>
+            <Link href={`/cuenta/registro?pedido=${encodeURIComponent(order.number)}${order.email ? `&email=${encodeURIComponent(order.email)}` : ''}`} className={buttonClass('ghost', 'sm', 'w-full')} onClick={onClose}>
               Crea tu cuenta
             </Link>
           </div>

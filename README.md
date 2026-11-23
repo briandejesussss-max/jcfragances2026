@@ -74,7 +74,8 @@ No se necesita la clave `service_role`.
 
 - Rutas: `/cuenta/registro`, `/cuenta/ingresar` (contraseña, enlace por correo o Google), `/cuenta` (mis pedidos), `/cuenta/pedidos/[número]`, `/cuenta/perfil`, `/cuenta/recuperar`, `/auth/callback`.
 - El propietario está en la tabla `admins`; cualquier otra cuenta es cliente y la base de datos solo le deja leer **sus** pedidos y editar **su** perfil. Un cliente que abre `/admin` ve "No autorizado".
-- Los pedidos hechos antes con el mismo correo se ligan solos a la cuenta al confirmar el correo (`claim_my_orders`).
+- Pedidos hechos sin cuenta: el cliente los agrega con **número de pedido + correo de la compra** (`claim_order`). No hay ligado automático por correo porque, sin dominio propio, Supabase no confirma correos.
+- Modo actual (sin dominio): registro con correo y contraseña sin confirmación ("Confirm email" desactivado). Sin enlace mágico ni recuperación por correo: la ayuda es por WhatsApp. La tienda detecta la configuración de Supabase y muestra esas opciones solas cuando se activen.
 - Avisos por correo al cambiar la etapa en el panel, si el cliente los tiene activados y `RESEND_API_KEY` está configurada.
 - Requisitos en Supabase (Authentication): activar el registro, SMTP propio para que lleguen los correos a clientes, URL del sitio y `https://<sitio>/auth/callback` en *Redirect URLs*, y el proveedor Google si se quiere ese botón (la tienda lo muestra solo cuando está activo).
 

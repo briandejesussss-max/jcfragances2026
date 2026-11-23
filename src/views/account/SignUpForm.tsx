@@ -9,7 +9,22 @@ import { Field, Input } from '@/views/shared/Field';
 import { AuthShell, Divider } from './AuthShell';
 import { GoogleButton } from './GoogleButton';
 
-export function SignUpForm({ email = '', signupEnabled, googleEnabled }: { email?: string; signupEnabled: boolean; googleEnabled: boolean }) {
+export function SignUpForm({
+  email = '',
+  order = '',
+  signupEnabled,
+  googleEnabled,
+  emailConfirmation,
+  emailNotifications,
+}: {
+  email?: string;
+  /** Pedido recién hecho sin cuenta: se ofrece ligarlo al terminar */
+  order?: string;
+  signupEnabled: boolean;
+  googleEnabled: boolean;
+  emailConfirmation: boolean;
+  emailNotifications: boolean;
+}) {
   const [state, action, pending] = useActionState<FormState, FormData>(signUpAction, {});
   return (
     <AuthShell
@@ -34,6 +49,7 @@ export function SignUpForm({ email = '', signupEnabled, googleEnabled }: { email
         </>
       )}
       <form action={action} className="space-y-3">
+        {order && <input type="hidden" name="order" value={order} />}
         <Field label="Nombre">
           <Input name="name" autoComplete="name" required />
         </Field>
@@ -43,18 +59,22 @@ export function SignUpForm({ email = '', signupEnabled, googleEnabled }: { email
         <Field label="Contraseña" hint="Mínimo 8 caracteres. Bloqueamos contraseñas filtradas en internet.">
           <Input name="password" type="password" autoComplete="new-password" minLength={8} required />
         </Field>
-        <label className="flex items-start gap-2.5 text-xs leading-relaxed text-sand">
-          <input type="checkbox" name="notify" defaultChecked className="mt-0.5 size-4 accent-ember" />
-          Avisarme por correo cuando mi pedido cambie de etapa
-        </label>
+        {emailNotifications && (
+          <label className="flex items-start gap-2.5 text-xs leading-relaxed text-sand">
+            <input type="checkbox" name="notify" defaultChecked className="mt-0.5 size-4 accent-ember" />
+            Avisarme por correo cuando mi pedido cambie de etapa
+          </label>
+        )}
         {state.error && <Alert>{state.error}</Alert>}
         <Button type="submit" variant="cream" size="lg" className="w-full" disabled={pending || !signupEnabled}>
           {pending ? 'Creando cuenta…' : 'Crear mi cuenta'}
         </Button>
       </form>
-      <Link href="/cuenta/ingresar?modo=enlace" className="self-center text-xs text-sand underline underline-offset-4">
-        Prefiero que me manden un enlace sin contraseña
-      </Link>
+      {emailConfirmation && (
+        <Link href="/cuenta/ingresar?modo=enlace" className="self-center text-xs text-sand underline underline-offset-4">
+          Prefiero que me manden un enlace sin contraseña
+        </Link>
+      )}
     </AuthShell>
   );
 }

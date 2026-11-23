@@ -19,14 +19,20 @@ export function LoginForm({
   linkError = false,
   googleEnabled,
   signupEnabled,
+  emailConfirmation,
+  whatsappHelp,
 }: {
   next: string;
   initialMode?: Mode;
   linkError?: boolean;
   googleEnabled: boolean;
   signupEnabled: boolean;
+  /** Sin correos (sin dominio): solo contraseña y ayuda por WhatsApp */
+  emailConfirmation: boolean;
+  whatsappHelp: string;
 }) {
-  const [mode, setMode] = useState<Mode>(initialMode);
+  const [modeState, setMode] = useState<Mode>(initialMode);
+  const mode: Mode = emailConfirmation ? modeState : 'password';
   const [pwState, pwAction, pwPending] = useActionState<FormState, FormData>(passwordLoginAction, {});
   const [lkState, lkAction, lkPending] = useActionState<FormState, FormData>(magicLinkAction, {});
 
@@ -47,6 +53,7 @@ export function LoginForm({
       {linkError && <Alert>El enlace ya expiró o no es válido. Pide uno nuevo.</Alert>}
       {googleEnabled && <GoogleButton next={next} />}
 
+      {emailConfirmation && (
       <div className="flex gap-1.5 rounded-pill border border-cork p-1" role="tablist" aria-label="Forma de entrar">
         {(
           [
@@ -66,6 +73,7 @@ export function LoginForm({
           </button>
         ))}
       </div>
+      )}
 
       {mode === 'password' ? (
         <form action={pwAction} className="space-y-3">
@@ -76,9 +84,15 @@ export function LoginForm({
           <Field label="Contraseña">
             <Input name="password" type="password" autoComplete="current-password" required />
           </Field>
-          <Link href="/cuenta/recuperar" className="block text-right text-xs text-sand underline underline-offset-4">
-            ¿Olvidaste tu contraseña?
-          </Link>
+          {emailConfirmation ? (
+            <Link href="/cuenta/recuperar" className="block text-right text-xs text-sand underline underline-offset-4">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          ) : (
+            <a href={whatsappHelp} target="_blank" rel="noopener noreferrer" className="block text-right text-xs text-sand underline underline-offset-4">
+              ¿Olvidaste tu contraseña? Escríbenos por WhatsApp
+            </a>
+          )}
           {pwState.error && <Alert>{pwState.error}</Alert>}
           <Button type="submit" variant="cream" size="lg" className="w-full" disabled={pwPending}>
             {pwPending ? 'Entrando…' : 'Entrar'}

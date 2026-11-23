@@ -13,7 +13,7 @@ import { Field, Input, Select } from '@/views/shared/Field';
 const PROVIDER_LABEL: Record<string, string> = { email: 'correo', google: 'Google' };
 
 /** "Mis datos": contacto, dirección para la próxima compra y avisos por correo. */
-export function ProfileForm({ profile, email, providers }: { profile: CustomerProfile; email: string; providers: string[] }) {
+export function ProfileForm({ profile, email, providers, emailNotifications, emailConfirmed }: { profile: CustomerProfile; email: string; providers: string[]; emailNotifications: boolean; emailConfirmed: boolean }) {
   const [p, setP] = useState(profile);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
@@ -71,6 +71,7 @@ export function ProfileForm({ profile, email, providers }: { profile: CustomerPr
         <p className="col-span-2 text-xs text-sand">Se llena sola en tu próxima compra.</p>
       </section>
 
+      {emailNotifications && (
       <section className="rounded-3xl border border-cork bg-umber p-4">
         <p className="text-[10px] uppercase tracking-[0.1em] text-ember">Avisos</p>
         <label className="mt-3 flex items-center justify-between gap-4 text-sm">
@@ -81,11 +82,12 @@ export function ProfileForm({ profile, email, providers }: { profile: CustomerPr
           <input type="checkbox" role="switch" checked={p.notifyEmail} onChange={(e) => setP({ ...p, notifyEmail: e.target.checked })} className="size-5 accent-ember" />
         </label>
       </section>
+      )}
 
       <section className="space-y-2 rounded-3xl border border-dashed border-cork p-4 text-sm">
         <p className="text-[10px] uppercase tracking-[0.1em] text-sand">Cuenta</p>
         <p>
-          {email} <span className="text-ok">· confirmado</span>
+          {email} {emailConfirmed && <span className="text-ok">· confirmado</span>}
         </p>
         <p className="text-xs text-sand">Entras con: {providers.map((x) => PROVIDER_LABEL[x] ?? x).join(' y ')}</p>
         <Link href="/cuenta/nueva-contrasena" className="text-xs text-sand underline underline-offset-4">
