@@ -23,10 +23,10 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // No pongas código entre createServerClient y getUser(): getUser valida el token con Supabase.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // No pongas código entre createServerClient y getClaims(): refresca el token si está por vencer
+  // y valida su firma en el servidor (llaves ES256), sin ir a Supabase en cada petición.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? data.claims : null;
 
   const { pathname } = request.nextUrl;
   const redirectTo = (path: string, next?: string) => {

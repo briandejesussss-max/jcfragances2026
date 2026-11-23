@@ -27,6 +27,5 @@ export async function loadMyOrder(number: string) {
 export async function loadMyProfile(): Promise<{ profile: CustomerProfile; email: string; providers: string[] }> {
   const { db, user } = await requireCustomerPage('/cuenta/perfil');
   const profile = (await getProfile(db, user.id).catch(() => null)) ?? { id: user.id, name: '', phone: '', address: {}, notifyEmail: true };
-  const providers = ((user.app_metadata?.providers as string[] | undefined) ?? [user.app_metadata?.provider ?? 'email']).filter(Boolean);
-  return { profile, email: user.email ?? '', providers };
+  return { profile, email: user.email, providers: user.providers };
 }

@@ -1,5 +1,6 @@
 'use server';
 
+import { getSessionUser } from '@/lib/auth/session';
 import { createSupabasePublicClient, createSupabaseServerClient } from '@/lib/supabase/server';
 import { buildOrderItems, itemsSubtotal, shippingFor, validateCustomer } from '@/models/domain/orders';
 import { sizesOf, stockIssues } from '@/models/domain/sizes';
@@ -55,8 +56,7 @@ export async function placeOrder(input: { customer: Partial<Customer>; lines: Ca
 
     // Con sesión, create_order guarda la cuenta del cliente (auth.uid()); sin sesión actúa como visitante.
     const db = await createSupabaseServerClient();
-    const { data: auth } = await db.auth.getUser();
-    const user = auth.user;
+    const user = await getSessionUser();
     const [config, byId] = await Promise.all([getStoreConfig(db), getFragrancesByIds(db, [...new Set(lines.map((l) => l.fragId))])]);
     const sizes = sizesOf(config);
 
