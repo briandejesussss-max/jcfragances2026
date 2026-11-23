@@ -1,0 +1,104 @@
+@import 'tailwindcss';
+
+/*
+ * Sistema de diseño de la tienda (5 paletas, como el sitio original).
+ * Solo tokens y estilos base: los estilos de cada vista viven junto a su componente
+ * (clases de Tailwind y archivos *.module.css por vista).
+ */
+/*
+ * Tokens de color. Nombres semánticos de la paleta original "Madera cálida";
+ * los valores cambian según la paleta elegida (html[data-palette]). OLED negro es la predeterminada.
+ *   walnut = fondo · umber = fondo elevado · bark = superficie/botón · cork = bordes
+ *   drift = texto terciario · sand = texto secundario · cream = texto principal · ember = acento
+ */
+@theme {
+  --color-walnut: #000000;
+  --color-umber: #0a0a0a;
+  --color-bark: #121212;
+  --color-cork: #2a2a2a;
+  --color-drift: #6e6e6e;
+  --color-sand: #b0b0b0;
+  --color-cream: #f5f5f5;
+  --color-ember: #ff6a1a;
+  --color-ok: #3ecf8e;
+  --color-bad: #ff6b6b;
+  --color-whatsapp: #25d366;
+
+  --font-sans: var(--font-inter), 'Helvetica Neue', Arial, sans-serif;
+
+  --radius-pill: 36px;
+
+  --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-slide-in: slide-in 0.3s ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes slide-in {
+    from { transform: translateX(100%); }
+    to { transform: none; }
+  }
+}
+
+html[data-palette='medianoche'] {
+  --color-walnut: #0a1128; --color-umber: #0e1733; --color-bark: #16213f; --color-cork: #2a3a63;
+  --color-drift: #6b7aa3; --color-sand: #a9b6d6; --color-cream: #e8eefc; --color-ember: #6ea8ff;
+}
+html[data-palette='blanco'] {
+  --color-walnut: #f6f4ef; --color-umber: #efece5; --color-bark: #e9e5dc; --color-cork: #cfc9bc;
+  --color-drift: #8a8374; --color-sand: #5c564b; --color-cream: #17140f; --color-ember: #c2410c;
+  color-scheme: light;
+}
+html[data-palette='grafito'] {
+  --color-walnut: #121316; --color-umber: #181a1f; --color-bark: #202228; --color-cork: #33363f;
+  --color-drift: #6b7080; --color-sand: #a6abb7; --color-cream: #eceef2; --color-ember: #e0a82e;
+}
+html[data-palette='cafe'] {
+  --color-walnut: #100904; --color-umber: #1a0f08; --color-bark: #382416; --color-cork: #40372e;
+  --color-drift: #6c5f51; --color-sand: #c8b8a2; --color-cream: #ffedd7; --color-ember: #dc5000;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-walnut text-cream font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-medium uppercase leading-[0.95] tracking-tight;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-ember);
+    color: var(--color-cream);
+  }
+
+  input, select, textarea, button {
+    font: inherit;
+    color: inherit;
+  }
+
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.7);
+    backdrop-filter: blur(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

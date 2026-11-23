@@ -1,0 +1,12 @@
+/* Barra superior translúcida con separador punteado. */
+.bar {
+  background: color-mix(in srgb, var(--color-walnut) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px dashed var(--color-cork);
+}
+
+.count {
+  min-width: 1.15rem;
+  height: 1.15rem;
+}
