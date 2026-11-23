@@ -62,11 +62,11 @@ export function ProductView({ fragrance: f }: { fragrance: Fragrance }) {
       </div>
 
       <div className="mx-auto mt-6 grid max-w-5xl gap-4 px-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <NotesPyramid fragrance={f} />
           <CommunityProfile fragrance={f} />
         </div>
-        <div className="lg:sticky lg:top-20 lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
           <ProductPurchase fragrance={f} />
         </div>
       </div>
