@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, KeyRound, PackageSearch, Sparkles, X } from 'lucide-react';
+import { CircleHelp, Heart, KeyRound, PackageSearch, Sparkles, X } from 'lucide-react';
 import { useEffect } from 'react';
 import type { Currency } from '@/models/types';
 import { Select } from '@/views/shared/Field';
@@ -83,6 +83,9 @@ export function SideMenu() {
         <Section title="Pedidos">
           <MenuLink href="/rastreo" icon={<PackageSearch className="size-4" />} onClick={close}>
             Rastrear mi pedido
+          </MenuLink>
+          <MenuLink href="/ayuda" icon={<CircleHelp className="size-4" />} onClick={close}>
+            Guía de compra y cuenta
           </MenuLink>
         </Section>
 

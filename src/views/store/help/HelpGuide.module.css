@@ -1,0 +1,46 @@
+/* Guía para clientes: pasos numerados y línea de etapas de ejemplo. */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  counter-reset: step;
+}
+
+.steps > li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.875rem;
+  align-items: start;
+}
+
+.steps > li::before {
+  content: counter(step);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-ember);
+  color: var(--color-ember);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: 1.125rem minmax(0, 1fr);
+  gap: 0.875rem;
+}
+
+.rail {
+  width: 2px;
+  flex: 1;
+  min-height: 1.25rem;
+}
+
+.stage:last-child .rail {
+  display: none;
+}
