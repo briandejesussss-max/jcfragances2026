@@ -15,7 +15,7 @@
 }
 
 .stage {
-  background: radial-gradient(circle at 50% 70%, rgb(56 36 22 / 0.9), transparent 70%);
+  background: radial-gradient(circle at 50% 70%, color-mix(in srgb, var(--color-bark) 90%, transparent), transparent 70%);
 }
 
 .bottle {

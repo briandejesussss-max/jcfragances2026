@@ -27,7 +27,12 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, var(--color-walnut) 8%, rgb(16 9 4 / 0.55) 55%, rgb(16 9 4 / 0.25));
+  background: linear-gradient(
+    to top,
+    var(--color-walnut) 8%,
+    color-mix(in srgb, var(--color-walnut) 55%, transparent) 55%,
+    color-mix(in srgb, var(--color-walnut) 25%, transparent)
+  );
 }
 
 .bottle {

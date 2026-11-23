@@ -4,6 +4,7 @@ import { SmartImage } from '@/views/shared/SmartImage';
 import Link from 'next/link';
 import { Menu, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { PaletteSwitcher } from '@/views/shared/PaletteSwitcher';
 import { useStore } from '../state/StoreProvider';
 import styles from './Header.module.css';
 
@@ -39,16 +40,19 @@ export function Header() {
           </span>
         </Link>
 
-        <button
-          type="button"
-          onClick={() => setCartOpen(true)}
-          aria-label={`Abrir bolsa (${count} productos)`}
-          className="relative flex items-center gap-2 rounded-pill bg-bark px-3.5 py-2 text-[11px] font-medium uppercase tracking-[0.06em] hover:bg-cork"
-        >
-          <ShoppingBag className="size-4" />
-          <span className="hidden sm:inline">Bolsa</span>
-          <span className={cn(styles.count, 'grid place-items-center rounded-full bg-ember px-1 text-[10px] text-cream')}>{count}</span>
-        </button>
+        <div className="flex items-center gap-1">
+          <PaletteSwitcher />
+          <button
+            type="button"
+            onClick={() => setCartOpen(true)}
+            aria-label={`Abrir bolsa (${count} productos)`}
+            className="relative flex items-center gap-2 rounded-pill bg-bark px-3.5 py-2 text-[11px] font-medium uppercase tracking-[0.06em] hover:bg-cork"
+          >
+            <ShoppingBag className="size-4" />
+            <span className="hidden sm:inline">Bolsa</span>
+            <span className={cn(styles.count, 'grid place-items-center rounded-full bg-ember px-1 text-[10px] text-cream')}>{count}</span>
+          </button>
+        </div>
       </div>
     </header>
   );
