@@ -12,18 +12,18 @@ export function AdminShell({ email, children }: { email: string; children: React
       <header className="sticky top-0 z-30 border-b border-dashed border-cork bg-walnut/90 backdrop-blur">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-3">
           <div className="flex items-center justify-between gap-3">
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium uppercase tracking-[0.06em]">JS Fragances · Panel</p>
-              <p className="text-[11px] text-drift">{email}</p>
+              <p className="truncate text-[11px] text-drift">{email}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <PaletteSwitcher />
-              <Link href="/" target="_blank" className="flex items-center gap-1 rounded-pill border border-cork px-3 py-1.5 text-[11px] uppercase text-sand hover:text-cream">
-                <ExternalLink className="size-3.5" /> Ver tienda
+              <Link href="/" target="_blank" aria-label="Ver tienda" className="flex items-center gap-1 rounded-pill border border-cork px-3 py-1.5 text-[11px] uppercase text-sand hover:text-cream">
+                <ExternalLink className="size-3.5" /> <span className="hidden sm:inline">Ver tienda</span>
               </Link>
               <form action={logout}>
-                <button type="submit" className="flex items-center gap-1 rounded-pill border border-cork px-3 py-1.5 text-[11px] uppercase text-sand hover:text-cream">
-                  <LogOut className="size-3.5" /> Salir
+                <button type="submit" aria-label="Salir" className="flex items-center gap-1 rounded-pill border border-cork px-3 py-1.5 text-[11px] uppercase text-sand hover:text-cream">
+                  <LogOut className="size-3.5" /> <span className="hidden sm:inline">Salir</span>
                 </button>
               </form>
             </div>
