@@ -1,4 +1,4 @@
-import { AtSign, MessageCircle, PackageSearch } from 'lucide-react';
+import { AtSign, CircleHelp, MessageCircle, PackageSearch } from 'lucide-react';
 import Link from 'next/link';
 import { whatsappLink } from '@/lib/utils/whatsapp';
 import type { StoreConfig } from '@/models/types';
@@ -28,6 +28,9 @@ export function Footer({ config }: { config: StoreConfig }) {
           <p className="text-[10px] uppercase tracking-[0.14em] text-sand">Tu pedido</p>
           <Link href="/rastreo" className="flex items-center gap-2 hover:text-ember">
             <PackageSearch className="size-4" /> Rastrear pedido
+          </Link>
+          <Link href="/ayuda" className="flex items-center gap-2 hover:text-ember">
+            <CircleHelp className="size-4" /> Guía para clientes
           </Link>
         </div>
       </div>

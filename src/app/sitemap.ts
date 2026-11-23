@@ -12,5 +12,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     slugs = [];
   }
-  return [{ url: base, changeFrequency: 'daily', priority: 1 }, ...slugs.map((s) => ({ url: `${base}/perfume/${s}`, changeFrequency: 'weekly' as const, priority: 0.8 }))];
+  return [{ url: base, changeFrequency: 'daily', priority: 1 }, { url: `${base}/ayuda`, changeFrequency: 'monthly' as const, priority: 0.5 }, ...slugs.map((s) => ({ url: `${base}/perfume/${s}`, changeFrequency: 'weekly' as const, priority: 0.8 }))];
 }
