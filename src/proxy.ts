@@ -6,6 +6,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Solo el panel necesita sesión; la tienda pública queda fuera del proxy y se sirve desde caché.
-  matcher: ['/admin/:path*'],
+  // Solo el panel, la cuenta y el retorno de inicio de sesión usan la sesión;
+  // la tienda pública queda fuera del proxy y se sirve desde caché.
+  matcher: ['/admin/:path*', '/cuenta/:path*', '/auth/:path*'],
 };

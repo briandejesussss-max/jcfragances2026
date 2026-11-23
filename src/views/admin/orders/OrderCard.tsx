@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { UserRound } from 'lucide-react';
 import { setOrderDiscountAction, setOrderShippingAction, setOrderStatusAction, type StatusChange } from '@/controllers/order-admin.controller';
 import { formatDate, formatMoney } from '@/lib/utils/format';
 import { whatsappLink } from '@/lib/utils/whatsapp';
@@ -18,7 +19,7 @@ const STATUS_TONE: Record<string, string> = {
   cancelado: 'text-bad',
 };
 
-export function OrderCard({ order: o }: { order: Order }) {
+export function OrderCard({ order: o, account }: { order: Order; account?: { notifyEmail: boolean } }) {
   const router = useRouter();
   const notify = useToast();
   const [pending, start] = useTransition();
@@ -32,14 +33,23 @@ export function OrderCard({ order: o }: { order: Order }) {
   const actions = nextActions(o);
   const message = customerMessage(o);
 
-  const run = (fn: () => Promise<ActionResult>, ok: string) =>
+  const run = <T,>(fn: () => Promise<ActionResult<T>>, ok: string | ((data: T) => string)) =>
     start(async () => {
       const res = await fn();
-      notify(res.ok ? ok : res.error, res.ok ? 2600 : 4500);
+      notify(res.ok ? (typeof ok === 'function' ? ok(res.data) : ok) : res.error, res.ok ? 3500 : 4500);
       if (res.ok) router.refresh();
     });
 
-  const change = (status: StatusChange['status']) => run(() => setOrderStatusAction(o.id, { status, note, carrier, tracking, trackingUrl }), 'Pedido actualizado ✓');
+  const EMAIL_NOTE = {
+    sent: ' · aviso por correo enviado',
+    failed: ' · no se pudo enviar el correo',
+    not_configured: ' · correo no configurado (falta Resend)',
+    off: ' · el cliente desactivó los correos',
+    guest: '',
+  } as const;
+
+  const change = (status: StatusChange['status']) =>
+    run(() => setOrderStatusAction(o.id, { status, note, carrier, tracking, trackingUrl }), (d) => `Pedido actualizado ✓${EMAIL_NOTE[d.email]}`);
 
   return (
     <article className="space-y-2 rounded-3xl border border-cork bg-umber p-4 text-xs">
@@ -48,6 +58,16 @@ export function OrderCard({ order: o }: { order: Order }) {
         <span className={cn('font-medium uppercase', STATUS_TONE[o.status] ?? 'text-cream')}>{statusLabel(o.status)}</span>
       </div>
       <p className="text-[11px] text-drift">{formatDate(o.created_at)}</p>
+      {o.user_id && (
+        <div className="flex flex-wrap gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-pill border border-sky-400/70 px-2 py-0.5 text-[10px] uppercase text-sky-300">
+            <UserRound className="size-3" /> Cliente con cuenta
+          </span>
+          <span className="rounded-pill border border-cork px-2 py-0.5 text-[10px] uppercase text-sand">
+            Avisos por correo: {account?.notifyEmail === false ? 'no' : 'sí'}
+          </span>
+        </div>
+      )}
       <div>
         {c.name} · {c.phone}
         <br />

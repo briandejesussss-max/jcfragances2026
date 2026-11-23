@@ -4,6 +4,7 @@ import { requireAdminPage } from '@/lib/auth/session';
 import { getAppSettings, listMovements } from '@/models/repositories/finance.repository';
 import { getFragrance, listFragranceSummaries } from '@/models/repositories/fragrance.repository';
 import { listOrders, listOrderTotals } from '@/models/repositories/order.repository';
+import { getProfilesByIds } from '@/models/repositories/profile.repository';
 import { getStoreConfig } from '@/models/repositories/store-config.repository';
 
 /**
@@ -30,7 +31,11 @@ export async function loadAdminStoreConfig() {
 
 export async function loadAdminOrders() {
   const { db } = await requireAdminPage();
-  return listOrders(db, 100);
+  const orders = await listOrders(db, 100);
+  const profiles = await getProfilesByIds(db, [...new Set(orders.map((o) => o.user_id).filter((x): x is string => !!x))]);
+  // Para el panel solo importa si el cliente tiene cuenta y si quiere avisos por correo.
+  const accounts = Object.fromEntries([...profiles].map(([id, p]) => [id, { notifyEmail: p.notifyEmail }]));
+  return { orders, accounts };
 }
 
 export async function loadFinance() {

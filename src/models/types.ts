@@ -157,6 +157,8 @@ export interface Order {
   shipped_at: string | null;
   delivered_at: string | null;
   events: OrderEvent[];
+  /** Cuenta del cliente que compró (null = compra sin cuenta) */
+  user_id: string | null;
 }
 
 export type TrackedOrder = Pick<
@@ -185,6 +187,16 @@ export type TaxBase = 'beneficio' | 'ingresos';
 export interface AppSettings {
   taxReservePct: number;
   taxBase: TaxBase;
+}
+
+/** Perfil de un cliente con cuenta (tabla `profiles`). */
+export interface CustomerProfile {
+  id: string;
+  name: string;
+  phone: string;
+  /** Última dirección de entrega usada; se precarga en la siguiente compra */
+  address: Partial<Customer>;
+  notifyEmail: boolean;
 }
 
 /** Línea del carrito guardada en el navegador: el precio se vuelve a calcular en el servidor. */

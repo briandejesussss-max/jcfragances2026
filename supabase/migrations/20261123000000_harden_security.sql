@@ -1,5 +1,5 @@
 -- ============================================================================
--- Endurecimiento de seguridad (PROPUESTA: revisar antes de aplicar en producción)
+-- Endurecimiento de seguridad (aplicada en producción el 23-nov-2026)
 --
 -- 1. Solo los usuarios de la tabla `admins` pueden escribir en el catálogo,
 --    pedidos y finanzas. Hoy las políticas permiten todo a CUALQUIER usuario

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
+import { getCheckoutDefaultsAction } from '@/controllers/account.controller';
 import { placeOrder, type PlacedOrder } from '@/controllers/checkout.controller';
 import { MEXICAN_STATES } from '@/models/domain/address';
 import { CUSTOMER_REQUIRED } from '@/models/domain/orders';
@@ -16,7 +17,7 @@ import { useZipLookup } from './useZipLookup';
 const EMPTY: Customer = { name: '', phone: '', email: '', street: '', numExt: '', numInt: '', cp: '', colonia: '', city: '', state: '' };
 
 /** Datos de entrega y envío del pedido. El total definitivo lo calcula el servidor. */
-export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder) => void; disabled: boolean }) {
+export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder, email: string) => void; disabled: boolean }) {
   const { cart } = useStore();
   const notify = useToast();
   // Se recuerdan los datos en este dispositivo para la próxima compra.
@@ -27,6 +28,26 @@ export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder
   const zip = useZipLookup(c.cp);
 
   const set = (k: keyof Customer, v: string) => setC((prev) => ({ ...prev, [k]: v }));
+
+  // Con sesión iniciada, llena los campos vacíos con los datos guardados en su cuenta.
+  useEffect(() => {
+    let cancelled = false;
+    getCheckoutDefaultsAction()
+      .then((d) => {
+        if (cancelled || !d) return;
+        setC((prev) => {
+          const next = { ...prev };
+          (Object.keys(d) as Array<keyof Customer>).forEach((k) => {
+            if (!String(next[k] ?? '').trim() && d[k]) next[k] = String(d[k]);
+          });
+          return next;
+        });
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [setC]);
 
   useEffect(() => {
     if (zip.status !== 'ok' || !zip.info) return;
@@ -55,7 +76,7 @@ export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder
         setError(res.error);
         return;
       }
-      onPlaced(res.data);
+      onPlaced(res.data, c.email);
     });
   };
 

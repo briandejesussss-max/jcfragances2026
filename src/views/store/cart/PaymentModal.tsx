@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Copy } from 'lucide-react';
 import { BANK, SHIPPING } from '@/config/store';
 import type { PlacedOrder } from '@/controllers/checkout.controller';
@@ -11,7 +12,7 @@ import { useToast } from '@/views/shared/Toast';
 import { useStore } from '../state/StoreProvider';
 
 /** Instrucciones de pago por transferencia después de registrar el pedido. */
-export function PaymentModal({ order, onClose }: { order: PlacedOrder | null; onClose: () => void }) {
+export function PaymentModal({ order, onClose }: { order: (PlacedOrder & { email?: string }) | null; onClose: () => void }) {
   const { config, price } = useStore();
   const notify = useToast();
   if (!order) return null;
@@ -63,6 +64,18 @@ export function PaymentModal({ order, onClose }: { order: PlacedOrder | null; on
         <a href={whatsappLink(config.whatsapp, msg)} target="_blank" rel="noopener noreferrer" className={buttonClass('whatsapp', 'lg', 'w-full')}>
           Enviar comprobante por WhatsApp
         </a>
+        {order.linkedToAccount ? (
+          <Link href={`/cuenta/pedidos/${encodeURIComponent(order.number)}`} className={buttonClass('ghost', 'md', 'w-full')} onClick={onClose}>
+            Ver el avance en mi cuenta
+          </Link>
+        ) : (
+          <div className="space-y-2 rounded-2xl border border-dashed border-cork p-3 text-xs text-sand">
+            <p>¿Quieres seguir tu pedido desde tu perfil?</p>
+            <Link href={`/cuenta/registro${order.email ? `?email=${encodeURIComponent(order.email)}` : ''}`} className={buttonClass('ghost', 'sm', 'w-full')} onClick={onClose}>
+              Crea tu cuenta
+            </Link>
+          </div>
+        )}
       </div>
     </Modal>
   );

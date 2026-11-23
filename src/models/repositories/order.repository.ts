@@ -7,7 +7,7 @@ import type { Customer, Order, OrderItem, TrackedOrder } from '../types';
 
 const num = (v: unknown) => Number(v ?? 0);
 
-const toOrder = (r: Record<string, unknown>): Order =>
+export const toOrder = (r: Record<string, unknown>): Order =>
   ({
     ...r,
     total: num(r.total),
@@ -15,6 +15,7 @@ const toOrder = (r: Record<string, unknown>): Order =>
     discount: num(r.discount),
     events: (r.events as Order['events']) ?? [],
     items: (r.items as OrderItem[]) ?? [],
+    user_id: (r.user_id as string | null) ?? null,
   }) as Order;
 
 export async function createOrder(
@@ -59,4 +60,17 @@ export async function listOrderTotals(db: SupabaseClient): Promise<Pick<Order, '
   const { data, error } = await db.from('orders').select('status,total');
   if (error) return [];
   return (data ?? []).map((r) => ({ status: r.status, total: num(r.total) }));
+}
+
+/** Pedidos de un cliente con cuenta (las políticas RLS ya limitan a los suyos; el filtro evita que el propietario vea todos aquí). */
+export async function listOrdersOfUser(db: SupabaseClient, userId: string): Promise<Order[]> {
+  const { data, error } = await db.from('orders').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(200);
+  if (error) throw new Error(`No se pudieron cargar tus pedidos: ${error.message}`);
+  return (data ?? []).map(toOrder);
+}
+
+export async function getOrderOfUser(db: SupabaseClient, userId: string, number: string): Promise<Order | null> {
+  const { data, error } = await db.from('orders').select('*').eq('user_id', userId).eq('number', number.toUpperCase()).maybeSingle();
+  if (error) throw new Error(`No se pudo leer el pedido: ${error.message}`);
+  return data ? toOrder(data) : null;
 }

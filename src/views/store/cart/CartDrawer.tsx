@@ -16,7 +16,7 @@ import { PaymentModal } from './PaymentModal';
 export function CartDrawer() {
   const { cartOpen, setCartOpen, cart, byId, sizes, price, changeQty, removeLine, clearCart } = useStore();
   const [checkout, setCheckout] = useState(false);
-  const [placed, setPlaced] = useState<PlacedOrder | null>(null);
+  const [placed, setPlaced] = useState<(PlacedOrder & { email: string }) | null>(null);
 
   useEffect(() => {
     if (!cartOpen) return;
@@ -38,11 +38,11 @@ export function CartDrawer() {
   const subtotal = rows.reduce((a, r) => a + r.unit * r.line.qty, 0);
   const issues = stockIssues(cart, byId as Map<string, Fragrance>, sizes);
 
-  const onPlaced = (o: PlacedOrder) => {
+  const onPlaced = (o: PlacedOrder, email: string) => {
     clearCart();
     setCheckout(false);
     setCartOpen(false);
-    setPlaced(o);
+    setPlaced({ ...o, email });
   };
 
   return (

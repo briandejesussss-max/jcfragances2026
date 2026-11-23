@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { supabaseEnv } from './env';
 
 /**
- * Refresca la sesión de Supabase en cada petición del panel y protege /admin.
+ * Refresca la sesión de Supabase y protege /admin (propietario) y /cuenta (clientes).
  * Devuelve la respuesta con las cookies actualizadas.
  */
 export async function updateSession(request: NextRequest) {
@@ -29,20 +29,30 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isLogin = pathname === '/admin/login';
+  const redirectTo = (path: string, next?: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = path;
+    url.search = '';
+    if (next) url.searchParams.set('next', next);
+    const redirect = NextResponse.redirect(url);
+    // Conserva las cookies de sesión que Supabase acaba de refrescar.
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+    return redirect;
+  };
 
-  if (!user && pathname.startsWith('/admin') && !isLogin) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/admin/login';
-    loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
+  // Panel del propietario (la verificación de administrador la hace el layout del panel).
+  const isAdminLogin = pathname === '/admin/login';
+  if (pathname.startsWith('/admin')) {
+    if (!user && !isAdminLogin && pathname !== '/admin/no-autorizado') return redirectTo('/admin/login', pathname);
+    if (user && isAdminLogin) return redirectTo('/admin');
   }
 
-  if (user && isLogin) {
-    const panelUrl = request.nextUrl.clone();
-    panelUrl.pathname = '/admin';
-    panelUrl.search = '';
-    return NextResponse.redirect(panelUrl);
+  // Cuenta de cliente
+  const PUBLIC_ACCOUNT = ['/cuenta/registro', '/cuenta/ingresar', '/cuenta/recuperar', '/cuenta/revisa-tu-correo'];
+  if (pathname.startsWith('/cuenta')) {
+    const isPublic = PUBLIC_ACCOUNT.includes(pathname);
+    if (!user && !isPublic) return redirectTo('/cuenta/ingresar', pathname);
+    if (user && (pathname === '/cuenta/registro' || pathname === '/cuenta/ingresar')) return redirectTo('/cuenta');
   }
 
   return response;

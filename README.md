@@ -64,9 +64,19 @@ Copia `.env.example` a `.env.local`. En Vercel van en *Production* y *Preview*.
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Sí | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Sí | Clave publicable (`sb_publishable_…`); la seguridad la dan las políticas RLS |
-| `NEXT_PUBLIC_SITE_URL` | Sí | URL pública (sitemap, metadatos) |
+| `NEXT_PUBLIC_SITE_URL` | Sí | URL pública (sitemap, metadatos, enlaces de correos) |
+| `RESEND_API_KEY` | **No (secreta)** | Opcional. Envía los avisos de cambio de etapa. Solo en Vercel |
+| `EMAIL_FROM` | Sí | Opcional. Remitente de los avisos, p. ej. `JS FRAGANCES <pedidos@tu-dominio.com>` |
 
 No se necesita la clave `service_role`.
+
+## Cuentas de cliente
+
+- Rutas: `/cuenta/registro`, `/cuenta/ingresar` (contraseña, enlace por correo o Google), `/cuenta` (mis pedidos), `/cuenta/pedidos/[número]`, `/cuenta/perfil`, `/cuenta/recuperar`, `/auth/callback`.
+- El propietario está en la tabla `admins`; cualquier otra cuenta es cliente y la base de datos solo le deja leer **sus** pedidos y editar **su** perfil. Un cliente que abre `/admin` ve "No autorizado".
+- Los pedidos hechos antes con el mismo correo se ligan solos a la cuenta al confirmar el correo (`claim_my_orders`).
+- Avisos por correo al cambiar la etapa en el panel, si el cliente los tiene activados y `RESEND_API_KEY` está configurada.
+- Requisitos en Supabase (Authentication): activar el registro, SMTP propio para que lleguen los correos a clientes, URL del sitio y `https://<sitio>/auth/callback` en *Redirect URLs*, y el proveedor Google si se quiere ese botón (la tienda lo muestra solo cuando está activo).
 
 ## Desarrollo
 

@@ -1,12 +1,16 @@
 'use server';
 
 import { revalidatePath, updateTag } from 'next/cache';
+import { headers } from 'next/headers';
 import { requireAdminAction } from '@/lib/auth/session';
+import { sendEmail, siteUrl, type EmailResult } from '@/lib/services/email';
 import { itemsSubtotal } from '@/models/domain/orders';
 import { deductItem, sizesOf } from '@/models/domain/sizes';
 import { getFragrancesByIds, saveFragranceData } from '@/models/repositories/fragrance.repository';
 import { getOrder, updateOrder } from '@/models/repositories/order.repository';
+import { getProfile } from '@/models/repositories/profile.repository';
 import { getStoreConfig } from '@/models/repositories/store-config.repository';
+import { orderStatusEmail } from '@/views/emails/order-status-email';
 import type { ActionResult, Fragrance, Order, OrderStatus } from '@/models/types';
 import { runAction, UserError } from './action-result';
 import { CATALOG_TAG } from './catalog.controller';
@@ -57,7 +61,7 @@ export interface StatusChange {
  * Cambia la etapa del pedido y registra el evento. Al marcarlo pagado descuenta el inventario
  * (lo bajo pedido no descuenta). El ingreso en finanzas lo crea el trigger `orders_to_income`.
  */
-export async function setOrderStatusAction(id: string, change: StatusChange): Promise<ActionResult> {
+export async function setOrderStatusAction(id: string, change: StatusChange): Promise<ActionResult<{ email: EmailResult | 'off' | 'guest' }>> {
   return runAction(async () => {
     const db = await requireAdminAction();
     const o = await getOrder(db, id);
@@ -104,6 +108,21 @@ export async function setOrderStatusAction(id: string, change: StatusChange): Pr
     await updateOrder(db, id, patch);
     if (markPaid) updateTag(CATALOG_TAG);
     revalidatePath(ORDERS_PATH);
-    return undefined;
+
+    // Aviso por correo al cliente con cuenta que lo tenga activado.
+    let email: EmailResult | 'off' | 'guest' = 'guest';
+    if (o.user_id) {
+      const profile = await getProfile(db, o.user_id).catch(() => null);
+      const to = o.customer?.email;
+      if (!profile?.notifyEmail || !to) email = 'off';
+      else {
+        const updated: Order = { ...o, ...patch } as Order;
+        const config = await getStoreConfig(db);
+        const h = await headers();
+        const url = `${siteUrl(h.get('origin'))}/cuenta/pedidos/${encodeURIComponent(o.number)}`;
+        email = await sendEmail({ to, ...orderStatusEmail(updated, config, url) });
+      }
+    }
+    return { email };
   });
 }

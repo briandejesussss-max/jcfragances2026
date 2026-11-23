@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Menu, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { PaletteSwitcher } from '@/views/shared/PaletteSwitcher';
+import { AccountButton } from './AccountButton';
 import { useStore } from '../state/StoreProvider';
 import styles from './Header.module.css';
 
@@ -42,6 +43,7 @@ export function Header() {
 
         <div className="flex items-center gap-1">
           <PaletteSwitcher />
+          <AccountButton />
           <button
             type="button"
             onClick={() => setCartOpen(true)}

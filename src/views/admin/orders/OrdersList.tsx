@@ -7,7 +7,7 @@ import { Select } from '@/views/shared/Field';
 import { PageTitle } from '../shared/PageTitle';
 import { OrderCard } from './OrderCard';
 
-export function OrdersList({ orders }: { orders: Order[] }) {
+export function OrdersList({ orders, accounts }: { orders: Order[]; accounts: Record<string, { notifyEmail: boolean }> }) {
   const [status, setStatus] = useState<OrderStatus | 'activos' | 'todos'>('activos');
   const list = useMemo(
     () =>
@@ -35,7 +35,7 @@ export function OrdersList({ orders }: { orders: Order[] }) {
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {list.map((o) => (
-            <OrderCard key={o.id} order={o} />
+            <OrderCard key={o.id} order={o} account={o.user_id ? accounts[o.user_id] : undefined} />
           ))}
         </div>
       )}

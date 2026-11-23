@@ -1,10 +1,11 @@
 'use server';
 
-import { createSupabasePublicClient } from '@/lib/supabase/server';
+import { createSupabasePublicClient, createSupabaseServerClient } from '@/lib/supabase/server';
 import { buildOrderItems, itemsSubtotal, shippingFor, validateCustomer } from '@/models/domain/orders';
 import { sizesOf, stockIssues } from '@/models/domain/sizes';
 import { getFragrancesByIds } from '@/models/repositories/fragrance.repository';
 import { createOrder, trackOrder } from '@/models/repositories/order.repository';
+import { getProfile, saveProfile } from '@/models/repositories/profile.repository';
 import { getStoreConfig } from '@/models/repositories/store-config.repository';
 import type { ActionResult, CartLine, Customer, OrderItem, TrackedOrder } from '@/models/types';
 import { runAction, UserError } from './action-result';
@@ -15,6 +16,8 @@ export interface PlacedOrder {
   subtotal: number;
   shipping: number;
   total: number;
+  /** El pedido quedó ligado a la cuenta del cliente */
+  linkedToAccount: boolean;
 }
 
 const clean = (v: unknown, max = 160) => String(v ?? '').trim().slice(0, max);
@@ -50,7 +53,10 @@ export async function placeOrder(input: { customer: Partial<Customer>; lines: Ca
       .map((l) => ({ fragId: l.fragId, size: l.size, qty: Math.floor(Number(l.qty)) }));
     if (!lines.length) throw new UserError('Agrega al menos una fragancia a tu bolsa');
 
-    const db = createSupabasePublicClient();
+    // Con sesión, create_order guarda la cuenta del cliente (auth.uid()); sin sesión actúa como visitante.
+    const db = await createSupabaseServerClient();
+    const { data: auth } = await db.auth.getUser();
+    const user = auth.user;
     const [config, byId] = await Promise.all([getStoreConfig(db), getFragrancesByIds(db, [...new Set(lines.map((l) => l.fragId))])]);
     const sizes = sizesOf(config);
 
@@ -70,7 +76,20 @@ export async function placeOrder(input: { customer: Partial<Customer>; lines: Ca
     } catch (e) {
       throw new UserError(`No se pudo registrar el pedido (${e instanceof Error ? e.message : 'error'}). Intenta de nuevo`);
     }
-    return { number, items, subtotal, shipping, total };
+    if (user) {
+      // La dirección usada se guarda en su perfil para precargar la siguiente compra.
+      const prev = await getProfile(db, user.id).catch(() => null);
+      const { name, phone, email: _email, ...address } = customer;
+      void _email;
+      await saveProfile(db, {
+        id: user.id,
+        name: prev?.name || name,
+        phone: prev?.phone || phone,
+        address,
+        notifyEmail: prev?.notifyEmail ?? true,
+      }).catch(() => undefined);
+    }
+    return { number, items, subtotal, shipping, total, linkedToAccount: !!user };
   });
 }
 
