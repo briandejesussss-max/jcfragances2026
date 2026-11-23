@@ -210,6 +210,20 @@ export interface CustomerAccount {
   ordersCount: number;
 }
 
+/** Persona que compró sin cuenta (pedidos agrupados por correo). */
+export interface GuestBuyer {
+  email: string;
+  name: string;
+  phone: string;
+  ordersCount: number;
+  /** Suma de sus pedidos no cancelados */
+  total: number;
+  lastOrderNumber: string;
+  lastOrderAt: string;
+  /** Ya tiene cuenta con ese correo, pero no ha agregado estos pedidos */
+  hasAccount: boolean;
+}
+
 /** Línea del carrito guardada en el navegador: el precio se vuelve a calcular en el servidor. */
 export interface CartLine {
   fragId: string;

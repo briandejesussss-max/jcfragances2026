@@ -1,33 +1,65 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, KeyRound, Search, X } from 'lucide-react';
 import { resetCustomerPasswordAction } from '@/controllers/customers.controller';
 import { formatDate } from '@/lib/utils/format';
 import { whatsappLink } from '@/lib/utils/whatsapp';
-import type { CustomerAccount } from '@/models/types';
+import type { CustomerAccount, GuestBuyer } from '@/models/types';
+import { cn } from '@/lib/utils/cn';
 import { Alert } from '@/views/shared/Alert';
 import { Button, buttonClass } from '@/views/shared/Button';
 import { Input } from '@/views/shared/Field';
 import { useToast } from '@/views/shared/Toast';
 import { PageTitle } from '../shared/PageTitle';
+import { GuestBuyerCard } from './GuestBuyerCard';
 
 const SITE = 'https://jcfragances2026.vercel.app';
 
 /** Panel → Clientes: cuentas registradas y contraseña temporal para quien olvidó la suya. */
-export function CustomersList({ customers, query }: { customers: CustomerAccount[]; query: string }) {
+type View = 'accounts' | 'guests';
+
+const href = (view: View, q: string) => {
+  const p = new URLSearchParams();
+  if (view === 'guests') p.set('vista', 'sin-cuenta');
+  if (q.trim()) p.set('q', q.trim());
+  const s = p.toString();
+  return `/admin/clientes${s ? `?${s}` : ''}`;
+};
+
+export function CustomersList({ customers, guests, query, view }: { customers: CustomerAccount[]; guests: GuestBuyer[]; query: string; view: View }) {
   const router = useRouter();
   const [q, setQ] = useState(query);
 
   const search = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push(q.trim() ? `/admin/clientes?q=${encodeURIComponent(q.trim())}` : '/admin/clientes');
+    router.push(href(view, q));
   };
+
+  const tabs: Array<[View, string, number]> = [
+    ['accounts', 'Con cuenta', customers.length],
+    ['guests', 'Compraron sin cuenta', guests.length],
+  ];
 
   return (
     <>
-      <PageTitle title={`Clientes (${customers.length}${customers.length === 100 ? '+' : ''})`} />
+      <PageTitle title="Clientes">
+        <div className="flex gap-1" role="tablist" aria-label="Tipo de cliente">
+          {tabs.map(([k, label, n]) => (
+            <Link
+              key={k}
+              href={href(k, query)}
+              role="tab"
+              aria-selected={view === k}
+              className={cn('rounded-pill border px-3 py-1.5 text-[11px] uppercase', view === k ? 'border-cream bg-cream text-walnut' : 'border-cork text-sand hover:text-cream')}
+            >
+              {label} ({n})
+            </Link>
+          ))}
+        </div>
+      </PageTitle>
       <form onSubmit={search} className="mb-4 flex gap-2">
         <label className="relative flex-1">
           <span className="sr-only">Buscar cliente</span>
@@ -39,6 +71,23 @@ export function CustomersList({ customers, query }: { customers: CustomerAccount
         </Button>
       </form>
 
+      {view === 'guests' ? (
+        <>
+          <Alert tone="info" className="mb-4">
+            Personas que te han comprado sin crear cuenta (agrupadas por correo). Invítalas por WhatsApp: el enlace ya trae su correo y su último pedido para que lo agreguen al registrarse.
+          </Alert>
+          {guests.length === 0 ? (
+            <p className="rounded-3xl border border-cork bg-umber p-6 text-center text-sm text-sand">{query ? 'Nadie con esa búsqueda.' : 'Todos tus compradores ya tienen cuenta.'}</p>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {guests.map((g) => (
+                <GuestBuyerCard key={g.email} guest={g} />
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+      <>
       <Alert tone="info" className="mb-4">
         Si un cliente olvidó su contraseña, primero confirma que es él: que te escriba desde el teléfono de sus pedidos o te dé un número de pedido y su correo. Luego genera una contraseña temporal y mándasela.
       </Alert>
@@ -51,6 +100,8 @@ export function CustomersList({ customers, query }: { customers: CustomerAccount
             <CustomerCard key={c.id} customer={c} />
           ))}
         </div>
+      )}
+      </>
       )}
     </>
   );

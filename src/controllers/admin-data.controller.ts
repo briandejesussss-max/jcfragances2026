@@ -4,7 +4,7 @@ import { requireAdminPage } from '@/lib/auth/session';
 import { getAppSettings, listMovements } from '@/models/repositories/finance.repository';
 import { getFragrance, listFragranceSummaries } from '@/models/repositories/fragrance.repository';
 import { listOrders, listOrderTotals } from '@/models/repositories/order.repository';
-import { listCustomers } from '@/models/repositories/customer.repository';
+import { listCustomers, listGuestBuyers } from '@/models/repositories/customer.repository';
 import { getProfilesByIds } from '@/models/repositories/profile.repository';
 import { getStoreConfig } from '@/models/repositories/store-config.repository';
 
@@ -45,7 +45,10 @@ export async function loadFinance() {
   return { movements, orders, settings };
 }
 
+/** Clientes con cuenta y personas que compraron sin cuenta (para las dos vistas de la pestaña Clientes). */
 export async function loadCustomers(query: string) {
   const { db } = await requireAdminPage();
-  return listCustomers(db, query.slice(0, 80));
+  const q = query.slice(0, 80);
+  const [customers, guests] = await Promise.all([listCustomers(db, q), listGuestBuyers(db, q)]);
+  return { customers, guests };
 }

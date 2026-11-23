@@ -1,7 +1,7 @@
 import 'server-only';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { CustomerAccount } from '../types';
+import type { CustomerAccount, GuestBuyer } from '../types';
 
 /** Cuentas de cliente para el panel (funciones de la base de datos que solo aceptan administradores). */
 
@@ -27,4 +27,21 @@ export async function setCustomerPassword(db: SupabaseClient, userId: string, pa
   if (error.message.includes('es administrador')) throw new Error('Esa cuenta es de administrador; no se puede cambiar desde aquí.');
   if (error.message.includes('no encontrado')) throw new Error('No se encontró la cuenta del cliente.');
   throw new Error(`No se pudo cambiar la contraseña: ${error.message}`);
+}
+
+type GuestRow = { email: string; name: string; phone: string; orders_count: number; total: number; last_order_number: string; last_order_at: string; has_account: boolean };
+
+export async function listGuestBuyers(db: SupabaseClient, query = ''): Promise<GuestBuyer[]> {
+  const { data, error } = await db.rpc('admin_list_guest_buyers', { p_query: query });
+  if (error) throw new Error(`No se pudieron cargar los compradores sin cuenta: ${error.message}`);
+  return ((data ?? []) as GuestRow[]).map((r) => ({
+    email: r.email,
+    name: r.name,
+    phone: r.phone,
+    ordersCount: Number(r.orders_count) || 0,
+    total: Number(r.total) || 0,
+    lastOrderNumber: r.last_order_number,
+    lastOrderAt: r.last_order_at,
+    hasAccount: !!r.has_account,
+  }));
 }
