@@ -118,6 +118,30 @@ export interface StoreConfig {
   logo: string;
   lowMlThreshold: number;
   sizes: SizeConfig[];
+  /** Portada: perfume del desglose, ocasiones y fotos de Instagram (se edita en Panel → Tienda). */
+  home?: HomeConfig;
+}
+
+/** Una tarjeta de "Un perfume para cada momento". Sin perfume = se elige solo. */
+export interface HomeOccasion {
+  title: string;
+  fragranceId?: string;
+}
+
+/** Una foto de la galería "Síguenos en Instagram". */
+export interface InstagramPhoto {
+  image: string;
+  /** Link a la publicación (si no, abre el perfil). */
+  link?: string;
+}
+
+export interface HomeConfig {
+  /** Perfume que se "desglosa" en la portada (se le quita la tapa y salen sus notas). */
+  featuredId?: string;
+  /** Qué porcentaje de la foto (de arriba hacia abajo) es la tapa. */
+  capPct?: number;
+  occasions?: HomeOccasion[];
+  instagram?: InstagramPhoto[];
 }
 
 export type OrderStatus =

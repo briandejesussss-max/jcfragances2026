@@ -11,6 +11,7 @@ html:not([data-palette]) {
   --aurora-2: #ff4f9a;
   --aurora-3: #9b5dff;
   --aurora-gradient: linear-gradient(90deg, var(--aurora-1), var(--aurora-2) 55%, var(--aurora-3));
+  --brand-gradient: var(--aurora-gradient);
 }
 
 /* Títulos con tipografía más moderna */
