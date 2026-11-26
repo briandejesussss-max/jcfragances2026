@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from 'lucide-react';
 import { saveHomeConfigAction } from '@/controllers/home-config.controller';
-import { CAPTION_MAX, clampCap, DEFAULT_CAP_PCT, DEFAULT_OCCASIONS, MAX_INSTAGRAM } from '@/models/domain/home';
+import { CAPTION_MAX, DEFAULT_OCCASIONS, MAX_CAROUSEL, MAX_INSTAGRAM } from '@/models/domain/home';
 import type { FragranceSummary, HomeConfig, InstagramPhoto } from '@/models/types';
 import { Alert } from '@/views/shared/Alert';
 import { Button } from '@/views/shared/Button';
@@ -15,23 +15,29 @@ import { ImageUploadField } from '../shared/ImageUploadField';
 import { resizeImage } from '../shared/image-tools';
 
 /**
- * Panel → Tienda → Portada: perfume que se "desglosa" (y dónde termina su tapa),
+ * Panel → Tienda → Portada: perfumes del carrusel de la portada (y su orden),
  * las 4 tarjetas de "Un perfume para cada momento" y las fotos de "Síguenos en Instagram".
  */
 export function HomeConfigForm({ home, fragrances }: { home: HomeConfig | undefined; fragrances: FragranceSummary[] }) {
   const router = useRouter();
   const notify = useToast();
   const withImg = fragrances.filter((f) => f.image);
-  const [featuredId, setFeaturedId] = useState(home?.featuredId ?? '');
-  const [capPct, setCapPct] = useState(clampCap(home?.capPct ?? DEFAULT_CAP_PCT));
+  const [carousel, setCarousel] = useState<string[]>(home?.carouselIds?.length ? home.carouselIds : home?.featuredId ? [home.featuredId] : []);
   const [occasions, setOccasions] = useState(DEFAULT_OCCASIONS.map((d, i) => ({ title: home?.occasions?.[i]?.title ?? d.title, fragranceId: home?.occasions?.[i]?.fragranceId ?? '' })));
   const [photos, setPhotos] = useState<InstagramPhoto[]>(home?.instagram ?? []);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  const featured = withImg.find((f) => f.id === featuredId);
+  const byId = new Map(withImg.map((f) => [f.id, f]));
 
   const setOccasion = (i: number, patch: Partial<{ title: string; fragranceId: string }>) => setOccasions((prev) => prev.map((o, j) => (j === i ? { ...o, ...patch } : o)));
   const setPhoto = (i: number, patch: Partial<InstagramPhoto>) => setPhotos((prev) => prev.map((p, j) => (j === i ? { ...p, ...patch } : p)));
+  const moveIn = <T,>(list: T[], i: number, d: number) => {
+    const next = [...list];
+    const j = i + d;
+    if (j < 0 || j >= next.length) return list;
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+  };
   const movePhoto = (i: number, d: number) =>
     setPhotos((prev) => {
       const next = [...prev];
@@ -46,8 +52,7 @@ export function HomeConfigForm({ home, fragrances }: { home: HomeConfig | undefi
     setError(null);
     start(async () => {
       const res = await saveHomeConfigAction({
-        featuredId: featuredId || undefined,
-        capPct,
+        carouselIds: carousel.filter(Boolean),
         occasions: occasions.map((o) => ({ title: o.title, fragranceId: o.fragranceId || undefined })),
         instagram: photos.filter((p) => p.image),
       });
@@ -65,35 +70,40 @@ export function HomeConfigForm({ home, fragrances }: { home: HomeConfig | undefi
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        {/* Perfume del desglose */}
+        {/* Carrusel de la portada */}
         <div className="space-y-3 rounded-3xl border border-cork bg-umber p-4 sm:p-5">
-          <Field label="Perfume de portada" hint="Al bajar, se le quita la tapa y salen sus notas. Usa un perfume con foto del frasco solo, de frente y sin fondo, y con su pirámide de notas llena.">
-            <Select value={featuredId} onChange={(e) => setFeaturedId(e.target.value)}>
-              <option value="">— Ninguno (portada clásica) —</option>
-              {withImg.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.brand} · {f.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          {featured && (
-            <div className="flex gap-4">
-              <div className="relative h-60 w-40 shrink-0 overflow-hidden rounded-2xl bg-bark">
-                <SmartImage src={featured.image!} alt={featured.name} fill sizes="160px" className="object-contain" />
-                <div className="pointer-events-none absolute inset-x-0 top-0 bg-ember/25" style={{ height: `${capPct}%` }} />
-                <div className="pointer-events-none absolute inset-x-0 border-t-2 border-dashed border-ember" style={{ top: `${capPct}%` }}>
-                  <span className="absolute -top-5 left-1 rounded bg-ember px-1.5 text-[10px] font-semibold text-walnut">Tapa ↑</span>
-                </div>
+          <div>
+            <Label>Perfumes del carrusel (hasta {MAX_CAROUSEL})</Label>
+            <p className="text-[11px] text-drift">Es lo primero que ven tus clientes: pasan solos cada pocos segundos, en este orden. Si dejas la lista vacía, se muestran los más nuevos del catálogo.</p>
+          </div>
+          {carousel.map((id, i) => {
+            const f = byId.get(id);
+            return (
+              <div key={`${id}-${i}`} className="flex items-center gap-2">
+                <span className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-bark">{f?.image && <SmartImage src={f.image} alt="" fill sizes="48px" className="object-contain" />}</span>
+                <Select value={id} onChange={(e) => setCarousel((prev) => prev.map((x, j) => (j === i ? e.target.value : x)))} aria-label={`Perfume ${i + 1} del carrusel`} className="min-w-0 flex-1">
+                  {withImg.map((x) => (
+                    <option key={x.id} value={x.id}>
+                      {x.name} · {x.brand}
+                    </option>
+                  ))}
+                </Select>
+                <button type="button" disabled={i === 0} onClick={() => setCarousel((prev) => moveIn(prev, i, -1))} aria-label={`Subir perfume ${i + 1}`} className="grid size-8 shrink-0 place-items-center rounded-full border border-cork text-sand hover:text-cream disabled:opacity-30">
+                  <ArrowLeft className="size-3.5 rotate-90" />
+                </button>
+                <button type="button" disabled={i === carousel.length - 1} onClick={() => setCarousel((prev) => moveIn(prev, i, 1))} aria-label={`Bajar perfume ${i + 1}`} className="grid size-8 shrink-0 place-items-center rounded-full border border-cork text-sand hover:text-cream disabled:opacity-30">
+                  <ArrowRight className="size-3.5 rotate-90" />
+                </button>
+                <button type="button" onClick={() => setCarousel((prev) => prev.filter((_, j) => j !== i))} aria-label={`Quitar perfume ${i + 1}`} className="grid size-8 shrink-0 place-items-center rounded-full border border-cork text-sand hover:text-bad">
+                  <Trash2 className="size-3.5" />
+                </button>
               </div>
-              <div className="min-w-0 flex-1 space-y-2">
-                <Label>¿Dónde termina la tapa?</Label>
-                <input type="range" min={5} max={60} value={capPct} onChange={(e) => setCapPct(Number(e.target.value))} className="w-full accent-[var(--color-ember)]" aria-label="Altura de la tapa" />
-                <p className="text-xs text-sand">
-                  Mueve la barra hasta que la línea punteada quede <b className="text-cream">justo debajo de la tapa</b>. Lo de arriba de la línea es lo que se levanta en la animación. ({capPct}%)
-                </p>
-              </div>
-            </div>
+            );
+          })}
+          {carousel.length < MAX_CAROUSEL && withImg.length > 0 && (
+            <Button size="sm" variant="ghost" onClick={() => setCarousel((prev) => [...prev, withImg.find((f) => !prev.includes(f.id))?.id ?? withImg[0].id])}>
+              <Plus className="size-3.5" /> Agregar perfume
+            </Button>
           )}
         </div>
 
