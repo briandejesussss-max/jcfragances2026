@@ -1,3 +1,4 @@
+import { inspirationSearchText } from './inspiration';
 import type { FragranceSummary } from '../types';
 
 /** Filtros y orden del catálogo público. */
@@ -41,7 +42,7 @@ export function filterCatalog(list: FragranceSummary[], filter: CatalogFilter): 
       (f.name ?? '').toLowerCase().includes(q) ||
       (f.brand ?? '').toLowerCase().includes(q) ||
       (f.notes ?? '').toLowerCase().includes(q) ||
-      (f.inspiration ? `${f.inspiration.brand} ${f.inspiration.name}`.toLowerCase().includes(q) : false);
+      inspirationSearchText(f.inspiration).includes(q);
     return brandOk && genderOk && queryOk;
   });
 

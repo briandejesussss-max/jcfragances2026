@@ -6,6 +6,7 @@ import { Heart, Sparkles } from 'lucide-react';
 import { PLACEHOLDER_IMAGE } from '@/config/store';
 import { cn } from '@/lib/utils/cn';
 import { fragranceSlug } from '@/lib/utils/slug';
+import { inspirationTitle } from '@/models/domain/inspiration';
 import { profileOf } from '@/models/domain/profile';
 import type { FragranceSummary } from '@/models/types';
 import { useStore } from '../state/StoreProvider';
@@ -60,7 +61,7 @@ export function FragranceCard({ fragrance: f, priority = false }: { fragrance: F
           <h3 className={cn(styles.name, 'mt-1 truncate text-base sm:text-lg')}>{f.name}</h3>
           {f.inspiration?.name && (
             <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-ember">
-              <Sparkles className="size-3 shrink-0" /> <span className="truncate">Inspirado en {f.inspiration.name}</span>
+              <Sparkles className="size-3 shrink-0" /> <span className="truncate">Inspirado en {inspirationTitle(f.inspiration, ' ')}</span>
             </p>
           )}
           <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-sand">
