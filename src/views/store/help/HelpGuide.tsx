@@ -241,7 +241,7 @@ export function HelpGuide({ config }: { config: StoreConfig }) {
           Los pedidos de productos en existencia solo tienen cuatro etapas: registrado, pagado, enviado y entregado. Cuando se envíe, en el detalle aparece el botón <UI>Rastrear paquete</UI> de la paquetería.
         </p>
         <p className="max-w-[62ch] text-sand">
-          Cuando tu pedido esté <b className="font-medium text-cream">entregado</b>, ábrelo y toca <UI>Calificar</UI> en cada perfume: elige estrellas, cuánto te duró, su estela y deja un comentario si quieres. Tu reseña aparece en la ficha del perfume con tu nombre de pila y la etiqueta “Compra verificada”, y la puedes editar cuando quieras.
+          Cuando tu pedido esté <b className="font-medium text-cream">entregado</b>, ábrelo y toca <UI>Calificar</UI> en cada perfume: elige estrellas, cuánto te duró, su estela y deja un comentario si quieres. Tu reseña aparece en la ficha del perfume con tu nombre de pila y la etiqueta “Compra verificada”. También puedes opinar sin cuenta desde <UI>Escribir reseña</UI> en la ficha de cualquier perfume: sale como “Opinión” y se publica cuando la tienda la revisa.
         </p>
         <Note>
           <b className="font-medium text-cream">¿Sin cuenta?</b> También puedes rastrear en{' '}

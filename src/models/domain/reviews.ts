@@ -57,5 +57,9 @@ export function reviewErrorMessage(raw: string): string {
   if (raw.includes('sin sesion')) return 'Tu sesión terminó. Vuelve a entrar a tu cuenta.';
   if (raw.includes('comentario largo')) return `El comentario puede tener hasta ${COMMENT_MAX} caracteres.`;
   if (raw.includes('calificacion')) return 'Elige de 1 a 5 estrellas.';
+  if (raw.includes('sin links')) return 'Por seguridad, las reseñas no pueden llevar links ni páginas web.';
+  if (raw.includes('falta nombre')) return 'Escribe tu nombre (al menos 2 letras).';
+  if (raw.includes('limite diario')) return 'Llegaste al límite de reseñas por hoy. Intenta mañana.';
+  if (raw.includes('sin visitante')) return 'Activa las cookies o el almacenamiento del navegador para dejar tu reseña.';
   return 'No se pudo guardar tu reseña. Intenta de nuevo.';
 }

@@ -2,27 +2,45 @@ import { BadgeCheck, MessageSquareQuote } from 'lucide-react';
 import { LONGEVITY_LABEL, SILLAGE_LABEL, summarizeReviews } from '@/models/domain/reviews';
 import type { Review } from '@/models/types';
 import { Stars } from '@/views/reviews/Stars';
+import { WriteReview } from '@/views/reviews/WriteReview';
 
 const dateFmt = new Intl.DateTimeFormat('es-MX', { month: 'short', year: 'numeric', timeZone: 'America/Mexico_City' });
 
-/** Reseñas reales de clientes con compra verificada. */
-export function CustomerReviews({ reviews }: { reviews: Review[] }) {
+/** Etiqueta de cada reseña: "Compra verificada" (compró en la tienda) u "Opinión". */
+export function ReviewTag({ verified }: { verified: boolean }) {
+  return verified ? (
+    <span className="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.06em] text-ember">
+      <BadgeCheck className="size-3" /> Compra verificada
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.06em] text-sand">
+      <MessageSquareQuote className="size-3" /> Opinión
+    </span>
+  );
+}
+
+/** Reseñas de clientes: cualquiera puede escribir; las de compra verificada se distinguen. */
+export function CustomerReviews({ fragranceId, reviews }: { fragranceId: string; reviews: Review[] }) {
   const s = summarizeReviews(reviews);
+  const verified = reviews.filter((r) => r.verified).length;
+  const opinions = s.count - verified;
   return (
     <section id="resenas" className="scroll-mt-20 rounded-3xl border border-cork bg-umber p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-[11px] tracking-[0.14em] text-sand">Reseñas de clientes</h2>
-        <span className="inline-flex items-center gap-1 rounded-full border border-cork px-2 py-0.5 text-[9px] uppercase text-sand">
-          <BadgeCheck className="size-3" /> Compras verificadas
-        </span>
+        {s.count > 0 && (
+          <span className="text-[11px] text-sand">
+            {s.count} {s.count === 1 ? 'reseña' : 'reseñas'}
+          </span>
+        )}
       </div>
+
+      <WriteReview fragranceId={fragranceId} />
 
       {s.count === 0 ? (
         <div className="mt-4 flex items-start gap-3 rounded-2xl bg-bark/50 p-4 text-sm text-sand">
           <MessageSquareQuote className="mt-0.5 size-5 shrink-0 text-ember" />
-          <p>
-            Aún no hay reseñas de este perfume. Si lo compraste con tu cuenta, cuando tu pedido esté entregado podrás calificarlo desde <strong className="text-cream">Mis pedidos</strong>.
-          </p>
+          <p>Aún no hay reseñas de este perfume. ¿Ya lo probaste? Sé la primera persona en opinar.</p>
         </div>
       ) : (
         <>
@@ -31,7 +49,7 @@ export function CustomerReviews({ reviews }: { reviews: Review[] }) {
               <strong className="block font-mono text-4xl font-medium">{s.average.toFixed(1)}</strong>
               <Stars value={s.average} size="md" className="mt-1" />
               <span className="mt-1 block text-[11px] text-sand">
-                {s.count} {s.count === 1 ? 'reseña' : 'reseñas'}
+                {[verified && `${verified} ${verified === 1 ? 'compra verificada' : 'compras verificadas'}`, opinions && `${opinions} ${opinions === 1 ? 'opinión' : 'opiniones'}`].filter(Boolean).join(' · ')}
               </span>
             </div>
             <div className="space-y-1">
@@ -60,9 +78,7 @@ export function CustomerReviews({ reviews }: { reviews: Review[] }) {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="flex items-center gap-2 text-sm">
                     <strong className="font-medium">{r.authorName || 'Cliente'}</strong>
-                    <span className="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.06em] text-ember">
-                      <BadgeCheck className="size-3" /> Compra verificada
-                    </span>
+                    <ReviewTag verified={r.verified} />
                   </span>
                   <span className="text-[11px] text-drift">{dateFmt.format(new Date(r.createdAt))}</span>
                 </div>
@@ -78,6 +94,7 @@ export function CustomerReviews({ reviews }: { reviews: Review[] }) {
               </li>
             ))}
           </ul>
+          <p className="mt-3 text-[11px] text-drift">“Compra verificada”: lo compró en la tienda. “Opinión”: reseña revisada por la tienda, sin compra registrada.</p>
         </>
       )}
     </section>

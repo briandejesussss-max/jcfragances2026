@@ -237,6 +237,10 @@ export interface Review {
   comment: string;
   authorName: string;
   hidden: boolean;
+  /** Tiene un pedido entregado con este perfume ("Compra verificada"). */
+  verified: boolean;
+  /** Espera aprobación del administrador (las reseñas sin compra). */
+  pending: boolean;
   createdAt: string;
 }
 
@@ -247,9 +251,14 @@ export interface ReviewStat {
 }
 
 /** Reseña propia del cliente (para "ya calificado" y editar). */
-export type MyReview = Pick<Review, 'fragranceId' | 'rating' | 'longevity' | 'sillage' | 'comment' | 'hidden'>;
+export type MyReview = Pick<Review, 'fragranceId' | 'rating' | 'longevity' | 'sillage' | 'comment' | 'hidden' | 'pending' | 'verified'>;
 
-export type ReviewInput = Pick<Review, 'fragranceId' | 'rating' | 'longevity' | 'sillage' | 'comment'>;
+export type ReviewInput = Pick<Review, 'fragranceId' | 'rating' | 'longevity' | 'sillage' | 'comment'> & {
+  /** Nombre para mostrar (si va vacío y hay sesión, se usa el de la cuenta). */
+  name?: string;
+  /** Identificador anónimo del navegador (para visitantes sin cuenta). */
+  visitor?: string | null;
+};
 
 /** Línea del carrito guardada en el navegador: el precio se vuelve a calcular en el servidor. */
 export interface CartLine {

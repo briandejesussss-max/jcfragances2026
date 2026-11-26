@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Trash2 } from 'lucide-react';
-import { deleteReviewAction, setReviewHiddenAction } from '@/controllers/review.controller';
+import { Check, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { approveReviewAction, deleteReviewAction, setReviewHiddenAction } from '@/controllers/review.controller';
 import { formatDate } from '@/lib/utils/format';
 import { cn } from '@/lib/utils/cn';
 import { LONGEVITY_LABEL, SILLAGE_LABEL } from '@/models/domain/reviews';
@@ -11,27 +11,31 @@ import type { Review } from '@/models/types';
 import { Button } from '@/views/shared/Button';
 import { useToast } from '@/views/shared/Toast';
 import { Stars } from '@/views/reviews/Stars';
+import { ReviewTag } from '@/views/store/product/CustomerReviews';
 import { PageTitle } from '../shared/PageTitle';
 
-type Filter = 'all' | 'visible' | 'hidden' | 'low';
-const FILTERS: Array<[Filter, string]> = [
-  ['all', 'Todas'],
-  ['visible', 'Publicadas'],
-  ['hidden', 'Ocultas'],
-  ['low', '1–2 ★'],
-];
+type Filter = 'pending' | 'visible' | 'hidden' | 'all';
+const MATCH: Record<Filter, (r: Review) => boolean> = {
+  pending: (r) => r.pending && !r.hidden,
+  visible: (r) => !r.pending && !r.hidden,
+  hidden: (r) => r.hidden,
+  all: () => true,
+};
+const LABEL: Record<Filter, string> = { pending: 'Por aprobar', visible: 'Publicadas', hidden: 'Ocultas', all: 'Todas' };
 
 /** Panel → Reseñas: ver, ocultar/mostrar o borrar reseñas de clientes. */
 export function ReviewsModeration({ reviews, names }: { reviews: Review[]; names: Record<string, string> }) {
-  const [filter, setFilter] = useState<Filter>('all');
-  const shown = reviews.filter((r) => (filter === 'visible' ? !r.hidden : filter === 'hidden' ? r.hidden : filter === 'low' ? r.rating <= 2 : true));
-  const avg = reviews.length ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : 0;
+  const toApprove = reviews.filter(MATCH.pending).length;
+  const [filter, setFilter] = useState<Filter>(toApprove ? 'pending' : 'visible');
+  const shown = reviews.filter(MATCH[filter]);
+  const published = reviews.filter(MATCH.visible);
+  const avg = published.length ? published.reduce((a, r) => a + r.rating, 0) / published.length : 0;
 
   return (
     <>
       <PageTitle title="Reseñas">
         <div className="flex flex-wrap gap-1">
-          {FILTERS.map(([k, label]) => (
+          {(Object.keys(LABEL) as Filter[]).map((k) => (
             <button
               key={k}
               type="button"
@@ -39,15 +43,15 @@ export function ReviewsModeration({ reviews, names }: { reviews: Review[]; names
               onClick={() => setFilter(k)}
               className={cn('rounded-pill border px-3 py-1.5 text-[11px] uppercase', filter === k ? 'border-cream bg-cream text-walnut' : 'border-cork text-sand hover:text-cream')}
             >
-              {label}
+              {LABEL[k]} ({reviews.filter(MATCH[k]).length})
             </button>
           ))}
         </div>
       </PageTitle>
       <p className="mb-4 text-sm text-sand">
         {reviews.length === 0
-          ? 'Todavía no hay reseñas. Los clientes con cuenta pueden calificar sus perfumes cuando marques su pedido como “Entregado”.'
-          : `${reviews.length} ${reviews.length === 1 ? 'reseña' : 'reseñas'} · promedio ${avg.toFixed(1)} ★. Las ocultas no se ven en la tienda ni cuentan en el promedio.`}
+          ? 'Todavía no hay reseñas. Cualquier persona puede escribir una desde la ficha del perfume.'
+          : `${published.length} publicadas · promedio ${avg.toFixed(1)} ★. Las “Opinión” (sin compra) esperan tu aprobación; las de “Compra verificada” se publican solas. Las pendientes y ocultas no se ven en la tienda ni cuentan en el promedio.`}
       </p>
       <ul className="space-y-2">
         {shown.map((r) => (
@@ -79,14 +83,21 @@ function ReviewRow({ review: r, name }: { review: Review; name: string }) {
         <div className="min-w-0">
           <strong className="block truncate text-sm font-medium">{name}</strong>
           <span className="flex flex-wrap items-center gap-2 text-[11px] text-sand">
-            <Stars value={r.rating} size="xs" /> {r.authorName || 'Cliente'} · {formatDate(r.createdAt)}
+            <Stars value={r.rating} size="xs" /> {r.authorName || 'Cliente'} · {formatDate(r.createdAt)} · <ReviewTag verified={r.verified} />
             {r.hidden && <span className="rounded-full border border-cork px-2 py-0.5 text-[9px] uppercase">Oculta</span>}
           </span>
         </div>
         <div className="flex gap-1">
-          <Button size="sm" variant="ghost" disabled={pending} onClick={() => run(() => setReviewHiddenAction(r.id, !r.hidden), r.hidden ? 'Reseña visible de nuevo' : 'Reseña oculta')}>
-            {r.hidden ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />} {r.hidden ? 'Mostrar' : 'Ocultar'}
-          </Button>
+          {r.pending && !r.hidden && (
+            <Button size="sm" variant="cream" disabled={pending} onClick={() => run(() => approveReviewAction(r.id), 'Reseña aprobada y publicada')}>
+              <Check className="size-3.5" /> Aprobar
+            </Button>
+          )}
+          {!(r.pending && !r.hidden) && (
+            <Button size="sm" variant="ghost" disabled={pending} onClick={() => run(() => setReviewHiddenAction(r.id, !r.hidden), r.hidden ? 'Reseña visible de nuevo' : 'Reseña oculta')}>
+              {r.hidden ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />} {r.hidden ? 'Mostrar' : 'Ocultar'}
+            </Button>
+          )}
           {confirm ? (
             <Button size="sm" variant="danger" disabled={pending} onClick={() => run(() => deleteReviewAction(r.id), 'Reseña borrada')}>
               ¿Borrar?

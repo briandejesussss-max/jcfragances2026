@@ -1,21 +1,25 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Star } from 'lucide-react';
-import { submitReviewAction } from '@/controllers/review.controller';
+import { getReviewerNameAction, submitReviewAction } from '@/controllers/review.controller';
+import { visitorId } from '@/lib/analytics/track';
 import { cn } from '@/lib/utils/cn';
 import { COMMENT_MAX, LONGEVITY_OPTIONS, SILLAGE_OPTIONS } from '@/models/domain/reviews';
 import type { Longevity, MyReview, Sillage } from '@/models/types';
 import { Alert } from '@/views/shared/Alert';
 import { Button } from '@/views/shared/Button';
-import { Label, Textarea } from '@/views/shared/Field';
+import { Input, Label, Textarea } from '@/views/shared/Field';
 
 const RATING_WORDS = ['', 'No me gustó', 'Regular', 'Bien', 'Muy bien', '¡Me encantó!'];
 
-/** Calificación de un perfume comprado: estrellas, duración, estela y comentario. */
-export function ReviewForm({ fragranceId, initial, onDone }: { fragranceId: string; initial?: MyReview; onDone: () => void }) {
+export type ReviewResult = { pending: boolean; verified: boolean };
+
+/** Reseña de un perfume: nombre, estrellas, duración, estela y comentario. Funciona con o sin cuenta. */
+export function ReviewForm({ fragranceId, initial, onDone, onCancel }: { fragranceId: string; initial?: MyReview; onDone: (r: ReviewResult & { name: string }) => void; onCancel: () => void }) {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [rating, setRating] = useState(initial?.rating ?? 0);
   const [hover, setHover] = useState(0);
   const [longevity, setLongevity] = useState<Longevity | null>(initial?.longevity ?? null);
@@ -25,20 +29,37 @@ export function ReviewForm({ fragranceId, initial, onDone }: { fragranceId: stri
   const [pending, start] = useTransition();
   const shown = hover || rating;
 
+  // Con sesión iniciada, llena el nombre con el de la cuenta.
+  useEffect(() => {
+    let cancelled = false;
+    getReviewerNameAction()
+      .then((n) => !cancelled && n && setName((prev) => prev || n))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (name.trim().length < 2) return setError('Escribe tu nombre.');
     if (!rating) return setError('Elige de 1 a 5 estrellas.');
     setError(null);
     start(async () => {
-      const res = await submitReviewAction({ fragranceId, rating, longevity, sillage, comment });
+      const res = await submitReviewAction({ fragranceId, rating, longevity, sillage, comment, name, visitor: visitorId() });
       if (!res.ok) return setError(res.error);
       router.refresh();
-      onDone();
+      onDone({ ...res.data, name: name.trim().split(/\s+/)[0] });
     });
   };
 
   return (
     <form onSubmit={submit} className="space-y-3 rounded-2xl border border-cork bg-walnut p-3">
+      <label className="block">
+        <Label>Tu nombre</Label>
+        <Input value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder="Ej. Miguel" autoComplete="given-name" />
+        <span className="mt-1 block text-[11px] text-drift">Se publica solo tu nombre de pila.</span>
+      </label>
       <fieldset>
         <legend className="mb-1 text-[10px] font-medium uppercase tracking-[0.08em] text-sand">Tu calificación</legend>
         <div className="flex items-center gap-2" onMouseLeave={() => setHover(0)}>
@@ -72,13 +93,13 @@ export function ReviewForm({ fragranceId, initial, onDone }: { fragranceId: stri
       {error && <Alert>{error}</Alert>}
       <div className="flex gap-2">
         <Button type="submit" variant="cream" disabled={pending}>
-          {pending ? 'Guardando…' : initial ? 'Guardar cambios' : 'Publicar reseña'}
+          {pending ? 'Enviando…' : initial ? 'Guardar cambios' : 'Enviar reseña'}
         </Button>
-        <Button variant="ghost" onClick={onDone} disabled={pending}>
+        <Button variant="ghost" onClick={onCancel} disabled={pending}>
           Cancelar
         </Button>
       </div>
-      <p className="text-[11px] text-drift">Se publica con tu nombre de pila y la etiqueta “Compra verificada”.</p>
+      <p className="text-[11px] text-drift">Si compraste este perfume con tu cuenta y ya te llegó, sale como “Compra verificada” y se publica al momento. Si no, sale como “Opinión” y se publica cuando la tienda la revise.</p>
     </form>
   );
 }
