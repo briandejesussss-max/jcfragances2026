@@ -35,7 +35,7 @@
 .bottle {
   position: absolute;
   left: 50%;
-  top: 62%;
+  top: 58%;
   z-index: 2;
 }
 
@@ -45,21 +45,28 @@
   filter: drop-shadow(0 24px 32px rgb(0 0 0 / 0.55));
 }
 
-.mist {
+
+.ring {
   position: absolute;
   left: 50%;
-  border-radius: 9999px;
-  filter: blur(6px);
-  background: var(--color-ember);
+  top: 50%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-cream) 12%, transparent);
   pointer-events: none;
 }
-.mist[data-tone='0'] { background: #ff8a1e; }
-.mist[data-tone='2'] { background: color-mix(in srgb, var(--color-ember) 50%, #9b5dff); }
+
+.spark {
+  position: absolute;
+  left: 50%;
+  z-index: 5;
+  border-radius: 9999px;
+  pointer-events: none;
+}
 
 .note {
   position: absolute;
   left: 50%;
-  top: 0;
+  top: 50%;
   z-index: 3;
   display: flex;
   flex-direction: column;
@@ -106,17 +113,13 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .bob { animation: bob 4s ease-in-out infinite; }
   /* Al cargar, el frasco aparece en el centro creciendo suavemente */
   .bottle { animation: bottle-in 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
 }
 @keyframes bottle-in {
   from { opacity: 0; scale: 0.82; }
 }
-@keyframes bob {
-  50% { translate: 0 -6px; }
-}
 
 @media (min-width: 1024px) {
-  .bottle { top: 58%; }
+  .bottle { top: 56%; }
 }
