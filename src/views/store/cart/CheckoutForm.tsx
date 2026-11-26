@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from 'react';
 import { getCheckoutDefaultsAction } from '@/controllers/account.controller';
 import { placeOrder, type PlacedOrder } from '@/controllers/checkout.controller';
+import { track } from '@/lib/analytics/track';
 import { MEXICAN_STATES } from '@/models/domain/address';
 import { CUSTOMER_REQUIRED } from '@/models/domain/orders';
 import type { Customer } from '@/models/types';
@@ -28,6 +29,8 @@ export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder
   const zip = useZipLookup(c.cp);
 
   const set = (k: keyof Customer, v: string) => setC((prev) => ({ ...prev, [k]: v }));
+
+  useEffect(() => track('checkout_start'), []);
 
   // Con sesión iniciada, llena los campos vacíos con los datos guardados en su cuenta.
   useEffect(() => {
@@ -76,6 +79,7 @@ export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder
         setError(res.error);
         return;
       }
+      track('order_placed');
       onPlaced(res.data, c.email);
     });
   };

@@ -4,14 +4,15 @@ import { BANK } from '@/config/store';
 import { formatClabe, formatDate, formatMoney } from '@/lib/utils/format';
 import { whatsappLink } from '@/lib/utils/whatsapp';
 import { itemText } from '@/models/domain/orders';
-import type { Order, StoreConfig } from '@/models/types';
+import type { MyReview, Order, StoreConfig } from '@/models/types';
 import { buttonClass } from '@/views/shared/Button';
 import { cn } from '@/lib/utils/cn';
 import { orderSteps } from './order-progress';
 import { OrderStatusBadge } from './OrderStatusBadge';
+import { RateItems } from './RateItems';
 
 /** Detalle de un pedido del cliente: línea de etapas con notas, paquetería, productos y pago. */
-export function OrderDetail({ order: o, config }: { order: Order; config: StoreConfig }) {
+export function OrderDetail({ order: o, config, reviews }: { order: Order; config: StoreConfig; reviews: MyReview[] }) {
   const steps = orderSteps(o);
   const cancelled = o.status === 'cancelado';
   const ask = whatsappLink(config.whatsapp, `Hola, tengo una pregunta sobre mi pedido ${o.number}.`);
@@ -27,6 +28,8 @@ export function OrderDetail({ order: o, config }: { order: Order; config: StoreC
         <h1 className="text-4xl normal-case">{o.number}</h1>
         <OrderStatusBadge order={o} />
       </div>
+
+      {o.status === 'entregado' && <RateItems items={o.items} reviews={reviews} />}
 
       {cancelled ? (
         <div className="rounded-3xl border border-bad/50 bg-bad/10 p-4 text-sm text-bad">Este pedido fue cancelado. Si tienes dudas, escríbenos por WhatsApp.</div>

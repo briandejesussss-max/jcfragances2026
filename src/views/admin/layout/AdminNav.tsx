@@ -2,7 +2,7 @@
 
 import Link, { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calculator, ClipboardList, FlaskConical, LineChart, LoaderCircle, Package, Store, Users, type LucideIcon } from 'lucide-react';
+import { BarChart3, Calculator, ClipboardList, FlaskConical, LineChart, LoaderCircle, Package, Star, Store, Users, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const ITEMS: Array<{ href: string; label: string; icon: LucideIcon }> = [
@@ -10,6 +10,8 @@ const ITEMS: Array<{ href: string; label: string; icon: LucideIcon }> = [
   { href: '/admin/fragancias', label: 'Fragancias', icon: FlaskConical },
   { href: '/admin/inventario', label: 'Inventario', icon: Package },
   { href: '/admin/clientes', label: 'Clientes', icon: Users },
+  { href: '/admin/resenas', label: 'Reseñas', icon: Star },
+  { href: '/admin/estadisticas', label: 'Estadísticas', icon: BarChart3 },
   { href: '/admin/finanzas', label: 'Finanzas', icon: LineChart },
   { href: '/admin/calculadoras', label: 'Calculadoras', icon: Calculator },
   { href: '/admin/tienda', label: 'Tienda', icon: Store },

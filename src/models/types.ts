@@ -224,6 +224,33 @@ export interface GuestBuyer {
   hasAccount: boolean;
 }
 
+export type Longevity = 'poca' | 'media' | 'larga';
+export type Sillage = 'suave' | 'moderada' | 'fuerte';
+
+/** Reseña pública de un cliente (compra verificada). */
+export interface Review {
+  id: string;
+  fragranceId: string;
+  rating: number;
+  longevity: Longevity | null;
+  sillage: Sillage | null;
+  comment: string;
+  authorName: string;
+  hidden: boolean;
+  createdAt: string;
+}
+
+/** Promedio y número de reseñas visibles de un perfume. */
+export interface ReviewStat {
+  average: number;
+  reviews: number;
+}
+
+/** Reseña propia del cliente (para "ya calificado" y editar). */
+export type MyReview = Pick<Review, 'fragranceId' | 'rating' | 'longevity' | 'sillage' | 'comment' | 'hidden'>;
+
+export type ReviewInput = Pick<Review, 'fragranceId' | 'rating' | 'longevity' | 'sillage' | 'comment'>;
+
 /** Línea del carrito guardada en el navegador: el precio se vuelve a calcular en el servidor. */
 export interface CartLine {
   fragId: string;
@@ -235,3 +262,22 @@ export type Currency = 'MXN' | 'USD';
 
 /** Resultado estándar de las acciones del servidor. */
 export type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
+
+/** Resumen de estadísticas del panel (función admin_stats). */
+export interface AdminStats {
+  days: number;
+  totals: {
+    visitors: number;
+    page_views: number;
+    product_views: number;
+    add_to_cart: number;
+    whatsapp_clicks: number;
+    orders: number;
+    paid_orders: number;
+    revenue: number;
+  };
+  funnel: { visitors: number; viewed_product: number; added_to_cart: number; started_checkout: number; ordered: number };
+  daily: Array<{ day: string; visitors: number; orders: number }>;
+  sources: Array<{ source: string; visitors: number }>;
+  fragrances: Array<{ id: string; name: string; brand: string; views: number; viewers: number; adds: number; sold: number }>;
+}

@@ -12,7 +12,7 @@ import { OrderStatusBadge } from './OrderStatusBadge';
 const isActive = (o: Order) => !['entregado', 'cancelado'].includes(o.status);
 
 /** "Mi cuenta": pedidos del cliente con su avance. */
-export function MyOrders({ name, email, orders, passwordChanged }: { name: string; email: string; orders: Order[]; passwordChanged?: boolean }) {
+export function MyOrders({ name, email, orders, passwordChanged, pendingReviews = 0 }: { name: string; email: string; orders: Order[]; passwordChanged?: boolean; pendingReviews?: number }) {
   return (
     <div className="mx-auto max-w-2xl space-y-5 px-4 py-10">
       <div className="flex items-end justify-between gap-3">
@@ -25,6 +25,11 @@ export function MyOrders({ name, email, orders, passwordChanged }: { name: strin
         </Link>
       </div>
       {passwordChanged && <Alert tone="ok">Contraseña actualizada ✓</Alert>}
+      {pendingReviews > 0 && (
+        <div className="rounded-2xl border border-ember/50 bg-ember/10 px-4 py-3 text-sm">
+          ⭐ Tienes {pendingReviews} {pendingReviews === 1 ? 'perfume' : 'perfumes'} por calificar. Abre un pedido entregado y cuéntanos qué te pareció.
+        </div>
+      )}
 
       {orders.length === 0 ? (
         <div className="space-y-3 rounded-3xl border border-dashed border-cork p-6 text-center text-sm text-sand">

@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { ArrowLeft, Clock, Star, Wind } from 'lucide-react';
 import { PLACEHOLDER_IMAGE } from '@/config/store';
 import { profileOf } from '@/models/domain/profile';
-import type { Fragrance } from '@/models/types';
+import { summarizeReviews } from '@/models/domain/reviews';
+import type { Fragrance, Review } from '@/models/types';
 import { cn } from '@/lib/utils/cn';
 import { CommunityProfile } from './CommunityProfile';
+import { CustomerReviews } from './CustomerReviews';
 import { NotesPyramid } from './NotesPyramid';
 import { ProductPurchase } from './ProductPurchase';
 import styles from './ProductView.module.css';
@@ -13,8 +15,9 @@ import styles from './ProductView.module.css';
 const cssUrl = (u: string) => `url("${u.replace(/"/g, '%22').replace(/\)/g, '%29')}")`;
 
 /** Ficha completa de un perfume (vista de servidor con partes interactivas). */
-export function ProductView({ fragrance: f }: { fragrance: Fragrance }) {
+export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; reviews: Review[] }) {
   const p = profileOf(f);
+  const summary = summarizeReviews(reviews);
   const bg = (f.bgImage ?? '').trim();
   return (
     <article className="pb-16">
@@ -42,15 +45,24 @@ export function ProductView({ fragrance: f }: { fragrance: Fragrance }) {
                 <Chip>
                   <Wind className="size-3.5" /> Estela {p.estela}
                 </Chip>
-                <Chip>
-                  <Star className="size-3.5" /> {p.rating}
-                </Chip>
+                {summary.count > 0 ? (
+                  <a href="#resenas" className="inline-flex items-center gap-1.5 rounded-full border border-ember/60 bg-walnut/60 px-3 py-1.5 hover:border-ember">
+                    <Star className="size-3.5 fill-ember text-ember" /> {summary.average.toFixed(1)} · {summary.count} {summary.count === 1 ? 'reseña' : 'reseñas'}
+                  </a>
+                ) : (
+                  <Chip>
+                    <Star className="size-3.5" /> {p.rating}
+                  </Chip>
+                )}
                 <Chip>{f.concentration || 'EDP'}</Chip>
                 {f.gender && <Chip>{f.gender}</Chip>}
               </div>
               <nav className="mt-6 flex flex-wrap gap-4 text-[11px] uppercase tracking-[0.08em] text-sand" aria-label="Secciones de la ficha">
                 <a href="#veredicto" className="hover:text-cream">
-                  Veredicto comunitario
+                  Radiografía olfativa
+                </a>
+                <a href="#resenas" className="hover:text-cream">
+                  Reseñas
                 </a>
                 <a href="#precios" className="hover:text-cream">
                   Formatos & decants
@@ -65,6 +77,7 @@ export function ProductView({ fragrance: f }: { fragrance: Fragrance }) {
         <div className="min-w-0 space-y-4">
           <NotesPyramid fragrance={f} />
           <CommunityProfile fragrance={f} />
+          <CustomerReviews reviews={reviews} />
         </div>
         <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
           <ProductPurchase fragrance={f} />

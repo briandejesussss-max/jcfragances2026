@@ -1,9 +1,10 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { track } from '@/lib/analytics/track';
 import { formatPrice } from '@/lib/utils/format';
 import { BOTTLE, reservedFor, sizesOf, sizeState } from '@/models/domain/sizes';
-import type { CartLine, Currency, FragranceSummary, SizeConfig, StoreConfig } from '@/models/types';
+import type { CartLine, Currency, FragranceSummary, ReviewStat, SizeConfig, StoreConfig } from '@/models/types';
 import { ToastProvider, useToast } from '@/views/shared/Toast';
 import { usePersistentState } from './usePersistentState';
 
@@ -13,6 +14,7 @@ interface StoreContextValue {
   fragrances: FragranceSummary[];
   byId: Map<string, FragranceSummary>;
   usdRate: number;
+  reviewStats: Record<string, ReviewStat>;
   currency: Currency;
   setCurrency: (c: Currency) => void;
   price: (value: number | undefined) => string;
@@ -38,6 +40,7 @@ interface Props {
   config: StoreConfig;
   fragrances: FragranceSummary[];
   usdRate: number;
+  reviewStats: Record<string, ReviewStat>;
   children: ReactNode;
 }
 
@@ -49,7 +52,7 @@ export function StoreProvider(props: Props) {
   );
 }
 
-function StoreState({ config, fragrances, usdRate, children }: Props) {
+function StoreState({ config, fragrances, usdRate, reviewStats, children }: Props) {
   const notify = useToast();
   const sizes = useMemo(() => sizesOf(config), [config]);
   const byId = useMemo(() => new Map(fragrances.map((f) => [f.id, f])), [fragrances]);
@@ -100,6 +103,7 @@ function StoreState({ config, fragrances, usdRate, children }: Props) {
       });
       const what = size === BOTTLE ? 'botella' : sizes.find((s) => s.key === size)?.label ?? size;
       notify(`Agregado a la bolsa: ${f.name} (${what})${st.onDemand ? ' · BAJO PEDIDO' : ''}`, 3000);
+      track('add_to_cart', id);
       return true;
     },
     [byId, sizes, cart, setCart, notify],
@@ -128,6 +132,7 @@ function StoreState({ config, fragrances, usdRate, children }: Props) {
     fragrances,
     byId,
     usdRate,
+    reviewStats,
     currency,
     setCurrency,
     price,
