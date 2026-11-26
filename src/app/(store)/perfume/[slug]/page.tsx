@@ -27,7 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${f.brand} ${f.name}`,
     description,
     alternates: { canonical: `/perfume/${fragranceSlug(f)}` },
-    openGraph: { title: `${f.brand} ${f.name}`, description, images: f.image ? [{ url: f.image }] : undefined },
+    // La imagen de vista previa la genera opengraph-image.tsx (PNG, así WhatsApp sí la muestra).
+    openGraph: { title: `${f.brand} ${f.name}`, description },
   };
 }
 
