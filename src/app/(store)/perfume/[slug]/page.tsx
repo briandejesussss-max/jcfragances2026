@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getCatalog, getFragranceBySlug } from '@/controllers/catalog.controller';
+import { getCatalog, getFragranceBySlug, getFragranceReviews } from '@/controllers/catalog.controller';
 import { fragranceSlug } from '@/lib/utils/slug';
 import { ProductView } from '@/views/store/product/ProductView';
 
@@ -35,5 +35,6 @@ export default async function PerfumePage({ params }: Props) {
   const { slug } = await params;
   const fragrance = await getFragranceBySlug(slug);
   if (!fragrance) notFound();
-  return <ProductView fragrance={fragrance} />;
+  const reviews = await getFragranceReviews(fragrance.id);
+  return <ProductView fragrance={fragrance} reviews={reviews} />;
 }

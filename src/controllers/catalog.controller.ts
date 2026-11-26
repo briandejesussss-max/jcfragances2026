@@ -5,8 +5,9 @@ import { createSupabasePublicClient } from '@/lib/supabase/server';
 import { getUsdRate } from '@/lib/services/exchange-rate';
 import { fragranceSlug } from '@/lib/utils/slug';
 import { getFragrance, listFragranceSummaries } from '@/models/repositories/fragrance.repository';
+import { listFragranceReviews, listReviewStats } from '@/models/repositories/review.repository';
 import { getStoreConfig } from '@/models/repositories/store-config.repository';
-import type { Fragrance, FragranceSummary, StoreConfig } from '@/models/types';
+import type { Fragrance, FragranceSummary, Review, ReviewStat, StoreConfig } from '@/models/types';
 
 /**
  * Datos públicos de la tienda. Se cachean en el servidor (y en la CDN de Vercel) con la etiqueta
@@ -14,12 +15,16 @@ import type { Fragrance, FragranceSummary, StoreConfig } from '@/models/types';
  */
 
 export const CATALOG_TAG = 'catalog';
+/** Reseñas de clientes: se invalida al publicar, editar u ocultar una reseña. */
+export const REVIEWS_TAG = 'reviews';
 const REVALIDATE_SECONDS = 600;
 
 export interface CatalogData {
   config: StoreConfig;
   fragrances: FragranceSummary[];
   usdRate: number;
+  /** Promedio real de reseñas por perfume (solo los que tienen) */
+  reviewStats: Record<string, ReviewStat>;
 }
 
 const loadCatalog = unstable_cache(
@@ -32,9 +37,28 @@ const loadCatalog = unstable_cache(
   { tags: [CATALOG_TAG], revalidate: REVALIDATE_SECONDS },
 );
 
+const loadReviewStats = unstable_cache(async () => listReviewStats(createSupabasePublicClient()), ['review-stats-v1'], {
+  tags: [REVIEWS_TAG],
+  revalidate: REVALIDATE_SECONDS,
+});
+
 export async function getCatalog(): Promise<CatalogData> {
-  const [data, usdRate] = await Promise.all([loadCatalog(), getUsdRate()]);
-  return { ...data, usdRate };
+  const [data, usdRate, reviewStats] = await Promise.all([loadCatalog(), getUsdRate(), loadReviewStats()]);
+  return { ...data, usdRate, reviewStats };
+}
+
+const loadReviews = unstable_cache(async (fragranceId: string) => listFragranceReviews(createSupabasePublicClient(), fragranceId), ['fragrance-reviews-v1'], {
+  tags: [REVIEWS_TAG],
+  revalidate: REVALIDATE_SECONDS,
+});
+
+/** Reseñas visibles de un perfume (cacheadas; se actualizan al publicar o moderar). */
+export async function getFragranceReviews(fragranceId: string): Promise<Review[]> {
+  try {
+    return await loadReviews(fragranceId);
+  } catch {
+    return [];
+  }
 }
 
 const loadFragrance = unstable_cache(

@@ -6,6 +6,8 @@ import { getFragrance, listFragranceSummaries } from '@/models/repositories/frag
 import { listOrders, listOrderTotals } from '@/models/repositories/order.repository';
 import { listCustomers, listGuestBuyers } from '@/models/repositories/customer.repository';
 import { getProfilesByIds } from '@/models/repositories/profile.repository';
+import { adminListReviews } from '@/models/repositories/review.repository';
+import { getAdminStats } from '@/models/repositories/stats.repository';
 import { getStoreConfig } from '@/models/repositories/store-config.repository';
 
 /**
@@ -51,4 +53,20 @@ export async function loadCustomers(query: string) {
   const q = query.slice(0, 80);
   const [customers, guests] = await Promise.all([listCustomers(db, q), listGuestBuyers(db, q)]);
   return { customers, guests };
+}
+
+/** Reseñas para moderar, con el nombre del perfume. */
+export async function loadAdminReviews() {
+  const { db } = await requireAdminPage();
+  const [reviews, fragrances] = await Promise.all([adminListReviews(db), listFragranceSummaries(db)]);
+  const names = Object.fromEntries(fragrances.map((f) => [f.id, `${f.brand} ${f.name}`]));
+  return { reviews, names };
+}
+
+export const STATS_RANGES = [7, 30, 90] as const;
+
+export async function loadAdminStats(days: number) {
+  const { db } = await requireAdminPage();
+  const range = (STATS_RANGES as readonly number[]).includes(days) ? days : 30;
+  return getAdminStats(db, range);
 }

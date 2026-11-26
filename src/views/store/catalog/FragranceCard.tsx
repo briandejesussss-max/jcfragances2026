@@ -13,7 +13,8 @@ import { SizeButtons } from './SizeButtons';
 import styles from './FragranceCard.module.css';
 
 export function FragranceCard({ fragrance: f, priority = false }: { fragrance: FragranceSummary; priority?: boolean }) {
-  const { shelf, toggleShelf } = useStore();
+  const { shelf, toggleShelf, reviewStats } = useStore();
+  const stat = reviewStats[f.id];
   const inShelf = shelf.includes(f.id);
   const href = `/perfume/${fragranceSlug(f)}`;
 
@@ -48,7 +49,13 @@ export function FragranceCard({ fragrance: f, priority = false }: { fragrance: F
         <Link href={href} className="block p-3 pb-2 sm:p-4 sm:pb-2">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.08em]">
             <span className="truncate text-cream">{f.brand}</span>
-            <span className="shrink-0 font-mono text-sand">★ {profileOf(f).rating}</span>
+            {stat ? (
+              <span className="shrink-0 font-mono text-ember" title={`${stat.reviews} ${stat.reviews === 1 ? 'reseña' : 'reseñas'} de clientes`}>
+                ★ {stat.average.toFixed(1)} <span className="text-sand">({stat.reviews})</span>
+              </span>
+            ) : (
+              <span className="shrink-0 font-mono text-sand">★ {profileOf(f).rating}</span>
+            )}
           </div>
           <h3 className={cn(styles.name, 'mt-1 truncate text-base sm:text-lg')}>{f.name}</h3>
           <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-sand">

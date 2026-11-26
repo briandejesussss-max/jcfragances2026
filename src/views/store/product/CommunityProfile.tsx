@@ -13,8 +13,8 @@ export function CommunityProfile({ fragrance }: { fragrance: Fragrance }) {
   return (
     <section id="veredicto" className="scroll-mt-20 rounded-3xl border border-cork bg-umber p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-[11px] tracking-[0.14em] text-sand">Radiografía olfativa • Comunidad</h2>
-        <span className="rounded-full border border-cork px-2 py-0.5 text-[9px] uppercase text-sand">Consenso verificado</span>
+        <h2 className="text-[11px] tracking-[0.14em] text-sand">Radiografía olfativa</h2>
+        <span className="rounded-full border border-cork px-2 py-0.5 text-[9px] uppercase text-sand">Ficha de la tienda</span>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {stats.map((s) => (
