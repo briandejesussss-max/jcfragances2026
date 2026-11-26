@@ -84,9 +84,8 @@ export function FeatureHero({ brand, name, image, href, capPct, notes }: Feature
   const [ref, scrolled] = useScrollProgress(!reduced);
   const p = reduced ? 1 : scrolled;
 
-  const slide = easeOut(seg(p, 0.02, 0.2));
-  const cap = easeInOut(seg(p, 0.22, 0.36));
-  const spray = seg(p, 0.36, 0.82);
+  const cap = easeInOut(seg(p, 0.06, 0.26));
+  const spray = seg(p, 0.26, 0.8);
   const finale = easeOut(seg(p, 0.84, 0.97));
   const neckY = (capPct / 100) * BOTTLE_H;
 
@@ -120,7 +119,7 @@ export function FeatureHero({ brand, name, image, href, capPct, notes }: Feature
           style={{
             width: BOTTLE_W,
             height: BOTTLE_H,
-            transform: `translate(calc(-50% + ${(1 - slide) * 42}vw), -40%) rotate(${(1 - slide) * 12}deg) scale(${0.9 + slide * 0.1})`,
+            transform: 'translate(-50%, -40%)',
           }}
         >
           <div className={styles.layer} style={{ clipPath: `inset(${capPct}% 0 0 0)` }}>
