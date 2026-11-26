@@ -9,7 +9,29 @@ import type { Fragrance, Inspiration, SizeConfig, StoreConfig } from '@/models/t
 
 /** Genera la ficha olfativa descargable (PNG 1080×1350) en un <canvas>, con la paleta de la tienda. */
 
-const C = { bg: '#100904', bg2: '#1a0f08', bark: '#382416', cork: '#40372e', sand: '#c8b8a2', cream: '#ffedd7', ember: '#dc5000' };
+/** Colores café (los de siempre); se reemplazan por los de la paleta activa al generar la ficha. */
+const CAFE = { bg: '#100904', bg2: '#1a0f08', bark: '#382416', cork: '#40372e', sand: '#c8b8a2', cream: '#ffedd7', ember: '#dc5000' };
+type Palette = typeof CAFE;
+
+/** Lee la paleta que tiene puesta la página (OLED, medianoche, blanco, grafito o café). */
+function activePalette(): Palette {
+  try {
+    const css = getComputedStyle(document.documentElement);
+    const v = (name: string, fallback: string) => css.getPropertyValue(`--color-${name}`).trim() || fallback;
+    return { bg: v('walnut', CAFE.bg), bg2: v('umber', CAFE.bg2), bark: v('bark', CAFE.bark), cork: v('cork', CAFE.cork), sand: v('sand', CAFE.sand), cream: v('cream', CAFE.cream), ember: v('ember', CAFE.ember) };
+  } catch {
+    return CAFE;
+  }
+}
+
+/** "#382416" + 0.6 → "rgba(56,36,22,0.6)" */
+function alpha(hex: string, a: number): string {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h.slice(0, 6);
+  const n = parseInt(full, 16);
+  if (Number.isNaN(n)) return hex;
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
 const FONT = 'Inter, "Helvetica Neue", Arial, sans-serif';
 
 async function blobImage(url: string): Promise<HTMLImageElement | null> {
@@ -78,9 +100,9 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 
 /** Mini tarjeta "Inspirado en": miniatura del original (o un frasco), nombre y qué tan parecido es. */
-async function drawInspiration(ctx: CanvasRenderingContext2D, insp: Inspiration, x: number, y: number, w: number, h: number) {
+async function drawInspiration(ctx: CanvasRenderingContext2D, C: Palette, insp: Inspiration, x: number, y: number, w: number, h: number) {
   const sim = similarityOf(insp.similarity);
-  ctx.fillStyle = 'rgba(16,9,4,0.72)';
+  ctx.fillStyle = alpha(C.bg, 0.72);
   roundRect(ctx, x, y, w, h, 18);
   ctx.fill();
   ctx.strokeStyle = C.cork;
@@ -132,6 +154,7 @@ async function drawInspiration(ctx: CanvasRenderingContext2D, insp: Inspiration,
 }
 
 export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes: SizeConfig[], formatPrice: (n: number) => string): Promise<Blob> {
+  const C = activePalette();
   const W = 1080;
   const H = 1350;
   const cv = document.createElement('canvas');
@@ -147,7 +170,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   ctx.fillRect(0, 0, W, H);
 
   const glow = ctx.createRadialGradient(270, 340, 20, 270, 340, 340);
-  glow.addColorStop(0, 'rgba(220, 80, 0, 0.22)');
+  glow.addColorStop(0, alpha(C.ember, 0.22));
   glow.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, 700);
@@ -169,7 +192,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   ctx.fillText('FICHA OLFATIVA • DECANTS & BOTELLAS', W - 72, 92);
 
   // Frasco
-  ctx.fillStyle = 'rgba(56,36,22,0.45)';
+  ctx.fillStyle = alpha(C.bark, 0.45);
   roundRect(ctx, 72, 150, 370, 420, 28);
   ctx.fill();
   const insp = f.inspiration?.name ? f.inspiration : undefined;
@@ -225,7 +248,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   const colW = (rw - 20) / 3;
   stats.forEach((st, i) => {
     const sx = rx + i * (colW + 10);
-    ctx.fillStyle = 'rgba(56,36,22,0.6)';
+    ctx.fillStyle = alpha(C.bark, 0.6);
     roundRect(ctx, sx, ty, colW, 84, 16);
     ctx.fill();
     ctx.fillStyle = C.sand;
@@ -245,7 +268,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   let py = 610;
   if (insp) {
     const cardTop = ty + 18;
-    await drawInspiration(ctx, insp, rx, cardTop, rw, 84);
+    await drawInspiration(ctx, C, insp, rx, cardTop, rw, 84);
     py = Math.max(py, cardTop + 84 + 34);
   }
   // Si la pirámide se recorrió hacia abajo, sus filas se compactan para no tocar el pie.
@@ -271,7 +294,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   ];
   py += 24;
   for (const lvl of levels) {
-    ctx.fillStyle = 'rgba(56,36,22,0.35)';
+    ctx.fillStyle = alpha(C.bark, 0.35);
     roundRect(ctx, 72, py, W - 144, rowH, 22);
     ctx.fill();
     ctx.textAlign = 'left';
@@ -310,7 +333,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
         ov.addColorStop(1, 'rgba(0,0,0,0.88)');
         ctx.fillStyle = ov;
         ctx.fillRect(nx, ny, cardW, cardH);
-        ctx.fillStyle = C.cream;
+        ctx.fillStyle = '#ffffff'; // siempre blanco: va sobre la sombra oscura de la foto
         ctx.font = `500 15px ${FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText(clip(note.t, 15), nx + cardW / 2, ny + cardH - 12);
