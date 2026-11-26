@@ -3,7 +3,8 @@ import type { FragranceSummary, HomeConfig, HomeOccasion, InstagramPhoto } from 
 /** Portada: valores predeterminados y reglas. */
 
 export const DEFAULT_CAP_PCT = 24;
-export const MAX_INSTAGRAM = 9;
+export const MAX_INSTAGRAM = 12;
+export const CAPTION_MAX = 80;
 
 /** Las 4 ocasiones de "Un perfume para cada momento" y las palabras con que se eligen solas. */
 export const DEFAULT_OCCASIONS: Array<{ title: string; words: RegExp }> = [
@@ -43,9 +44,14 @@ export function sanitizeHome(input: HomeConfig | undefined, validIds: Set<string
     return { title: String(o?.title ?? '').trim().slice(0, 40) || d.title, ...(id ? { fragranceId: id } : {}) };
   });
   const instagram: InstagramPhoto[] = (input?.instagram ?? [])
-    .map((p) => ({ image: String(p?.image ?? '').trim(), link: String(p?.link ?? '').trim() }))
+    .map((p) => {
+      const image = String(p?.image ?? '').trim();
+      const link = String(p?.link ?? '').trim();
+      const caption = String(p?.caption ?? '').trim().slice(0, CAPTION_MAX);
+      const fragranceId = p?.fragranceId && validIds.has(p.fragranceId) ? p.fragranceId : undefined;
+      return { image, ...(/^https:\/\//i.test(link) ? { link } : {}), ...(caption ? { caption } : {}), ...(fragranceId ? { fragranceId } : {}) };
+    })
     .filter((p) => /^https:\/\//i.test(p.image))
-    .slice(0, MAX_INSTAGRAM)
-    .map((p) => (/^https:\/\//i.test(p.link) ? p : { image: p.image }));
+    .slice(0, MAX_INSTAGRAM);
   return { featuredId, capPct: clampCap(input?.capPct), occasions, instagram };
 }

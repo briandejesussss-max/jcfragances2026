@@ -84,3 +84,27 @@ html:not([data-palette]) .occasion[data-tone='3'] { background: radial-gradient(
 @media (min-width: 1024px) {
   .occasion { flex: none; }
 }
+
+/* Galería de Instagram tipo historias */
+.story {
+  position: relative;
+  flex: 0 0 42%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  scroll-snap-align: start;
+  border-radius: 20px;
+  background: var(--color-bark);
+  border: 1px solid color-mix(in srgb, var(--color-cream) 10%, transparent);
+  transition: transform 0.3s ease;
+}
+.story:hover {
+  transform: translateY(-3px);
+}
+.storyShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.65), transparent 50%);
+}
+@media (min-width: 640px) {
+  .story { flex-basis: 220px; }
+}

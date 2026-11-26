@@ -103,7 +103,7 @@ export function FeatureHero({ brand, name, image, href, capPct, notes }: Feature
   const showButtons = p < 0.05 || finale > 0;
 
   return (
-    <section ref={ref} className={styles.section} style={{ height: reduced ? '100svh' : '420svh' }} aria-label={`${brand} ${name}: sus notas olfativas`}>
+    <section ref={ref} className={styles.section} style={{ height: reduced ? '100svh' : '340svh' }} aria-label={`${brand} ${name}: sus notas olfativas`}>
       <div className={styles.sticky}>
         <div className={styles.glow} style={{ opacity: 0.55 + spray * 0.45 }} aria-hidden="true" />
 

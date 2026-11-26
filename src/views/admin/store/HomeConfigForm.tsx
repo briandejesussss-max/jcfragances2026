@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, Trash2 } from 'lucide-react';
 import { saveHomeConfigAction } from '@/controllers/home-config.controller';
-import { clampCap, DEFAULT_CAP_PCT, DEFAULT_OCCASIONS, MAX_INSTAGRAM } from '@/models/domain/home';
+import { CAPTION_MAX, clampCap, DEFAULT_CAP_PCT, DEFAULT_OCCASIONS, MAX_INSTAGRAM } from '@/models/domain/home';
 import type { FragranceSummary, HomeConfig, InstagramPhoto } from '@/models/types';
 import { Alert } from '@/views/shared/Alert';
 import { Button } from '@/views/shared/Button';
@@ -32,6 +32,14 @@ export function HomeConfigForm({ home, fragrances }: { home: HomeConfig | undefi
 
   const setOccasion = (i: number, patch: Partial<{ title: string; fragranceId: string }>) => setOccasions((prev) => prev.map((o, j) => (j === i ? { ...o, ...patch } : o)));
   const setPhoto = (i: number, patch: Partial<InstagramPhoto>) => setPhotos((prev) => prev.map((p, j) => (j === i ? { ...p, ...patch } : p)));
+  const movePhoto = (i: number, d: number) =>
+    setPhotos((prev) => {
+      const next = [...prev];
+      const j = i + d;
+      if (j < 0 || j >= next.length) return prev;
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,16 +123,26 @@ export function HomeConfigForm({ home, fragrances }: { home: HomeConfig | undefi
       <div className="space-y-3 rounded-3xl border border-cork bg-umber p-4 sm:p-5">
         <div>
           <Label>Fotos de Instagram (hasta {MAX_INSTAGRAM})</Label>
-          <p className="text-[11px] text-drift">Aparecen al final de la portada en cuadrícula. Si pegas el link de la publicación, al tocar la foto se abre esa publicación; si no, tu perfil. Sin fotos, la sección no aparece.</p>
+          <p className="text-[11px] text-drift">
+            Aparecen al final de la portada en una fila tipo historias que se desliza de lado; al tocar una se abre en grande. Puedes ponerle un texto corto y un perfume de referencia (aparece el botón “Ver perfume”). Si pegas el link de la publicación, “Ver en Instagram” abre esa publicación; si no, tu perfil. Sin fotos, la sección no aparece.
+          </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {photos.map((p, i) => (
             <div key={i} className="space-y-2 rounded-2xl border border-dashed border-cork p-2.5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-[10px] uppercase tracking-[0.08em] text-ember">Foto {i + 1}</span>
-                <button type="button" onClick={() => setPhotos((prev) => prev.filter((_, j) => j !== i))} className="inline-flex items-center gap-1 text-[11px] text-sand hover:text-bad">
-                  <Trash2 className="size-3.5" /> Quitar
-                </button>
+                <span className="flex items-center gap-1">
+                  <button type="button" disabled={i === 0} onClick={() => movePhoto(i, -1)} aria-label={`Mover foto ${i + 1} antes`} className="grid size-7 place-items-center rounded-full border border-cork text-sand hover:text-cream disabled:opacity-30">
+                    <ArrowLeft className="size-3.5" />
+                  </button>
+                  <button type="button" disabled={i === photos.length - 1} onClick={() => movePhoto(i, 1)} aria-label={`Mover foto ${i + 1} después`} className="grid size-7 place-items-center rounded-full border border-cork text-sand hover:text-cream disabled:opacity-30">
+                    <ArrowRight className="size-3.5" />
+                  </button>
+                  <button type="button" onClick={() => setPhotos((prev) => prev.filter((_, j) => j !== i))} className="ml-1 inline-flex items-center gap-1 text-[11px] text-sand hover:text-bad">
+                    <Trash2 className="size-3.5" /> Quitar
+                  </button>
+                </span>
               </div>
               <ImageUploadField
                 label="Foto"
@@ -134,7 +152,16 @@ export function HomeConfigForm({ home, fragrances }: { home: HomeConfig | undefi
                 previewClass="h-24"
                 prepare={async (file) => ({ blob: await resizeImage(file, 900, 'image/webp', 0.82), message: 'Foto lista ✓' })}
               />
-              <Input value={p.link ?? ''} onChange={(e) => setPhoto(i, { link: e.target.value })} placeholder="Link de la publicación (opcional)" />
+              <Input value={p.caption ?? ''} maxLength={CAPTION_MAX} onChange={(e) => setPhoto(i, { caption: e.target.value })} placeholder="Texto corto (ej. Pedido listo para Monterrey 📦)" aria-label={`Texto de la foto ${i + 1}`} />
+              <Select value={p.fragranceId ?? ''} onChange={(e) => setPhoto(i, { fragranceId: e.target.value || undefined })} aria-label={`Perfume de referencia de la foto ${i + 1}`}>
+                <option value="">Sin perfume de referencia</option>
+                {withImg.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.brand} · {f.name}
+                  </option>
+                ))}
+              </Select>
+              <Input value={p.link ?? ''} onChange={(e) => setPhoto(i, { link: e.target.value })} placeholder="Link de la publicación (opcional)" aria-label={`Link de la foto ${i + 1}`} />
             </div>
           ))}
         </div>

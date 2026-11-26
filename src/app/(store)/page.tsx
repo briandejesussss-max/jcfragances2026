@@ -26,6 +26,13 @@ export default async function HomePage() {
     ? PYRAMID_SECTIONS.flatMap((s) => pyramid[s].slice(0, 2).map((n) => ({ section: s, text: n.t, img: n.img || guessImage(n.t), emoji: n.e || guessEmoji(n.t, s) })))
     : [];
 
+  // Fotos de Instagram con su perfume de referencia (si lo tienen)
+  const byId = new Map(fragrances.map((f) => [f.id, f]));
+  const gallery = (home?.instagram ?? []).map((p) => {
+    const f = p.fragranceId ? byId.get(p.fragranceId) : undefined;
+    return { image: p.image, link: p.link, caption: p.caption, fragrance: f ? { name: f.name, brand: f.brand, href: `/perfume/${fragranceSlug(f)}` } : undefined };
+  });
+
   return (
     <>
       {featured?.image && notes.length ? (
@@ -41,7 +48,7 @@ export default async function HomePage() {
       <CuratedShelf />
       <BrandsCarousel />
       <Catalog />
-      <InstagramGallery photos={home?.instagram ?? []} handle={config.instagram} url={config.instagramUrl ?? ''} />
+      <InstagramGallery photos={gallery} handle={config.instagram} url={config.instagramUrl ?? ''} />
     </>
   );
 }

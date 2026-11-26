@@ -133,6 +133,10 @@ export interface InstagramPhoto {
   image: string;
   /** Link a la publicación (si no, abre el perfil). */
   link?: string;
+  /** Texto corto que se ve sobre la foto. */
+  caption?: string;
+  /** Perfume de referencia: al abrir la foto aparece "Ver perfume". */
+  fragranceId?: string;
 }
 
 export interface HomeConfig {
