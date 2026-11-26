@@ -5,8 +5,8 @@ type Variant = 'primary' | 'cream' | 'ghost' | 'danger' | 'whatsapp' | 'link';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-bark text-cream hover:bg-cork',
-  cream: 'bg-cream text-walnut hover:bg-sand',
+  primary: 'btn-primary bg-bark text-cream hover:bg-cork',
+  cream: 'btn-cream bg-cream text-walnut hover:bg-sand',
   ghost: 'border border-cream/80 text-cream hover:bg-bark',
   danger: 'border border-bad/60 text-bad hover:bg-bad/10',
   whatsapp: 'bg-whatsapp text-walnut hover:brightness-110',

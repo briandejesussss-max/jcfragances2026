@@ -20,9 +20,9 @@ export function FragranceCard({ fragrance: f, priority = false }: { fragrance: F
   const href = `/perfume/${fragranceSlug(f)}`;
 
   return (
-    <article className={cn(styles.card, 'flex flex-col justify-between overflow-hidden rounded-[20px] border border-cork bg-umber')}>
+    <article className={cn(styles.card, 'aurora-card flex flex-col justify-between overflow-hidden rounded-[20px] border border-cork bg-umber')}>
       <div>
-        <Link href={href} className={cn(styles.stage, 'relative block h-48 border-b border-dashed border-cork sm:h-52')}>
+        <Link href={href} className={cn(styles.stage, 'aurora-stage relative block h-48 border-b border-dashed border-cork sm:h-52')}>
           <SmartImage
             src={f.image || PLACEHOLDER_IMAGE(f.name)}
             alt={`${f.brand} ${f.name}`}

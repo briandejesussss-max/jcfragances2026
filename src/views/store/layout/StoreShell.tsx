@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { CatalogData } from '@/controllers/catalog.controller';
 import { CartDrawer } from '../cart/CartDrawer';
 import { Analytics } from '../state/Analytics';
+import { ScrollReveal } from '../state/ScrollReveal';
 import { CatalogFilterProvider } from '../state/CatalogFilterContext';
 import { StoreProvider } from '../state/StoreProvider';
 import { Footer } from './Footer';
@@ -14,6 +15,7 @@ export function StoreShell({ data, children }: { data: CatalogData; children: Re
     <StoreProvider config={data.config} fragrances={data.fragrances} usdRate={data.usdRate} reviewStats={data.reviewStats}>
       <CatalogFilterProvider>
         <Analytics />
+        <ScrollReveal />
         <Header />
         <SideMenu />
         <CartDrawer />

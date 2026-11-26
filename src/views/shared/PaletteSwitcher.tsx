@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils/cn';
 
 function applyPalette(key: PaletteKey) {
   const html = document.documentElement;
-  if (key === 'oled') html.removeAttribute('data-palette');
+  if (key === 'aurora') html.removeAttribute('data-palette');
   else html.setAttribute('data-palette', key);
   try {
     localStorage.setItem(PALETTE_STORAGE_KEY, key);
@@ -21,12 +21,12 @@ function applyPalette(key: PaletteKey) {
 /** Selector de paleta de colores (se recuerda en este dispositivo). */
 export function PaletteSwitcher({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState<PaletteKey>('oled');
+  const [current, setCurrent] = useState<PaletteKey>('aurora');
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- lee la paleta aplicada antes de hidratar
-    setCurrent((document.documentElement.getAttribute('data-palette') as PaletteKey) || 'oled');
+    setCurrent((document.documentElement.getAttribute('data-palette') as PaletteKey) || 'aurora');
   }, []);
 
   useEffect(() => {
