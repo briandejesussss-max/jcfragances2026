@@ -8,6 +8,7 @@ import type { Fragrance, Review } from '@/models/types';
 import { cn } from '@/lib/utils/cn';
 import { CommunityProfile } from './CommunityProfile';
 import { CustomerReviews } from './CustomerReviews';
+import { InspirationCard } from './InspirationCard';
 import { NotesPyramid } from './NotesPyramid';
 import { ProductSwipeNav } from './ProductNav';
 import { ProductActions } from './ProductActions';
@@ -63,6 +64,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
                 <Chip>{f.concentration || 'EDP'}</Chip>
                 {f.gender && <Chip>{f.gender}</Chip>}
               </div>
+              {f.inspiration?.name && <InspirationCard inspiration={f.inspiration} />}
               <p className="mt-4 text-[11px] text-drift sm:hidden">← Desliza a los lados para ver otro perfume →</p>
             </div>
           </div>

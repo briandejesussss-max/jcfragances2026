@@ -14,6 +14,7 @@ import { Checkbox, Field, Input, Label, Select, Textarea } from '@/views/shared/
 import { useToast } from '@/views/shared/Toast';
 import { ImageUploadField } from '../shared/ImageUploadField';
 import { prepareBottlePhoto, resizeImage } from '../shared/image-tools';
+import { InspirationFields } from './InspirationFields';
 import { PyramidEditor } from './PyramidEditor';
 import { SizePriceFields } from './SizePriceFields';
 
@@ -95,6 +96,7 @@ export function FragranceForm({ initial, config }: { initial: Fragrance | null; 
           }}
         />
         <SizePriceFields sizes={sizes} prices={f.prices ?? {}} stock={f.stock} onPrices={(p) => set('prices', p)} onStock={(s) => set('stock', s)} />
+        <InspirationFields value={f.inspiration} onChange={(v) => set('inspiration', v as Fragrance['inspiration'])} uploadName={uploadName} />
       </div>
 
       <div className="space-y-4 rounded-3xl border border-cork bg-umber p-4 sm:p-5">

@@ -9,7 +9,7 @@ import type { Fragrance, FragranceSummary } from '../types';
  */
 
 const SUMMARY_COLUMNS =
-  'id, position, name:data->>name, brand:data->>brand, concentration:data->>concentration, gender:data->>gender, image:data->>image, notes:data->>notes, comingSoon:data->comingSoon, profile:data->profile, prices:data->prices, stock:data->stock';
+  'id, position, name:data->>name, brand:data->>brand, concentration:data->>concentration, gender:data->>gender, image:data->>image, notes:data->>notes, comingSoon:data->comingSoon, profile:data->profile, prices:data->prices, stock:data->stock, inspiration:data->inspiration';
 
 type SummaryRow = Omit<FragranceSummary, 'comingSoon'> & { comingSoon: boolean | null };
 
@@ -21,6 +21,7 @@ const toSummary = (r: SummaryRow): FragranceSummary => ({
   prices: r.prices ?? {},
   profile: r.profile ?? undefined,
   stock: r.stock ?? undefined,
+  inspiration: r.inspiration ?? undefined,
 });
 
 export async function listFragranceSummaries(db: SupabaseClient): Promise<FragranceSummary[]> {
