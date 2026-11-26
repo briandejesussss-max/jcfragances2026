@@ -97,7 +97,9 @@ async function drawInspiration(ctx: CanvasRenderingContext2D, insp: Inspiration,
   ctx.clip();
   const thumb = await loadImage(insp.image);
   if (thumb) {
-    const k = Math.max(t / thumb.width, t / thumb.height);
+    // Frasco completo (sin recortar), centrado y con un poco de aire
+    const pad = 5;
+    const k = Math.min((t - pad * 2) / thumb.width, (t - pad * 2) / thumb.height);
     ctx.drawImage(thumb, tx + (t - thumb.width * k) / 2, ty + (t - thumb.height * k) / 2, thumb.width * k, thumb.height * k);
   } else {
     ctx.textAlign = 'center';
@@ -171,8 +173,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   roundRect(ctx, 72, 150, 370, 420, 28);
   ctx.fill();
   const insp = f.inspiration?.name ? f.inspiration : undefined;
-  // Con "Inspirado en", el frasco ocupa la parte de arriba y la mini tarjeta va abajo, dentro del mismo recuadro.
-  const areaH = insp ? 316 : 420;
+  const areaH = 420;
   const bottle = await loadImage(f.image);
   if (bottle) {
     const ratio = Math.min(314 / bottle.width, (areaH - 56) / bottle.height);
@@ -185,7 +186,6 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
     ctx.drawImage(bottle, 72 + (370 - dw) / 2, 150 + (areaH - dh) / 2, dw, dh);
     ctx.restore();
   }
-  if (insp) await drawInspiration(ctx, insp, 88, 150 + areaH, 338, 88);
 
   // Encabezado
   const rx = 475;
@@ -198,7 +198,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   ctx.fillStyle = C.cream;
   ctx.font = `500 48px ${FONT}`;
   let ty = 252;
-  for (const line of wrap(ctx, (f.name || 'Fragancia').toUpperCase(), rw).slice(0, 3)) {
+  for (const line of wrap(ctx, (f.name || 'Fragancia').toUpperCase(), rw).slice(0, insp ? 2 : 3)) {
     ctx.fillText(line, rx, ty);
     ty += 52;
   }
@@ -241,8 +241,17 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   ctx.font = `400 19px ${FONT}`;
   ctx.fillText(`Clima: ${prof.clima}   •   Ocasión: ${prof.ocasion.split(',')[0]}`, rx, ty);
 
-  // Pirámide
+  // "Inspirado en…": mini tarjeta con la miniatura del original, debajo de Clima / Ocasión
   let py = 610;
+  if (insp) {
+    const cardTop = ty + 18;
+    await drawInspiration(ctx, insp, rx, cardTop, rw, 84);
+    py = Math.max(py, cardTop + 84 + 34);
+  }
+  // Si la pirámide se recorrió hacia abajo, sus filas se compactan para no tocar el pie.
+  const shifted = py > 610;
+  const rowGap = shifted ? 10 : 15;
+  const rowH = shifted ? Math.max(152, Math.min(165, (H - 155 - 18 - (py + 24) - 2 * rowGap) / 3)) : 165;
   ctx.fillStyle = C.cream;
   ctx.font = `500 20px ${FONT}`;
   ctx.fillText('PIRÁMIDE OLFATIVA', 72, py);
@@ -263,7 +272,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   py += 24;
   for (const lvl of levels) {
     ctx.fillStyle = 'rgba(56,36,22,0.35)';
-    roundRect(ctx, 72, py, W - 144, 165, 22);
+    roundRect(ctx, 72, py, W - 144, rowH, 22);
     ctx.fill();
     ctx.textAlign = 'left';
     ctx.fillStyle = C.sand;
@@ -309,7 +318,7 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
         nx += cardW + gap;
       }
     }
-    py += 180;
+    py += rowH + rowGap;
   }
 
   // Pie con precios

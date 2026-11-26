@@ -10,7 +10,7 @@ export function InspirationCard({ inspiration: i }: { inspiration: Inspiration }
     <div className="mt-4 flex items-center gap-3 rounded-2xl border border-cork bg-walnut/60 p-2.5 backdrop-blur-sm">
       <div className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-cork bg-bark">
         {i.image ? (
-          <SmartImage src={i.image} alt={`Referencia: ${inspirationTitle(i, ' ')}`} fill sizes="56px" className="object-cover" />
+          <SmartImage src={i.image} alt={`Referencia: ${inspirationTitle(i, ' ')}`} fill sizes="56px" className="object-contain p-1" />
         ) : (
           <FlaskConical className="size-6 text-sand" aria-hidden="true" />
         )}
