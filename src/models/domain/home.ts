@@ -1,8 +1,9 @@
+import { createdTimestamp } from './catalog';
 import type { FragranceSummary, HomeConfig, HomeOccasion, InstagramPhoto } from '../types';
 
 /** Portada: valores predeterminados y reglas. */
 
-export const DEFAULT_CAP_PCT = 24;
+export const MAX_CAROUSEL = 6;
 export const MAX_INSTAGRAM = 12;
 export const CAPTION_MAX = 80;
 
@@ -13,8 +14,6 @@ export const DEFAULT_OCCASIONS: Array<{ title: string; words: RegExp }> = [
   { title: 'Para salir de noche', words: /noche|fiesta|antro|evento|salir/i },
   { title: 'Para diario', words: /diario|casual|d[ií]a|todo uso|vers[aá]til/i },
 ];
-
-export const clampCap = (n: unknown) => Math.min(60, Math.max(5, Math.round(Number(n) || DEFAULT_CAP_PCT)));
 
 /**
  * Ocasiones listas para mostrar: usa el perfume elegido en el panel o, si no hay,
@@ -35,6 +34,15 @@ export function resolveOccasions(home: HomeConfig | undefined, fragrances: Fragr
   }).filter((x): x is { title: string; fragrance: FragranceSummary } => !!x);
 }
 
+/** Perfumes del carrusel: los elegidos en el panel o, si no hay, el anterior "perfume de portada" y los más nuevos. */
+export function resolveCarousel(home: HomeConfig | undefined, fragrances: FragranceSummary[]): string[] {
+  const ok = new Map(fragrances.filter((f) => f.image && !f.comingSoon).map((f) => [f.id, f]));
+  const chosen = (home?.carouselIds ?? []).filter((id) => ok.has(id));
+  if (chosen.length) return chosen.slice(0, MAX_CAROUSEL);
+  const newest = [...ok.values()].sort((a, b) => createdTimestamp(b.id) - createdTimestamp(a.id)).map((f) => f.id);
+  return [...new Set([home?.featuredId, ...newest].filter((id): id is string => !!id && ok.has(id)))].slice(0, 5);
+}
+
 /** Limpia lo que llega del panel. */
 export function sanitizeHome(input: HomeConfig | undefined, validIds: Set<string>): HomeConfig {
   const featuredId = input?.featuredId && validIds.has(input.featuredId) ? input.featuredId : undefined;
@@ -53,5 +61,6 @@ export function sanitizeHome(input: HomeConfig | undefined, validIds: Set<string
     })
     .filter((p) => /^https:\/\//i.test(p.image))
     .slice(0, MAX_INSTAGRAM);
-  return { featuredId, capPct: clampCap(input?.capPct), occasions, instagram };
+  const carouselIds = [...new Set((input?.carouselIds ?? []).filter((id) => validIds.has(id)))].slice(0, MAX_CAROUSEL);
+  return { carouselIds, ...(featuredId ? { featuredId } : {}), occasions, instagram };
 }

@@ -1,0 +1,54 @@
+/* Carrusel de destacados de la portada. Colores de la paleta activa. */
+.slide {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 1rem;
+  min-height: 62svh;
+  overflow: hidden;
+  padding: 1.25rem;
+  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--color-cream) 10%, transparent);
+  background:
+    radial-gradient(70% 60% at 70% 55%, color-mix(in srgb, var(--tint) 33%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--color-cream) 7%, transparent), transparent);
+}
+
+@media (min-width: 640px) {
+  .slide {
+    grid-template-columns: 1fr 1fr;
+    min-height: 56svh;
+    padding: 2.5rem;
+  }
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--brand-gradient, var(--color-ember));
+}
+
+.barActive {
+  animation-name: fill;
+  animation-timing-function: linear;
+}
+
+@keyframes fill {
+  from { width: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .text { animation: up 0.6s ease-out; }
+  .bottle { animation: pop 0.7s cubic-bezier(0.2, 1.2, 0.4, 1); }
+  .bottle > * { animation: float 5s ease-in-out 0.7s infinite; }
+}
+@keyframes up {
+  from { opacity: 0; transform: translateY(16px); }
+}
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.8) rotate(-6deg); }
+}
+@keyframes float {
+  50% { transform: translateY(-10px); }
+}

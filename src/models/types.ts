@@ -140,9 +140,11 @@ export interface InstagramPhoto {
 }
 
 export interface HomeConfig {
-  /** Perfume que se "desglosa" en la portada (se le quita la tapa y salen sus notas). */
+  /** Perfumes del carrusel de la portada, en orden (hasta 6). Vacío = los más nuevos. */
+  carouselIds?: string[];
+  /** (Anterior) perfume de portada: si no hay carrusel, va primero. */
   featuredId?: string;
-  /** Qué porcentaje de la foto (de arriba hacia abajo) es la tapa. */
+  /** (Anterior) altura de la tapa; ya no se usa. */
   capPct?: number;
   occasions?: HomeOccasion[];
   instagram?: InstagramPhoto[];

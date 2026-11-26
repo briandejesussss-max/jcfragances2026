@@ -67,15 +67,6 @@ const loadFragrance = unstable_cache(
   { tags: [CATALOG_TAG], revalidate: REVALIDATE_SECONDS },
 );
 
-/** Fragancia completa por id (con pirámide), cacheada. */
-export async function getFragranceById(id: string): Promise<Fragrance | null> {
-  try {
-    return await loadFragrance(id);
-  } catch {
-    return null;
-  }
-}
-
 /** Busca por slug "casa-nombre", por id o por slug del nombre (enlaces antiguos). */
 export async function getFragranceBySlug(slug: string): Promise<Fragrance | null> {
   const { fragrances } = await loadCatalog();
