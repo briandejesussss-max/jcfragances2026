@@ -1,5 +1,6 @@
 import { SmartImage } from '@/views/shared/SmartImage';
-import { Clock, Star, Wind } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, Clock, Star, Wind } from 'lucide-react';
 import { PLACEHOLDER_IMAGE } from '@/config/store';
 import { profileOf } from '@/models/domain/profile';
 import { summarizeReviews } from '@/models/domain/reviews';
@@ -8,7 +9,7 @@ import { cn } from '@/lib/utils/cn';
 import { CommunityProfile } from './CommunityProfile';
 import { CustomerReviews } from './CustomerReviews';
 import { NotesPyramid } from './NotesPyramid';
-import { ProductBottomNav, ProductStageNav, ProductTopNav } from './ProductNav';
+import { ProductArrows, ProductSwipe } from './ProductNav';
 import { ProductPurchase } from './ProductPurchase';
 import styles from './ProductView.module.css';
 
@@ -20,7 +21,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
   const summary = summarizeReviews(reviews);
   const bg = (f.bgImage ?? '').trim();
   return (
-    <article className="pb-16">
+    <article className="pb-24">
       <div className={cn(styles.stage, 'border-b border-dashed border-cork')}>
         {bg ? (
           <div className={styles.photo} style={{ backgroundImage: cssUrl(bg) }} aria-hidden="true" />
@@ -28,13 +29,15 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
           f.image && <div className={styles.backdrop} style={{ backgroundImage: cssUrl(f.image) }} aria-hidden="true" />
         )}
         <div className="mx-auto max-w-5xl px-4 pb-8 pt-5">
-          <ProductTopNav id={f.id} />
+          <Link href="/#catalogo" className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-sand hover:text-cream">
+            <ArrowLeft className="size-4" /> Catálogo
+          </Link>
           <div className="mt-4 grid items-center gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-            <ProductStageNav id={f.id}>
+            <ProductSwipe id={f.id}>
               <div className="relative mx-auto h-72 w-full max-w-xs sm:h-96">
                 <SmartImage src={f.image || PLACEHOLDER_IMAGE(f.name)} alt={`${f.brand} ${f.name}`} fill priority sizes="(max-width: 640px) 80vw, 40vw" className={cn(styles.bottle, 'object-contain')} />
               </div>
-            </ProductStageNav>
+            </ProductSwipe>
             <div>
               <p className="text-xs uppercase tracking-[0.14em] text-ember">{f.brand}</p>
               <h1 className="mt-2 text-[clamp(2rem,7vw,3.4rem)]">{f.name}</h1>
@@ -83,7 +86,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
           <ProductPurchase fragrance={f} />
         </div>
       </div>
-      <ProductBottomNav id={f.id} />
+      <ProductArrows id={f.id} />
     </article>
   );
 }

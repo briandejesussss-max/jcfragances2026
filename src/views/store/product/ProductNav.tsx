@@ -3,13 +3,11 @@
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
-import { PLACEHOLDER_IMAGE } from '@/config/store';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { fragranceSlug } from '@/lib/utils/slug';
 import { DEFAULT_FILTER, filterCatalog } from '@/models/domain/catalog';
 import type { FragranceSummary } from '@/models/types';
-import { SmartImage } from '@/views/shared/SmartImage';
 import { useCatalogFilter } from '../state/CatalogFilterContext';
 import { useStore } from '../state/StoreProvider';
 
@@ -27,14 +25,14 @@ function useNeighbors(id: string) {
     const i = list.findIndex((f) => f.id === id);
     if (i === -1 || list.length < 2) return null;
     const at = (k: number) => list[(k + list.length) % list.length];
-    return { prev: at(i - 1), next: at(i + 1), index: i + 1, total: list.length };
+    return { prev: at(i - 1), next: at(i + 1) };
   }, [fragrances, filter, id]);
 }
 
 const href = (f: FragranceSummary) => `/perfume/${fragranceSlug(f)}`;
 
-/** Barra superior: "← Catálogo" y las flechas con el contador "3 / 30". También funciona con ← → del teclado. */
-export function ProductTopNav({ id }: { id: string }) {
+/** Flechas flotantes (siempre visibles) para ir al perfume anterior o siguiente. También con ← → del teclado. */
+export function ProductArrows({ id }: { id: string }) {
   const n = useNeighbors(id);
   const router = useRouter();
 
@@ -50,33 +48,22 @@ export function ProductTopNav({ id }: { id: string }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [n, router]);
 
+  if (!n) return null;
   return (
-    <div className="flex items-center justify-between gap-3">
-      <Link href="/#catalogo" className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-sand hover:text-cream">
-        <ArrowLeft className="size-4" /> Catálogo
-      </Link>
-      {n && (
-        <div className="flex items-center gap-2">
-          <ArrowButton f={n.prev} dir="prev" small />
-          <span className="font-mono text-[11px] text-sand" aria-label={`Perfume ${n.index} de ${n.total}`}>
-            {n.index} / {n.total}
-          </span>
-          <ArrowButton f={n.next} dir="next" small />
-        </div>
-      )}
-    </div>
+    <>
+      <ArrowButton f={n.prev} dir="prev" className="left-3 lg:left-5" />
+      <ArrowButton f={n.next} dir="next" className="right-3 lg:right-5" />
+    </>
   );
 }
 
-/** Foto del perfume con flechas a los lados; también se puede deslizar con el dedo. */
-export function ProductStageNav({ id, children }: { id: string; children: ReactNode }) {
+/** Deslizar el dedo sobre la foto: izquierda = siguiente, derecha = anterior. */
+export function ProductSwipe({ id, children }: { id: string; children: ReactNode }) {
   const n = useNeighbors(id);
   const router = useRouter();
   const start = useRef<{ x: number; y: number } | null>(null);
-
   return (
     <div
-      className="relative"
       onTouchStart={(e) => (start.current = { x: e.touches[0].clientX, y: e.touches[0].clientY })}
       onTouchEnd={(e) => {
         const s = start.current;
@@ -88,69 +75,22 @@ export function ProductStageNav({ id, children }: { id: string; children: ReactN
       }}
     >
       {children}
-      {n && (
-        <>
-          <ArrowButton f={n.prev} dir="prev" className="absolute left-0 top-1/2 -translate-y-1/2" />
-          <ArrowButton f={n.next} dir="next" className="absolute right-0 top-1/2 -translate-y-1/2" />
-        </>
-      )}
     </div>
   );
 }
 
-/** Al final de la ficha: tarjetas con foto y nombre del anterior y el siguiente. */
-export function ProductBottomNav({ id }: { id: string }) {
-  const n = useNeighbors(id);
-  if (!n) return null;
-  return (
-    <nav aria-label="Más perfumes" className="mx-auto mt-6 grid max-w-5xl grid-cols-2 gap-3 px-4">
-      {([
-        [n.prev, 'prev'],
-        [n.next, 'next'],
-      ] as const).map(([f, dir]) => (
-        <Link
-          key={dir}
-          href={href(f)}
-          className={cn('flex min-w-0 items-center gap-3 rounded-2xl border border-cork bg-umber p-3 transition hover:border-sand', dir === 'next' && 'flex-row-reverse text-right')}
-        >
-          <span className="relative size-14 shrink-0">
-            <SmartImage src={f.image || PLACEHOLDER_IMAGE(f.name)} alt="" fill sizes="56px" className="object-contain" />
-          </span>
-          <span className="min-w-0">
-            <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.08em] text-ember">
-              {dir === 'prev' ? (
-                <>
-                  <ChevronLeft className="size-3" /> Anterior
-                </>
-              ) : (
-                <>
-                  Siguiente <ChevronRight className="size-3" />
-                </>
-              )}
-            </span>
-            <span className="block truncate text-[10px] uppercase text-sand">{f.brand}</span>
-            <span className="block truncate text-sm">{f.name}</span>
-          </span>
-        </Link>
-      ))}
-    </nav>
-  );
-}
-
-function ArrowButton({ f, dir, small, className }: { f: FragranceSummary; dir: 'prev' | 'next'; small?: boolean; className?: string }) {
+function ArrowButton({ f, dir, className }: { f: FragranceSummary; dir: 'prev' | 'next'; className?: string }) {
   const Icon = dir === 'prev' ? ChevronLeft : ChevronRight;
   return (
     <Link
       href={href(f)}
-      aria-label={`${dir === 'prev' ? 'Perfume anterior' : 'Perfume siguiente'}: ${f.brand} ${f.name}`}
-      title={`${f.brand} ${f.name}`}
+      aria-label={dir === 'prev' ? 'Perfume anterior' : 'Perfume siguiente'}
       className={cn(
-        'grid shrink-0 place-items-center rounded-full border border-cork bg-walnut/70 text-cream backdrop-blur transition hover:border-cream active:scale-95',
-        small ? 'size-9' : 'size-11',
+        'fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 grid size-12 place-items-center rounded-full border border-sand/60 bg-cream text-walnut shadow-lg shadow-black/40 transition active:scale-95 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 hover:brightness-95',
         className,
       )}
     >
-      <Icon className={small ? 'size-4' : 'size-5'} />
+      <Icon className="size-6" strokeWidth={2.5} />
     </Link>
   );
 }
