@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils/cn';
 import { CommunityProfile } from './CommunityProfile';
 import { CustomerReviews } from './CustomerReviews';
 import { NotesPyramid } from './NotesPyramid';
+import { ProductSwipeNav } from './ProductNav';
 import { ProductPurchase } from './ProductPurchase';
 import styles from './ProductView.module.css';
 
@@ -57,6 +58,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
                 <Chip>{f.concentration || 'EDP'}</Chip>
                 {f.gender && <Chip>{f.gender}</Chip>}
               </div>
+              <p className="mt-4 text-[11px] text-drift sm:hidden">← Desliza a los lados para ver otro perfume →</p>
               <nav className="mt-6 flex flex-wrap gap-4 text-[11px] uppercase tracking-[0.08em] text-sand" aria-label="Secciones de la ficha">
                 <a href="#veredicto" className="hover:text-cream">
                   Radiografía olfativa
@@ -83,6 +85,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
           <ProductPurchase fragrance={f} />
         </div>
       </div>
+      <ProductSwipeNav id={f.id} />
     </article>
   );
 }
