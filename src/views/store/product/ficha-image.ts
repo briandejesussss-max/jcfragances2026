@@ -5,7 +5,7 @@ import { fragranceSlug } from '@/lib/utils/slug';
 import { profileOf } from '@/models/domain/profile';
 import { guessImage, pyramidFor } from '@/models/domain/pyramid';
 import { sellableKeys, sizeLabel } from '@/models/domain/sizes';
-import type { Fragrance, SizeConfig, StoreConfig } from '@/models/types';
+import type { Fragrance, Inspiration, SizeConfig, StoreConfig } from '@/models/types';
 
 /** Genera la ficha olfativa descargable (PNG 1080×1350) en un <canvas>, con la paleta de la tienda. */
 
@@ -77,6 +77,58 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
 
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 
+/** Mini tarjeta "Inspirado en": miniatura del original (o un frasco), nombre y qué tan parecido es. */
+async function drawInspiration(ctx: CanvasRenderingContext2D, insp: Inspiration, x: number, y: number, w: number, h: number) {
+  const sim = similarityOf(insp.similarity);
+  ctx.fillStyle = 'rgba(16,9,4,0.72)';
+  roundRect(ctx, x, y, w, h, 18);
+  ctx.fill();
+  ctx.strokeStyle = C.cork;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  const t = h - 18;
+  const tx = x + 9;
+  const ty = y + 9;
+  ctx.save();
+  roundRect(ctx, tx, ty, t, t, 12);
+  ctx.fillStyle = C.bark;
+  ctx.fill();
+  ctx.clip();
+  const thumb = await loadImage(insp.image);
+  if (thumb) {
+    const k = Math.max(t / thumb.width, t / thumb.height);
+    ctx.drawImage(thumb, tx + (t - thumb.width * k) / 2, ty + (t - thumb.height * k) / 2, thumb.width * k, thumb.height * k);
+  } else {
+    ctx.textAlign = 'center';
+    ctx.font = `${Math.round(t * 0.5)}px ${FONT}`;
+    ctx.fillText('🧴', tx + t / 2, ty + t * 0.68);
+  }
+  ctx.restore();
+
+  const left = tx + t + 14;
+  ctx.textAlign = 'left';
+  ctx.fillStyle = C.ember;
+  ctx.font = `500 13px ${FONT}`;
+  ctx.fillText('✨ INSPIRADO EN', left, y + 26);
+  ctx.fillStyle = C.cream;
+  ctx.font = `500 20px ${FONT}`;
+  let title = inspirationTitle(insp);
+  while (ctx.measureText(title).width > w - (left - x) - 12 && title.length > 4) title = title.slice(0, -2) + '…';
+  ctx.fillText(title, left, y + 52);
+  let dx = left;
+  for (let n = 1; n <= 3; n++) {
+    ctx.fillStyle = n <= sim.dots ? C.ember : C.cork;
+    ctx.beginPath();
+    ctx.arc(dx + 4, y + 70, 4, 0, Math.PI * 2);
+    ctx.fill();
+    dx += 13;
+  }
+  ctx.fillStyle = C.sand;
+  ctx.font = `400 15px ${FONT}`;
+  ctx.fillText(sim.label, dx + 6, y + 75);
+}
+
 export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes: SizeConfig[], formatPrice: (n: number) => string): Promise<Blob> {
   const W = 1080;
   const H = 1350;
@@ -118,18 +170,22 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   ctx.fillStyle = 'rgba(56,36,22,0.45)';
   roundRect(ctx, 72, 150, 370, 420, 28);
   ctx.fill();
+  const insp = f.inspiration?.name ? f.inspiration : undefined;
+  // Con "Inspirado en", el frasco ocupa la parte de arriba y la mini tarjeta va abajo, dentro del mismo recuadro.
+  const areaH = insp ? 316 : 420;
   const bottle = await loadImage(f.image);
   if (bottle) {
-    const ratio = Math.min(314 / bottle.width, 364 / bottle.height);
+    const ratio = Math.min(314 / bottle.width, (areaH - 56) / bottle.height);
     const dw = bottle.width * ratio;
     const dh = bottle.height * ratio;
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.75)';
     ctx.shadowBlur = 28;
     ctx.shadowOffsetY = 14;
-    ctx.drawImage(bottle, 72 + (370 - dw) / 2, 150 + (420 - dh) / 2, dw, dh);
+    ctx.drawImage(bottle, 72 + (370 - dw) / 2, 150 + (areaH - dh) / 2, dw, dh);
     ctx.restore();
   }
+  if (insp) await drawInspiration(ctx, insp, 88, 150 + areaH, 338, 88);
 
   // Encabezado
   const rx = 475;
@@ -184,15 +240,6 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   ctx.fillStyle = C.sand;
   ctx.font = `400 19px ${FONT}`;
   ctx.fillText(`Clima: ${prof.clima}   •   Ocasión: ${prof.ocasion.split(',')[0]}`, rx, ty);
-
-  // "Inspirado en…" (si hay espacio antes de la pirámide)
-  if (f.inspiration?.name && ty + 34 <= 598) {
-    ty += 34;
-    ctx.fillStyle = C.ember;
-    ctx.font = `500 19px ${FONT}`;
-    const t = `✨ Inspirado en ${inspirationTitle(f.inspiration)} (${similarityOf(f.inspiration.similarity).label.toLowerCase()})`;
-    ctx.fillText(clip(t, 60), rx, ty);
-  }
 
   // Pirámide
   let py = 610;
