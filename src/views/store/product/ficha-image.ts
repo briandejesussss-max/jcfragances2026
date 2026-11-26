@@ -97,7 +97,9 @@ async function drawInspiration(ctx: CanvasRenderingContext2D, insp: Inspiration,
   ctx.clip();
   const thumb = await loadImage(insp.image);
   if (thumb) {
-    const k = Math.max(t / thumb.width, t / thumb.height);
+    // Frasco completo (sin recortar), centrado y con un poco de aire
+    const pad = 5;
+    const k = Math.min((t - pad * 2) / thumb.width, (t - pad * 2) / thumb.height);
     ctx.drawImage(thumb, tx + (t - thumb.width * k) / 2, ty + (t - thumb.height * k) / 2, thumb.width * k, thumb.height * k);
   } else {
     ctx.textAlign = 'center';
