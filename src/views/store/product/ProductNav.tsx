@@ -1,10 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, type ReactNode } from 'react';
-import Link from 'next/link';
+import { useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
 import { fragranceSlug } from '@/lib/utils/slug';
 import { DEFAULT_FILTER, filterCatalog } from '@/models/domain/catalog';
 import type { FragranceSummary } from '@/models/types';
@@ -31,66 +28,56 @@ function useNeighbors(id: string) {
 
 const href = (f: FragranceSummary) => `/perfume/${fragranceSlug(f)}`;
 
-/** Flechas flotantes (siempre visibles) para ir al perfume anterior o siguiente. También con ← → del teclado. */
-export function ProductArrows({ id }: { id: string }) {
+/** ¿El dedo empezó sobre algo que ya se desplaza de lado (carrusel de notas) o un campo de texto? */
+function blocksSwipe(el: Element | null): boolean {
+  for (let n = el; n && n !== document.body; n = n.parentElement) {
+    if (n.matches('input, textarea, select, [role="dialog"], [data-no-swipe]')) return true;
+    const ox = getComputedStyle(n).overflowX;
+    if ((ox === 'auto' || ox === 'scroll') && n.scrollWidth > n.clientWidth + 2) return true;
+  }
+  return false;
+}
+
+/**
+ * Deslizar el dedo a los lados en cualquier parte de la ficha cambia de perfume:
+ * hacia la izquierda = siguiente, hacia la derecha = anterior. En computadora, teclas ← →.
+ * No dibuja nada en pantalla.
+ */
+export function ProductSwipeNav({ id }: { id: string }) {
   const n = useNeighbors(id);
   const router = useRouter();
+  const { cartOpen, menuOpen } = useStore();
+  const start = useRef<{ x: number; y: number; t: number } | null>(null);
 
   useEffect(() => {
     if (!n) return;
+    const go = (dir: 'prev' | 'next') => router.push(href(n[dir]));
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
-      if (e.altKey || e.ctrlKey || e.metaKey || t?.closest('input, textarea, select, [contenteditable="true"]')) return;
-      if (e.key === 'ArrowLeft') router.push(href(n.prev));
-      if (e.key === 'ArrowRight') router.push(href(n.next));
+      if (cartOpen || menuOpen || e.altKey || e.ctrlKey || e.metaKey || t?.closest('input, textarea, select, [contenteditable="true"]')) return;
+      if (e.key === 'ArrowLeft') go('prev');
+      if (e.key === 'ArrowRight') go('next');
+    };
+    const onStart = (e: TouchEvent) => {
+      start.current = e.touches.length === 1 && !cartOpen && !menuOpen && !blocksSwipe(e.target as Element) ? { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() } : null;
+    };
+    const onEnd = (e: TouchEvent) => {
+      const s = start.current;
+      start.current = null;
+      if (!s || Date.now() - s.t > 800) return;
+      const dx = e.changedTouches[0].clientX - s.x;
+      const dy = e.changedTouches[0].clientY - s.y;
+      if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8) go(dx < 0 ? 'next' : 'prev');
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [n, router]);
+    document.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('touchstart', onStart);
+      document.removeEventListener('touchend', onEnd);
+    };
+  }, [n, router, cartOpen, menuOpen]);
 
-  if (!n) return null;
-  return (
-    <>
-      <ArrowButton f={n.prev} dir="prev" className="left-3 lg:left-5" />
-      <ArrowButton f={n.next} dir="next" className="right-3 lg:right-5" />
-    </>
-  );
-}
-
-/** Deslizar el dedo sobre la foto: izquierda = siguiente, derecha = anterior. */
-export function ProductSwipe({ id, children }: { id: string; children: ReactNode }) {
-  const n = useNeighbors(id);
-  const router = useRouter();
-  const start = useRef<{ x: number; y: number } | null>(null);
-  return (
-    <div
-      onTouchStart={(e) => (start.current = { x: e.touches[0].clientX, y: e.touches[0].clientY })}
-      onTouchEnd={(e) => {
-        const s = start.current;
-        start.current = null;
-        if (!s || !n) return;
-        const dx = e.changedTouches[0].clientX - s.x;
-        const dy = e.changedTouches[0].clientY - s.y;
-        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) router.push(href(dx < 0 ? n.next : n.prev));
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function ArrowButton({ f, dir, className }: { f: FragranceSummary; dir: 'prev' | 'next'; className?: string }) {
-  const Icon = dir === 'prev' ? ChevronLeft : ChevronRight;
-  return (
-    <Link
-      href={href(f)}
-      aria-label={dir === 'prev' ? 'Perfume anterior' : 'Perfume siguiente'}
-      className={cn(
-        'fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 grid size-12 place-items-center rounded-full border border-sand/60 bg-cream text-walnut shadow-lg shadow-black/40 transition active:scale-95 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 hover:brightness-95',
-        className,
-      )}
-    >
-      <Icon className="size-6" strokeWidth={2.5} />
-    </Link>
-  );
+  return null;
 }

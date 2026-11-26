@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils/cn';
 import { CommunityProfile } from './CommunityProfile';
 import { CustomerReviews } from './CustomerReviews';
 import { NotesPyramid } from './NotesPyramid';
-import { ProductArrows, ProductSwipe } from './ProductNav';
+import { ProductSwipeNav } from './ProductNav';
 import { ProductPurchase } from './ProductPurchase';
 import styles from './ProductView.module.css';
 
@@ -21,7 +21,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
   const summary = summarizeReviews(reviews);
   const bg = (f.bgImage ?? '').trim();
   return (
-    <article className="pb-24">
+    <article className="pb-16">
       <div className={cn(styles.stage, 'border-b border-dashed border-cork')}>
         {bg ? (
           <div className={styles.photo} style={{ backgroundImage: cssUrl(bg) }} aria-hidden="true" />
@@ -33,11 +33,9 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
             <ArrowLeft className="size-4" /> Catálogo
           </Link>
           <div className="mt-4 grid items-center gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-            <ProductSwipe id={f.id}>
-              <div className="relative mx-auto h-72 w-full max-w-xs sm:h-96">
-                <SmartImage src={f.image || PLACEHOLDER_IMAGE(f.name)} alt={`${f.brand} ${f.name}`} fill priority sizes="(max-width: 640px) 80vw, 40vw" className={cn(styles.bottle, 'object-contain')} />
-              </div>
-            </ProductSwipe>
+            <div className="relative mx-auto h-72 w-full max-w-xs sm:h-96">
+              <SmartImage src={f.image || PLACEHOLDER_IMAGE(f.name)} alt={`${f.brand} ${f.name}`} fill priority sizes="(max-width: 640px) 80vw, 40vw" className={cn(styles.bottle, 'object-contain')} />
+            </div>
             <div>
               <p className="text-xs uppercase tracking-[0.14em] text-ember">{f.brand}</p>
               <h1 className="mt-2 text-[clamp(2rem,7vw,3.4rem)]">{f.name}</h1>
@@ -60,6 +58,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
                 <Chip>{f.concentration || 'EDP'}</Chip>
                 {f.gender && <Chip>{f.gender}</Chip>}
               </div>
+              <p className="mt-4 text-[11px] text-drift sm:hidden">← Desliza a los lados para ver otro perfume →</p>
               <nav className="mt-6 flex flex-wrap gap-4 text-[11px] uppercase tracking-[0.08em] text-sand" aria-label="Secciones de la ficha">
                 <a href="#veredicto" className="hover:text-cream">
                   Radiografía olfativa
@@ -86,7 +85,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
           <ProductPurchase fragrance={f} />
         </div>
       </div>
-      <ProductArrows id={f.id} />
+      <ProductSwipeNav id={f.id} />
     </article>
   );
 }
