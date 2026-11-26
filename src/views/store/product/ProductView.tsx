@@ -10,7 +10,9 @@ import { CommunityProfile } from './CommunityProfile';
 import { CustomerReviews } from './CustomerReviews';
 import { NotesPyramid } from './NotesPyramid';
 import { ProductSwipeNav } from './ProductNav';
+import { ProductActions } from './ProductActions';
 import { ProductPurchase } from './ProductPurchase';
+import { ProductTabs } from './ProductTabs';
 import styles from './ProductView.module.css';
 
 const cssUrl = (u: string) => `url("${u.replace(/"/g, '%22').replace(/\)/g, '%29')}")`;
@@ -29,9 +31,12 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
           f.image && <div className={styles.backdrop} style={{ backgroundImage: cssUrl(f.image) }} aria-hidden="true" />
         )}
         <div className="mx-auto max-w-5xl px-4 pb-8 pt-5">
-          <Link href="/#catalogo" className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-sand hover:text-cream">
-            <ArrowLeft className="size-4" /> Catálogo
-          </Link>
+          <div className="flex items-center justify-between gap-3">
+            <Link href="/#catalogo" className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-sand hover:text-cream">
+              <ArrowLeft className="size-4" /> Catálogo
+            </Link>
+            <ProductActions fragrance={f} />
+          </div>
           <div className="mt-4 grid items-center gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
             <div className="relative mx-auto h-72 w-full max-w-xs sm:h-96">
               <SmartImage src={f.image || PLACEHOLDER_IMAGE(f.name)} alt={`${f.brand} ${f.name}`} fill priority sizes="(max-width: 640px) 80vw, 40vw" className={cn(styles.bottle, 'object-contain')} />
@@ -59,29 +64,22 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
                 {f.gender && <Chip>{f.gender}</Chip>}
               </div>
               <p className="mt-4 text-[11px] text-drift sm:hidden">← Desliza a los lados para ver otro perfume →</p>
-              <nav className="mt-6 flex flex-wrap gap-4 text-[11px] uppercase tracking-[0.08em] text-sand" aria-label="Secciones de la ficha">
-                <a href="#veredicto" className="hover:text-cream">
-                  Radiografía olfativa
-                </a>
-                <a href="#resenas" className="hover:text-cream">
-                  Reseñas
-                </a>
-                <a href="#precios" className="hover:text-cream">
-                  Formatos & decants
-                </a>
-              </nav>
             </div>
           </div>
         </div>
       </div>
 
       <div className="mx-auto mt-6 grid max-w-5xl gap-4 px-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <div className="min-w-0 space-y-4">
-          <NotesPyramid fragrance={f} />
-          <CommunityProfile fragrance={f} />
-          <CustomerReviews fragranceId={f.id} reviews={reviews} />
+        <div className="min-w-0">
+          <ProductTabs
+            tabs={[
+              { id: 'notas', label: 'Notas', content: <NotesPyramid fragrance={f} /> },
+              { id: 'veredicto', label: 'Radiografía', content: <CommunityProfile fragrance={f} /> },
+              { id: 'resenas', label: summary.count ? `Reseñas (${summary.count})` : 'Reseñas', content: <CustomerReviews fragranceId={f.id} reviews={reviews} /> },
+            ]}
+          />
         </div>
-        <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
+        <div className="order-first min-w-0 lg:sticky lg:top-20 lg:order-none lg:self-start">
           <ProductPurchase fragrance={f} />
         </div>
       </div>
