@@ -23,7 +23,7 @@ export function Header() {
   const count = cart.reduce((a, l) => a + l.qty, 0);
 
   return (
-    <header className={cn(styles.bar, 'sticky top-0 z-40')}>
+    <header className={cn(styles.bar, 'aurora-header sticky top-0 z-40')}>
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <button type="button" onClick={() => setMenuOpen(true)} aria-label="Abrir menú" className="rounded-full p-2 text-cream hover:bg-bark">
           <Menu className="size-5" />

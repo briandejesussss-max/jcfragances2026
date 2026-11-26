@@ -18,7 +18,7 @@ export function Hero({ config, fragrances }: { config: StoreConfig; fragrances: 
       <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-8 pt-10 sm:pt-16 lg:grid-cols-2">
         <div>
           <h1 className={styles.title}>
-            Lleva el perfume que quieres, <span className={styles.accent}>en la medida que quieres.</span>
+            Lleva el perfume que quieres, <span className={`${styles.accent} text-aurora`}>en la medida que quieres.</span>
           </h1>
           <ul className="mt-6 space-y-2 text-sm text-sand">
             {STEPS.map((s) => (
@@ -40,7 +40,7 @@ export function Hero({ config, fragrances }: { config: StoreConfig; fragrances: 
         {newest.length > 0 && (
           <div className={`${styles.collage} grid grid-cols-5 items-end gap-2`} aria-label="Lo más nuevo">
             {newest.map((f, i) => (
-              <Link key={f.id} href={`/perfume/${fragranceSlug(f)}`} className="relative block" style={{ height: `${150 + (i % 2) * 50}px` }}>
+              <Link key={f.id} href={`/perfume/${fragranceSlug(f)}`} className="aurora-float relative block" style={{ height: `${150 + (i % 2) * 50}px` }}>
                 <SmartImage src={f.image!} alt={`${f.brand} ${f.name}`} fill sizes="20vw" priority={i < 2} className="object-contain drop-shadow-xl" />
               </Link>
             ))}

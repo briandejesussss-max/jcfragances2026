@@ -7,19 +7,20 @@
  */
 /*
  * Tokens de color. Nombres semánticos de la paleta original "Madera cálida";
- * los valores cambian según la paleta elegida (html[data-palette]). OLED negro es la predeterminada.
+ * los valores cambian según la paleta elegida (html[data-palette]). "Degradado" es la predeterminada.
  *   walnut = fondo · umber = fondo elevado · bark = superficie/botón · cork = bordes
  *   drift = texto terciario · sand = texto secundario · cream = texto principal · ember = acento
  */
 @theme {
-  --color-walnut: #000000;
-  --color-umber: #0a0a0a;
-  --color-bark: #121212;
-  --color-cork: #2a2a2a;
-  --color-drift: #6e6e6e;
-  --color-sand: #b0b0b0;
-  --color-cream: #f5f5f5;
-  --color-ember: #ff6a1a;
+  /* Predeterminada: "Degradado" (estética y animaciones en aurora.css) */
+  --color-walnut: #07060b;
+  --color-umber: #100e18;
+  --color-bark: #1a1726;
+  --color-cork: #2e2942;
+  --color-drift: #7b7594;
+  --color-sand: #b9b3cf;
+  --color-cream: #f4f2fb;
+  --color-ember: #ff5ea8;
   --color-ok: #3ecf8e;
   --color-bad: #ff6b6b;
   --color-whatsapp: #25d366;
@@ -41,6 +42,10 @@
   }
 }
 
+html[data-palette='oled'] {
+  --color-walnut: #000000; --color-umber: #0a0a0a; --color-bark: #121212; --color-cork: #2a2a2a;
+  --color-drift: #6e6e6e; --color-sand: #b0b0b0; --color-cream: #f5f5f5; --color-ember: #ff6a1a;
+}
 html[data-palette='medianoche'] {
   --color-walnut: #0a1128; --color-umber: #0e1733; --color-bark: #16213f; --color-cork: #2a3a63;
   --color-drift: #6b7aa3; --color-sand: #a9b6d6; --color-cream: #e8eefc; --color-ember: #6ea8ff;
