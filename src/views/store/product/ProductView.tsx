@@ -77,7 +77,7 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
         <div className="min-w-0 space-y-4">
           <NotesPyramid fragrance={f} />
           <CommunityProfile fragrance={f} />
-          <CustomerReviews reviews={reviews} />
+          <CustomerReviews fragranceId={f.id} reviews={reviews} />
         </div>
         <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
           <ProductPurchase fragrance={f} />

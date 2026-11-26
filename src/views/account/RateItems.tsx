@@ -33,7 +33,7 @@ export function RateItems({ items, reviews }: { items: OrderItem[]; reviews: MyR
                 </Link>
                 {mine && (
                   <span className="mt-0.5 flex items-center gap-2 text-[11px] text-sand">
-                    <Stars value={mine.rating} size="xs" /> {mine.hidden ? 'Oculta por la tienda' : 'Publicada'}
+                    <Stars value={mine.rating} size="xs" /> {mine.hidden ? 'Oculta por la tienda' : mine.pending ? 'En revisión' : 'Publicada'}
                   </span>
                 )}
               </div>
@@ -48,7 +48,7 @@ export function RateItems({ items, reviews }: { items: OrderItem[]; reviews: MyR
                   </Button>
                 ))}
             </div>
-            {editing === i.fragId && <ReviewForm fragranceId={i.fragId} initial={mine} onDone={() => setEditing(null)} />}
+            {editing === i.fragId && <ReviewForm fragranceId={i.fragId} initial={mine} onDone={() => setEditing(null)} onCancel={() => setEditing(null)} />}
           </div>
         );
       })}

@@ -27,7 +27,7 @@ export function setOptOut(off: boolean) {
   safe(() => (off ? localStorage.setItem(OPT_OUT_KEY, '1') : localStorage.removeItem(OPT_OUT_KEY)), undefined);
 }
 
-function visitorId(): string | null {
+export function visitorId(): string | null {
   return safe(() => {
     let id = localStorage.getItem(VISITOR_KEY);
     if (!id) {
