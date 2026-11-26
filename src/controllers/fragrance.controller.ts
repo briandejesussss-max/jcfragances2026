@@ -1,6 +1,6 @@
 'use server';
 
-import { sanitizeInspiration } from '@/models/domain/inspiration';
+import { inspirationRefs, sanitizeInspiration } from '@/models/domain/inspiration';
 import { updateTag } from 'next/cache';
 import { requireAdminAction } from '@/lib/auth/session';
 import { composePyramid, hasPyramid, PYRAMID_SECTIONS } from '@/models/domain/pyramid';
@@ -38,7 +38,7 @@ export async function saveFragranceAction(input: Fragrance): Promise<ActionResul
     const brand = String(input.brand ?? '').trim();
     if (!name || !brand) throw new UserError('Escribe el nombre y la casa de la fragancia');
     const inspiration = sanitizeInspiration(input.inspiration);
-    if (!isRemoteUrl(input.image ?? '') || !isRemoteUrl(input.bgImage ?? '') || !isRemoteUrl(inspiration?.image ?? ''))
+    if (!isRemoteUrl(input.image ?? '') || !isRemoteUrl(input.bgImage ?? '') || (inspiration ? inspirationRefs(inspiration) : []).some((r) => !isRemoteUrl(r.image ?? '')))
       throw new UserError('Las fotos deben subirse como archivo o pegarse como enlace https');
 
     const pyramid = sanitizePyramid(input.pyramid);

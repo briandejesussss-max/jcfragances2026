@@ -86,14 +86,23 @@ export interface Fragrance {
 
 export type Similarity = 'muy' | 'similar' | 'toque';
 
-export interface Inspiration {
+/** Un perfume original de referencia. */
+export interface InspirationRef {
   brand: string;
   name: string;
-  similarity: Similarity;
   /** Foto de referencia (opcional). */
   image?: string;
+}
+
+/**
+ * Perfume(s) original(es) en que se inspira. El primero va en brand/name/image
+ * (así quedan compatibles los que ya estaban capturados); los híbridos suman hasta 3 más en `others`.
+ */
+export interface Inspiration extends InspirationRef {
+  similarity: Similarity;
   /** Nota corta, p. ej. "Más dulce y dura más que el original". */
   note?: string;
+  others?: InspirationRef[];
 }
 
 /** Versión ligera para listados: sin pirámide ni foto de fondo. */

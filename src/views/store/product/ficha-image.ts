@@ -1,6 +1,6 @@
 'use client';
 
-import { inspirationTitle, similarityOf } from '@/models/domain/inspiration';
+import { inspirationBrands, inspirationRefs, inspirationTitle, similarityOf } from '@/models/domain/inspiration';
 import { fragranceSlug } from '@/lib/utils/slug';
 import { profileOf } from '@/models/domain/profile';
 import { guessImage, pyramidFor } from '@/models/domain/pyramid';
@@ -100,8 +100,13 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 
 /** Mini tarjeta "Inspirado en": miniatura del original (o un frasco), nombre y qué tan parecido es. */
+/** Alto de la mini tarjeta "Inspirado en": los híbridos usan un poco más (miniaturas en fila y nombre en 2 renglones). */
+const inspirationCardHeight = (insp: Inspiration) => (inspirationRefs(insp).length > 1 ? 104 : 84);
+
 async function drawInspiration(ctx: CanvasRenderingContext2D, C: Palette, insp: Inspiration, x: number, y: number, w: number, h: number) {
   const sim = similarityOf(insp.similarity);
+  const refs = inspirationRefs(insp).slice(0, 4);
+  const hybrid = refs.length > 1;
   ctx.fillStyle = alpha(C.bg, 0.72);
   roundRect(ctx, x, y, w, h, 18);
   ctx.fill();
@@ -109,48 +114,71 @@ async function drawInspiration(ctx: CanvasRenderingContext2D, C: Palette, insp: 
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  const t = h - 18;
+  // Miniaturas: un original = cuadro; híbrido = una al lado de otra (frasco completo, sin recortar)
+  const th = h - 18;
+  const tw = hybrid ? 50 : th;
+  const gap = 5;
   const tx = x + 9;
   const ty = y + 9;
-  ctx.save();
-  roundRect(ctx, tx, ty, t, t, 12);
-  ctx.fillStyle = C.bark;
-  ctx.fill();
-  ctx.clip();
-  const thumb = await loadImage(insp.image);
-  if (thumb) {
-    // Frasco completo (sin recortar), centrado y con un poco de aire
-    const pad = 5;
-    const k = Math.min((t - pad * 2) / thumb.width, (t - pad * 2) / thumb.height);
-    ctx.drawImage(thumb, tx + (t - thumb.width * k) / 2, ty + (t - thumb.height * k) / 2, thumb.width * k, thumb.height * k);
-  } else {
-    ctx.textAlign = 'center';
-    ctx.font = `${Math.round(t * 0.5)}px ${FONT}`;
-    ctx.fillText('🧴', tx + t / 2, ty + t * 0.68);
-  }
-  ctx.restore();
+  const thumbs = await Promise.all(refs.map((r) => loadImage(r.image)));
+  refs.forEach((_, k) => {
+    const cx = tx + k * (tw + gap);
+    ctx.save();
+    roundRect(ctx, cx, ty, tw, th, 12);
+    ctx.fillStyle = C.bark;
+    ctx.fill();
+    ctx.clip();
+    const img = thumbs[k];
+    if (img) {
+      const pad = 5;
+      const sc = Math.min((tw - pad * 2) / img.width, (th - pad * 2) / img.height);
+      ctx.drawImage(img, cx + (tw - img.width * sc) / 2, ty + (th - img.height * sc) / 2, img.width * sc, img.height * sc);
+    } else {
+      ctx.textAlign = 'center';
+      ctx.font = `${Math.round(Math.min(tw, th) * 0.5)}px ${FONT}`;
+      ctx.fillText('🧴', cx + tw / 2, ty + th / 2 + Math.min(tw, th) * 0.18);
+    }
+    ctx.restore();
+  });
 
-  const left = tx + t + 14;
+  const left = tx + refs.length * (tw + gap) + 9;
+  const maxW = x + w - left - 12;
+  const fit = (text: string) => {
+    let t = text;
+    while (ctx.measureText(t).width > maxW && t.length > 4) t = t.slice(0, -2) + '…';
+    return t;
+  };
   ctx.textAlign = 'left';
   ctx.fillStyle = C.ember;
   ctx.font = `500 13px ${FONT}`;
-  ctx.fillText('✨ INSPIRADO EN', left, y + 26);
+  ctx.fillText(hybrid ? `✨ HÍBRIDO · INSPIRADO EN ${refs.length}` : '✨ INSPIRADO EN', left, y + 26);
+
   ctx.fillStyle = C.cream;
-  ctx.font = `500 20px ${FONT}`;
-  let title = inspirationTitle(insp);
-  while (ctx.measureText(title).width > w - (left - x) - 12 && title.length > 4) title = title.slice(0, -2) + '…';
-  ctx.fillText(title, left, y + 52);
+  ctx.font = `500 ${hybrid ? 18 : 20}px ${FONT}`;
+  let lineY = y + 52;
+  const lines = hybrid ? wrap(ctx, inspirationTitle(insp), maxW) : [inspirationTitle(insp)];
+  const shown = lines.slice(0, 2);
+  if (lines.length > 2) shown[1] = `${shown[1]} …`;
+  shown.forEach((ln, k) => {
+    ctx.fillText(fit(ln), left, lineY);
+    if (k < shown.length - 1) lineY += 22;
+  });
+
+  const dotsY = lineY + (hybrid ? 22 : 18);
   let dx = left;
   for (let n = 1; n <= 3; n++) {
     ctx.fillStyle = n <= sim.dots ? C.ember : C.cork;
     ctx.beginPath();
-    ctx.arc(dx + 4, y + 70, 4, 0, Math.PI * 2);
+    ctx.arc(dx + 4, dotsY - 5, 4, 0, Math.PI * 2);
     ctx.fill();
     dx += 13;
   }
   ctx.fillStyle = C.sand;
   ctx.font = `400 15px ${FONT}`;
-  ctx.fillText(sim.label, dx + 6, y + 75);
+  // En híbridos, después del parecido van las casas: "Similar · Escentric Molecules · Nishane"
+  let line = hybrid && inspirationBrands(insp) ? `${sim.label} · ${inspirationBrands(insp)}` : sim.label;
+  while (ctx.measureText(line).width > x + w - (dx + 6) - 12 && line.length > 4) line = line.slice(0, -2) + '…';
+  ctx.fillText(line, dx + 6, dotsY);
 }
 
 export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes: SizeConfig[], formatPrice: (n: number) => string): Promise<Blob> {
@@ -268,8 +296,8 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   let py = 610;
   if (insp) {
     const cardTop = ty + 18;
-    await drawInspiration(ctx, C, insp, rx, cardTop, rw, 84);
-    py = Math.max(py, cardTop + 84 + 34);
+    await drawInspiration(ctx, C, insp, rx, cardTop, rw, inspirationCardHeight(insp));
+    py = Math.max(py, cardTop + inspirationCardHeight(insp) + 34);
   }
   // Si la pirámide se recorrió hacia abajo, sus filas se compactan para no tocar el pie.
   const shifted = py > 610;
