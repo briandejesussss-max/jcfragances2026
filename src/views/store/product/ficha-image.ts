@@ -1,5 +1,6 @@
 'use client';
 
+import { inspirationTitle, similarityOf } from '@/models/domain/inspiration';
 import { fragranceSlug } from '@/lib/utils/slug';
 import { profileOf } from '@/models/domain/profile';
 import { guessImage, pyramidFor } from '@/models/domain/pyramid';
@@ -183,6 +184,15 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
   ctx.fillStyle = C.sand;
   ctx.font = `400 19px ${FONT}`;
   ctx.fillText(`Clima: ${prof.clima}   •   Ocasión: ${prof.ocasion.split(',')[0]}`, rx, ty);
+
+  // "Inspirado en…" (si hay espacio antes de la pirámide)
+  if (f.inspiration?.name && ty + 34 <= 598) {
+    ty += 34;
+    ctx.fillStyle = C.ember;
+    ctx.font = `500 19px ${FONT}`;
+    const t = `✨ Inspirado en ${inspirationTitle(f.inspiration)} (${similarityOf(f.inspiration.similarity).label.toLowerCase()})`;
+    ctx.fillText(clip(t, 60), rx, ty);
+  }
 
   // Pirámide
   let py = 610;

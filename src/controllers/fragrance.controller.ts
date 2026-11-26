@@ -1,5 +1,6 @@
 'use server';
 
+import { sanitizeInspiration } from '@/models/domain/inspiration';
 import { updateTag } from 'next/cache';
 import { requireAdminAction } from '@/lib/auth/session';
 import { composePyramid, hasPyramid, PYRAMID_SECTIONS } from '@/models/domain/pyramid';
@@ -36,7 +37,8 @@ export async function saveFragranceAction(input: Fragrance): Promise<ActionResul
     const name = String(input.name ?? '').trim();
     const brand = String(input.brand ?? '').trim();
     if (!name || !brand) throw new UserError('Escribe el nombre y la casa de la fragancia');
-    if (!isRemoteUrl(input.image ?? '') || !isRemoteUrl(input.bgImage ?? ''))
+    const inspiration = sanitizeInspiration(input.inspiration);
+    if (!isRemoteUrl(input.image ?? '') || !isRemoteUrl(input.bgImage ?? '') || !isRemoteUrl(inspiration?.image ?? ''))
       throw new UserError('Las fotos deben subirse como archivo o pegarse como enlace https');
 
     const pyramid = sanitizePyramid(input.pyramid);
@@ -61,6 +63,7 @@ export async function saveFragranceAction(input: Fragrance): Promise<ActionResul
       pyramid,
       prices: input.prices ?? {},
       stock: input.stock ?? existing?.stock,
+      inspiration,
     };
 
     await saveFragrance(db, fragrance, existing ? undefined : await firstPosition(db));

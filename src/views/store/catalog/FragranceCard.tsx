@@ -2,7 +2,7 @@
 
 import { SmartImage } from '@/views/shared/SmartImage';
 import Link from 'next/link';
-import { Heart } from 'lucide-react';
+import { Heart, Sparkles } from 'lucide-react';
 import { PLACEHOLDER_IMAGE } from '@/config/store';
 import { cn } from '@/lib/utils/cn';
 import { fragranceSlug } from '@/lib/utils/slug';
@@ -58,6 +58,11 @@ export function FragranceCard({ fragrance: f, priority = false }: { fragrance: F
             )}
           </div>
           <h3 className={cn(styles.name, 'mt-1 truncate text-base sm:text-lg')}>{f.name}</h3>
+          {f.inspiration?.name && (
+            <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-ember">
+              <Sparkles className="size-3 shrink-0" /> <span className="truncate">Inspirado en {f.inspiration.name}</span>
+            </p>
+          )}
           <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-sand">
             <span className="text-drift">Notas:</span> {f.notes || 'Toca para abrir la pirámide y radiografía olfativa.'}
           </p>

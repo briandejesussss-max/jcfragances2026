@@ -80,6 +80,20 @@ export interface Fragrance {
   pyramid?: Pyramid;
   prices: Prices;
   stock?: Stock;
+  /** Perfume original en el que está inspirado (opcional). */
+  inspiration?: Inspiration;
+}
+
+export type Similarity = 'muy' | 'similar' | 'toque';
+
+export interface Inspiration {
+  brand: string;
+  name: string;
+  similarity: Similarity;
+  /** Foto de referencia (opcional). */
+  image?: string;
+  /** Nota corta, p. ej. "Más dulce y dura más que el original". */
+  note?: string;
 }
 
 /** Versión ligera para listados: sin pirámide ni foto de fondo. */

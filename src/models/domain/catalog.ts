@@ -40,7 +40,8 @@ export function filterCatalog(list: FragranceSummary[], filter: CatalogFilter): 
       !q ||
       (f.name ?? '').toLowerCase().includes(q) ||
       (f.brand ?? '').toLowerCase().includes(q) ||
-      (f.notes ?? '').toLowerCase().includes(q);
+      (f.notes ?? '').toLowerCase().includes(q) ||
+      (f.inspiration ? `${f.inspiration.brand} ${f.inspiration.name}`.toLowerCase().includes(q) : false);
     return brandOk && genderOk && queryOk;
   });
 
