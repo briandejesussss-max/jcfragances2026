@@ -20,7 +20,7 @@ const TOC = [
 ] as const;
 
 const UI = ({ children }: { children: ReactNode }) => (
-  <span className="inline-block whitespace-nowrap rounded-md border border-cork bg-umber px-2 text-[0.85em] text-cream">{children}</span>
+  <span className="inline-block max-w-full whitespace-nowrap break-words rounded-md border max-[340px]:whitespace-normal border-cork bg-umber px-2 text-[0.85em] text-cream">{children}</span>
 );
 
 function Section({ id, eyebrow, title, intro, children }: { id: string; eyebrow?: string; title: string; intro?: ReactNode; children: ReactNode }) {

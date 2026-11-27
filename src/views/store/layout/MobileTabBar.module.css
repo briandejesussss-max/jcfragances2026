@@ -20,7 +20,7 @@
 .track {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   max-width: 34rem;
   margin: 0 auto;
 }
@@ -43,6 +43,7 @@
   align-items: center;
   gap: 2px;
   padding: 6px 0 4px;
+  min-width: 0;
   border-radius: 16px;
   color: var(--color-sand);
   transition: color 160ms ease;
@@ -62,6 +63,24 @@
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.01em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Celulares muy angostos (plegables cerrados): barra más compacta para que quepan las 5 pestañas */
+@media (max-width: 340px) {
+  .bar {
+    padding-inline: 4px;
+  }
+  .label {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  .badge {
+    right: -6px;
+  }
 }
 
 .badge {
@@ -100,5 +119,19 @@ html:not([data-palette]) .badge {
 @media (prefers-reduced-motion: reduce) {
   .pill {
     transition: none;
+  }
+}
+
+/* Celular acostado (pantalla baja): ícono y texto en una fila para no comerse la pantalla */
+@media (orientation: landscape) and (max-height: 500px) {
+  .bar {
+    padding-block: 3px calc(3px + env(safe-area-inset-bottom, 0px));
+    padding-inline: max(10px, env(safe-area-inset-left, 0px)) max(10px, env(safe-area-inset-right, 0px));
+  }
+  .tab {
+    flex-direction: row;
+    justify-content: center;
+    gap: 6px;
+    padding: 5px 0;
   }
 }
