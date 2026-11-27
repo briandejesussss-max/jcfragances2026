@@ -68,7 +68,7 @@ export function CartDrawer() {
               {rows.map(({ line, f, unit }, i) => (
                 <div key={`${line.fragId}-${line.size}`} className="flex items-center justify-between gap-2 rounded-2xl border border-cork bg-umber p-3">
                   <div className="min-w-0">
-                    <span className="block text-[9px] uppercase tracking-[0.1em] text-sand">{f?.brand ?? 'No disponible'}</span>
+                    <span className="block text-[11px] uppercase tracking-[0.1em] text-sand">{f?.brand ?? 'No disponible'}</span>
                     <span className="block truncate text-sm">{f?.name ?? 'Fragancia retirada'}</span>
                     <span className="text-[11px] text-sand">
                       {f ? presentationLabel(sizes, f as Fragrance, line.size, true) : line.size}

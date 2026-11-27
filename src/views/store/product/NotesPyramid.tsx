@@ -15,7 +15,7 @@ export function NotesPyramid({ fragrance: f }: { fragrance: Fragrance }) {
       <div className="mt-4 space-y-4">
         {PYRAMID_SECTIONS.map((s) => (
           <div key={s}>
-            <span className="text-[10px] uppercase tracking-[0.1em] text-ember">{PYRAMID_SECTION_LABEL[s]}</span>
+            <span className="text-[11px] uppercase tracking-[0.1em] text-ember">{PYRAMID_SECTION_LABEL[s]}</span>
             {/* Celular: una fila que se desliza; desde tableta: se acomodan en varias filas */}
             <div className="-mx-1 mt-2 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
               {pyramid[s].length === 0 && <span className="text-xs text-drift">—</span>}

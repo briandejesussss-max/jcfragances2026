@@ -40,7 +40,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .text { animation: up 0.6s ease-out; }
-  .bottle { animation: pop 0.7s cubic-bezier(0.2, 1.2, 0.4, 1); }
+  .bottle { animation: pop 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
   .bottle > * { animation: float 5s ease-in-out 0.7s infinite; }
 }
 @keyframes up {

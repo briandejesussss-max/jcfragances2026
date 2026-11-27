@@ -61,7 +61,7 @@ export function ReviewForm({ fragranceId, initial, onDone, onCancel }: { fragran
         <span className="mt-1 block text-[11px] text-drift">Se publica solo tu nombre de pila.</span>
       </label>
       <fieldset>
-        <legend className="mb-1 text-[10px] font-medium uppercase tracking-[0.08em] text-sand">Tu calificación</legend>
+        <legend className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-sand">Tu calificación</legend>
         <div className="flex items-center gap-2" onMouseLeave={() => setHover(0)}>
           {[1, 2, 3, 4, 5].map((n) => (
             <button
@@ -107,7 +107,7 @@ export function ReviewForm({ fragranceId, initial, onDone, onCancel }: { fragran
 function Choice<T extends string>({ label, options, value, onChange }: { label: string; options: Array<{ value: T; label: string }>; value: T | null; onChange: (v: T | null) => void }) {
   return (
     <fieldset>
-      <legend className="mb-1 text-[10px] font-medium uppercase tracking-[0.08em] text-sand">{label}</legend>
+      <legend className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-sand">{label}</legend>
       <div className="flex flex-wrap gap-1.5">
         {options.map((o) => (
           <button

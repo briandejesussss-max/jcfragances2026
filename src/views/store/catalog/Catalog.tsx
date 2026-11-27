@@ -27,7 +27,7 @@ export function Catalog() {
   return (
     <section id="catalogo" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-10 sm:py-14">
       <div className="mb-6">
-        <p className="text-[10px] uppercase tracking-[0.14em] text-sand">Catálogo</p>
+        <p className="text-[11px] uppercase tracking-[0.14em] text-sand">Catálogo</p>
         <h2 className="mt-2 text-[clamp(1.8rem,6vw,2.55rem)]">Encuentra tu firma olfativa</h2>
       </div>
 

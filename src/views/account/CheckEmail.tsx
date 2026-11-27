@@ -19,7 +19,7 @@ export function CheckEmail({ email, isMagicLink }: { email: string; isMagicLink:
       </p>
       {!isMagicLink && (
         <div className="w-full space-y-2 rounded-2xl border border-cork bg-bark/60 p-4 text-left">
-          <span className="text-[10px] uppercase tracking-[0.1em] text-ember">¿Por qué confirmar?</span>
+          <span className="text-[11px] uppercase tracking-[0.1em] text-ember">¿Por qué confirmar?</span>
           <p className="flex gap-2.5 text-sm leading-relaxed text-sand">
             <ShieldCheck className="mt-0.5 size-4 shrink-0 text-cream" />
             Así sabemos que el correo es tuyo y podemos mostrarte los pedidos que ya hiciste con él.

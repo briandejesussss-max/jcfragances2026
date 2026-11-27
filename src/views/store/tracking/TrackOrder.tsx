@@ -33,7 +33,7 @@ export function TrackOrder() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
-      <p className="text-[10px] uppercase tracking-[0.14em] text-sand">Seguimiento</p>
+      <p className="text-[11px] uppercase tracking-[0.14em] text-sand">Seguimiento</p>
       <h1 className="mt-2 text-3xl">Rastrea tu pedido</h1>
       <form onSubmit={submit} className="mt-6 space-y-3 rounded-3xl border border-cork bg-umber p-5">
         <Field label="Número de pedido">

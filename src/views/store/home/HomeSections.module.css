@@ -44,8 +44,10 @@ html:not([data-palette]) .band {
   background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--color-ember) 35%, transparent), var(--color-umber) 70%);
   transition: transform 0.35s ease;
 }
-.occasion:hover {
-  transform: translateY(-4px);
+@media (hover: hover) and (pointer: fine) {
+  .occasion:hover {
+    transform: translateY(-4px);
+  }
 }
 html:not([data-palette]) .occasion[data-tone='1'] { background: radial-gradient(circle at 50% 40%, rgb(155 93 255 / 0.35), var(--color-umber) 70%); }
 html:not([data-palette]) .occasion[data-tone='2'] { background: radial-gradient(circle at 50% 40%, rgb(255 138 30 / 0.35), var(--color-umber) 70%); }
@@ -72,7 +74,7 @@ html:not([data-palette]) .occasion[data-tone='3'] { background: radial-gradient(
 
 @media (prefers-reduced-motion: no-preference) {
   .bandTrack { animation: band 18s linear infinite; }
-  .pop { animation: pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1); }
+  .pop { animation: pop 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
 }
 @keyframes band {
   to { transform: translateX(-50%); }
@@ -97,8 +99,10 @@ html:not([data-palette]) .occasion[data-tone='3'] { background: radial-gradient(
   border: 1px solid color-mix(in srgb, var(--color-cream) 10%, transparent);
   transition: transform 0.3s ease;
 }
-.story:hover {
-  transform: translateY(-3px);
+@media (hover: hover) and (pointer: fine) {
+  .story:hover {
+    transform: translateY(-3px);
+  }
 }
 .storyShade {
   position: absolute;

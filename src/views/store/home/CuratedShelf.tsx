@@ -21,7 +21,7 @@ export function CuratedShelf() {
     <section id="para-ti" className="mx-auto max-w-6xl scroll-mt-20 px-4 pt-10">
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.14em] text-sand">{saved.length ? 'Tu armario' : 'Seleccionado para ti'}</p>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-sand">{saved.length ? 'Tu armario' : 'Seleccionado para ti'}</p>
           <h3 className="mt-1 text-xl sm:text-2xl">Combina con tu armario</h3>
         </div>
         <span className="text-[11px] text-sand">❤️ Guarda tus favoritos</span>
@@ -31,7 +31,7 @@ export function CuratedShelf() {
           const inShelf = shelf.includes(f.id);
           return (
             <div key={f.id} className="relative rounded-2xl border border-cork bg-umber p-2.5">
-              <div className="mb-1.5 flex items-center justify-between text-[9px] uppercase tracking-[0.08em]">
+              <div className="mb-1.5 flex items-center justify-between text-[11px] uppercase tracking-[0.08em]">
                 <span>{inShelf ? 'En armario' : 'Para ti'}</span>
                 <button type="button" onClick={() => toggleShelf(f.id)} aria-label="Guardar en mi armario" className="p-1 text-sand hover:text-ember">
                   <Heart className={cn('size-3.5', inShelf && 'fill-ember text-ember')} />
@@ -42,9 +42,9 @@ export function CuratedShelf() {
                   <SmartImage src={f.image || PLACEHOLDER_IMAGE(f.name)} alt={f.name} fill sizes="25vw" className="object-contain p-2" />
                 </div>
                 <div className="pt-1.5 text-center">
-                  <span className="block truncate text-[9px] uppercase tracking-[0.1em] text-sand">{f.brand}</span>
+                  <span className="block truncate text-[11px] uppercase tracking-[0.1em] text-sand">{f.brand}</span>
                   <h4 className="truncate text-xs sm:text-sm">{f.name}</h4>
-                  <span className="font-mono text-[10px]">{f.comingSoon ? '⏳ Próximamente' : `Desde ${price(minSizePrice(sizes, f))}`}</span>
+                  <span className="font-mono text-[11px]">{f.comingSoon ? '⏳ Próximamente' : `Desde ${price(minSizePrice(sizes, f))}`}</span>
                 </div>
               </Link>
             </div>

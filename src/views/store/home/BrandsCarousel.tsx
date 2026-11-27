@@ -13,7 +13,7 @@ export function BrandsCarousel() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 pt-12" aria-label="Casas">
-      <p className="mb-3 text-[10px] uppercase tracking-[0.14em] text-sand">Explora por casa</p>
+      <p className="mb-3 text-[11px] uppercase tracking-[0.14em] text-sand">Explora por casa</p>
       <div className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-width:thin]">
         {brands.map(({ brand, count }) => (
           <button
@@ -23,7 +23,7 @@ export function BrandsCarousel() {
             className="shrink-0 snap-start rounded-2xl border border-cork bg-umber px-4 py-3 text-left transition hover:border-sand"
           >
             <span className="block text-sm font-medium uppercase">{brand}</span>
-            <span className="text-[10px] text-sand">
+            <span className="text-[11px] text-sand">
               {count} {count === 1 ? 'fragancia' : 'fragancias'}
             </span>
           </button>

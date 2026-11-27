@@ -7,7 +7,7 @@ export function ProductPurchase({ fragrance: f }: { fragrance: Fragrance }) {
     <section id="precios" className="scroll-mt-20 space-y-3 rounded-3xl border border-cork bg-umber p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-[11px] tracking-[0.14em] text-sand">Formatos en decants & botella</h2>
-        <span className="text-[10px] uppercase text-drift">Atomizadores de vidrio</span>
+        <span className="text-[11px] uppercase text-drift">Atomizadores de vidrio</span>
       </div>
       <SizeButtons fragrance={f} large />
     </section>

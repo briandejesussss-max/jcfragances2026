@@ -1,0 +1,97 @@
+/*
+ * "Se siente como app": detalles de plataforma para celular (aplican a todas las paletas).
+ * Basado en las guías mobile-native y apple-design. Cada regla dice por qué existe.
+ */
+
+/* Sin el destello gris/azul que el celular pinta al tocar: cada botón ya tiene su propia respuesta. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iPhone hace zoom si el texto del campo mide menos de 16px y no regresa: aquí se evita sin bloquear el zoom. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* Toque inmediato: sin la espera de ~300ms que el navegador deja por si hay doble toque. */
+a,
+button,
+summary,
+label,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+/* Mantener presionado un botón no selecciona su texto (el contenido sí sigue siendo seleccionable). */
+button,
+[role='button'],
+[role='tab'] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/*
+ * Respuesta al presionar (no al soltar): botones y tarjetas se "hunden" un poco al instante.
+ * Se usa la propiedad `scale` (no `transform`) para no pelear con otros efectos de las piezas.
+ */
+:where(button, a[class*='rounded-pill'], a[class*='rounded-full'], .btn-primary, .btn-cream) {
+  transition-property: scale, background-color, border-color, color, opacity, box-shadow, filter;
+  transition-duration: 140ms;
+  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+:where(button, a[class*='rounded-pill'], a[class*='rounded-full'], .btn-primary, .btn-cream):not(:disabled):active {
+  scale: 0.97;
+}
+:where(.aurora-card, article[class*='rounded']):active {
+  scale: 0.985;
+  transition: scale 160ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* El contenido de cajones y paneles se desliza sin arrastrar la página de atrás. */
+[role='dialog'] aside,
+[role='dialog'] [class*='overflow-y-auto'] {
+  overscroll-behavior: contain;
+}
+
+/* Barra de arriba: respeta el notch / isla dinámica del iPhone. */
+header.sticky {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Títulos grandes con letras un poco más juntas (como en las páginas de Apple). */
+h1 {
+  letter-spacing: -0.02em;
+}
+
+/* Entrada suave de cada página al navegar. */
+@media (prefers-reduced-motion: no-preference) {
+  .route-enter {
+    animation: route-enter 0.32s cubic-bezier(0.25, 1, 0.5, 1) both;
+  }
+}
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+/* Si la persona pidió menos transparencia, las barras de vidrio se vuelven sólidas. */
+@media (prefers-reduced-transparency: reduce) {
+  .aurora-header,
+  .app-tabbar {
+    background: var(--color-walnut) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Párrafos sin una palabra sola en la última línea */
+p {
+  text-wrap: pretty;
+}

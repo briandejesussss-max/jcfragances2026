@@ -73,7 +73,7 @@ export function ProfileForm({ profile, email, providers, emailNotifications, ema
 
       {emailNotifications && (
       <section className="rounded-3xl border border-cork bg-umber p-4">
-        <p className="text-[10px] uppercase tracking-[0.1em] text-ember">Avisos</p>
+        <p className="text-[11px] uppercase tracking-[0.1em] text-ember">Avisos</p>
         <label className="mt-3 flex items-center justify-between gap-4 text-sm">
           <span>
             Avisarme por correo
@@ -85,7 +85,7 @@ export function ProfileForm({ profile, email, providers, emailNotifications, ema
       )}
 
       <section className="space-y-2 rounded-3xl border border-dashed border-cork p-4 text-sm">
-        <p className="text-[10px] uppercase tracking-[0.1em] text-sand">Cuenta</p>
+        <p className="text-[11px] uppercase tracking-[0.1em] text-sand">Cuenta</p>
         <p>
           {email} {emailConfirmed && <span className="text-ok">· confirmado</span>}
         </p>

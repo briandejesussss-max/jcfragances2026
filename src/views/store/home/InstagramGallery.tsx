@@ -65,7 +65,7 @@ export function InstagramGallery({ photos, handle, url }: { photos: GalleryPhoto
             <IgIcon className="absolute right-2 top-2 size-4 text-white drop-shadow" />
             {(p.caption || p.fragrance) && (
               <span className="absolute inset-x-2.5 bottom-2.5 text-left">
-                {p.fragrance && <span className="mb-1 inline-block max-w-full truncate rounded-pill bg-black/45 px-2 py-0.5 text-[10px] text-white backdrop-blur">✦ {p.fragrance.name}</span>}
+                {p.fragrance && <span className="mb-1 inline-block max-w-full truncate rounded-pill bg-black/45 px-2 py-0.5 text-[11px] text-white backdrop-blur">✦ {p.fragrance.name}</span>}
                 {p.caption && <span className="line-clamp-2 block text-xs font-semibold leading-snug text-white">{p.caption}</span>}
               </span>
             )}

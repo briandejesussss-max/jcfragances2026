@@ -37,22 +37,25 @@ export function Header() {
           )}
           <span className="min-w-0">
             <span className="block truncate text-sm font-medium uppercase tracking-[0.06em]">{config.name}</span>
-            <span className="hidden truncate text-[10px] uppercase tracking-[0.1em] text-sand sm:block">{config.tagline}</span>
+            <span className="hidden truncate text-[11px] uppercase tracking-[0.1em] text-sand sm:block">{config.tagline}</span>
           </span>
         </Link>
 
         <div className="flex items-center gap-1">
           <PaletteSwitcher />
-          <AccountButton />
+          {/* En celular, Cuenta y Bolsa viven en la barra de pestañas de abajo */}
+          <span className="hidden md:contents">
+            <AccountButton />
+          </span>
           <button
             type="button"
             onClick={() => setCartOpen(true)}
             aria-label={`Abrir bolsa (${count} productos)`}
-            className="relative flex items-center gap-2 rounded-pill bg-bark px-3.5 py-2 text-[11px] font-medium uppercase tracking-[0.06em] hover:bg-cork"
+            className="relative hidden items-center gap-2 rounded-pill bg-bark px-3.5 py-2 md:flex text-[11px] font-medium uppercase tracking-[0.06em] hover:bg-cork"
           >
             <ShoppingBag className="size-4" />
             <span className="hidden sm:inline">Bolsa</span>
-            <span className={cn(styles.count, 'grid place-items-center rounded-full bg-ember px-1 text-[10px] text-cream')}>{count}</span>
+            <span className={cn(styles.count, 'grid place-items-center rounded-full bg-ember px-1 text-[11px] font-semibold text-walnut')}>{count}</span>
           </button>
         </div>
       </div>

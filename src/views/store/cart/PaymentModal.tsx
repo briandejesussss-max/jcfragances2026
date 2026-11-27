@@ -33,7 +33,7 @@ export function PaymentModal({ order, onClose }: { order: (PlacedOrder & { email
           </p>
         )}
         <div className="space-y-1 rounded-2xl border border-cork bg-bark/50 p-3 text-xs">
-          <p className="text-[10px] uppercase tracking-[0.1em] text-sand">Transferencia</p>
+          <p className="text-[11px] uppercase tracking-[0.1em] text-sand">Transferencia</p>
           <p>
             Productos: {price(order.subtotal)} · Envío: {price(order.shipping)}
           </p>

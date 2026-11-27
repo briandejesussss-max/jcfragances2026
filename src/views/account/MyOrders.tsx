@@ -17,7 +17,7 @@ export function MyOrders({ name, email, orders, passwordChanged, pendingReviews 
     <div className="mx-auto max-w-2xl space-y-5 px-4 py-10">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.14em] text-sand">Hola{name ? `, ${name.split(' ')[0]}` : ''}</p>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-sand">Hola{name ? `, ${name.split(' ')[0]}` : ''}</p>
           <h1 className="mt-2 text-3xl">Mis pedidos</h1>
         </div>
         <Link href="/cuenta/perfil" className="text-xs text-sand underline underline-offset-4">

@@ -20,7 +20,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={notify}>
       {children}
-      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-5 z-[100] flex justify-center px-4">
+      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] z-[100] md:bottom-5 flex justify-center px-4">
         {message && (
           <div className="animate-fade-in pointer-events-auto max-w-md rounded-pill border border-cork bg-bark px-5 py-3 text-center text-xs text-cream">
             {message}

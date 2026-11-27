@@ -3,6 +3,7 @@ import { Inter, Outfit } from 'next/font/google';
 import { PALETTE_BOOT_SCRIPT } from '@/config/palettes';
 import './globals.css';
 import './aurora.css';
+import './app-feel.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 /** Títulos de la estética "Degradado". */
@@ -23,6 +24,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // El teclado del celular reduce el área visible (los campos de abajo no quedan tapados)
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

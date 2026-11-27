@@ -31,7 +31,7 @@ export function FragranceCard({ fragrance: f, priority = false }: { fragrance: F
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className={cn(styles.bottle, 'object-contain p-4')}
           />
-          <span className="absolute left-2.5 top-2.5 flex flex-wrap gap-1">
+          <span className="absolute left-2.5 right-12 top-2.5 flex min-w-0 flex-wrap gap-1">
             {f.comingSoon && <Badge strong>⏳ Próximamente</Badge>}
             <Badge>{f.concentration || 'EDP'}</Badge>
             {f.gender && <Badge>{f.gender}</Badge>}
@@ -48,7 +48,7 @@ export function FragranceCard({ fragrance: f, priority = false }: { fragrance: F
         </button>
 
         <Link href={href} className="block p-3 pb-2 sm:p-4 sm:pb-2">
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.08em]">
+          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.08em]">
             <span className="truncate text-cream">{f.brand}</span>
             {stat ? (
               <span className="shrink-0 font-mono text-ember" title={`${stat.reviews} ${stat.reviews === 1 ? 'reseña' : 'reseñas'} de clientes`}>
@@ -80,7 +80,7 @@ function Badge({ children, strong = false }: { children: React.ReactNode; strong
   return (
     <span
       className={cn(
-        'rounded-full px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em]',
+        'max-w-full truncate rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.06em]',
         strong ? 'bg-cream text-walnut' : 'border border-cork bg-walnut/70 text-sand',
       )}
     >
