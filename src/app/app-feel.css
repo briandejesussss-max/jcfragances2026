@@ -95,3 +95,24 @@ h1 {
 p {
   text-wrap: pretty;
 }
+
+/*
+ * Monitores grandes (2K, 4K, ultrawide, TV): todo el diseño está en rem, así que al subir
+ * el tamaño base la página crece en proporción en vez de quedarse chiquita en el centro.
+ * Respeta el tamaño de letra que la persona eligió en su navegador (se usan %).
+ */
+@media (min-width: 1920px) {
+  html {
+    font-size: 112.5%;
+  }
+}
+@media (min-width: 2400px) {
+  html {
+    font-size: 131.25%;
+  }
+}
+@media (min-width: 3200px) {
+  html {
+    font-size: 162.5%;
+  }
+}
