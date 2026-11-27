@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Minus, Plus, Trash2, X } from 'lucide-react';
 import { SHIPPING } from '@/config/store';
+import { isFreeShipping } from '@/models/domain/orders';
+import { FreeShippingMeter } from './FreeShippingMeter';
 import type { PlacedOrder } from '@/controllers/checkout.controller';
 import { BOTTLE, presentationLabel, sizeState, stockIssues } from '@/models/domain/sizes';
 import type { Fragrance } from '@/models/types';
@@ -14,7 +16,7 @@ import { PaymentModal } from './PaymentModal';
 
 /** Bolsa de pedido: renglones, existencias, total estimado y formulario de entrega. */
 export function CartDrawer() {
-  const { cartOpen, setCartOpen, cart, byId, sizes, price, changeQty, removeLine, clearCart } = useStore();
+  const { cartOpen, setCartOpen, cart, byId, sizes, price, changeQty, removeLine, clearCart, config } = useStore();
   const [checkout, setCheckout] = useState(false);
   const [placed, setPlaced] = useState<(PlacedOrder & { email: string }) | null>(null);
 
@@ -36,6 +38,9 @@ export function CartDrawer() {
   });
   const count = cart.reduce((a, l) => a + l.qty, 0);
   const subtotal = rows.reduce((a, r) => a + r.unit * r.line.qty, 0);
+  const freeFrom = Number(config.freeShippingFrom) || 0;
+  const freeShip = isFreeShipping(subtotal, freeFrom);
+  const shipping = freeShip ? 0 : SHIPPING.base;
   const issues = stockIssues(cart, byId as Map<string, Fragrance>, sizes);
 
   const onPlaced = (o: PlacedOrder, email: string) => {
@@ -110,17 +115,18 @@ export function CartDrawer() {
 
             {rows.length > 0 && (
               <div className="space-y-2 border-t border-dashed border-cork p-4">
+                {freeFrom > 0 && <FreeShippingMeter subtotal={subtotal} freeFrom={freeFrom} />}
                 <div className="flex justify-between text-sm">
                   <span className="text-sand">Productos</span>
                   <span>{price(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-sand">
                   <span>Envío general</span>
-                  <span>{price(SHIPPING.base)}</span>
+                  <span className={freeShip ? 'font-semibold text-ok' : undefined}>{freeShip ? 'Gratis' : price(shipping)}</span>
                 </div>
                 <div className="flex justify-between text-base font-medium">
                   <span>Total estimado</span>
-                  <span>{price(subtotal + SHIPPING.base)}</span>
+                  <span>{price(subtotal + shipping)}</span>
                 </div>
                 {!checkout && (
                   <Button variant="cream" size="lg" className="w-full" onClick={() => setCheckout(true)} disabled={issues.length > 0}>

@@ -8,6 +8,7 @@ import { StoreProvider } from '../state/StoreProvider';
 import { Footer } from './Footer';
 import { Header } from './Header';
 import { MobileTabBar } from './MobileTabBar';
+import { PromoBar } from './PromoBar';
 import { SideMenu } from './SideMenu';
 
 /** Marco común de la tienda: estado, encabezado, menú, bolsa y pie. */
@@ -17,6 +18,7 @@ export function StoreShell({ data, children }: { data: CatalogData; children: Re
       <CatalogFilterProvider>
         <Analytics />
         <ScrollReveal />
+        <PromoBar />
         <Header />
         <SideMenu />
         <CartDrawer />

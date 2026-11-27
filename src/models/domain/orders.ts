@@ -15,8 +15,11 @@ export function validateCustomer(c: Customer): string | null {
   return null;
 }
 
-export const shippingFor = (cp: string) =>
-  SHIPPING.base + ((SHIPPING.extendedZipCodes as readonly string[]).includes(cp) ? SHIPPING.extra : 0);
+/** ¿Ya alcanza el envío gratis? (umbral 0 o vacío = no hay envío gratis) */
+export const isFreeShipping = (subtotal: number, freeFrom?: number) => Number(freeFrom) > 0 && subtotal >= Number(freeFrom);
+
+export const shippingFor = (cp: string, subtotal = 0, freeFrom?: number) =>
+  isFreeShipping(subtotal, freeFrom) ? 0 : SHIPPING.base + ((SHIPPING.extendedZipCodes as readonly string[]).includes(cp) ? SHIPPING.extra : 0);
 
 /**
  * Convierte el carrito en renglones de pedido usando los precios ACTUALES de la base de datos.

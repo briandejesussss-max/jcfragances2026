@@ -8,7 +8,7 @@ import type { ActionResult, SizeConfig, StoreConfig } from '@/models/types';
 import { runAction, UserError } from './action-result';
 import { CATALOG_TAG } from './catalog.controller';
 
-type StoreConfigInput = Pick<StoreConfig, 'name' | 'tagline' | 'whatsapp' | 'instagram' | 'instagramUrl' | 'notes' | 'logo' | 'sizes'>;
+type StoreConfigInput = Pick<StoreConfig, 'name' | 'tagline' | 'whatsapp' | 'instagram' | 'instagramUrl' | 'notes' | 'logo' | 'sizes' | 'freeShippingFrom' | 'promo'>;
 
 function cleanSizes(sizes: SizeConfig[]): SizeConfig[] {
   return (sizes ?? [])
@@ -19,6 +19,16 @@ function cleanSizes(sizes: SizeConfig[]): SizeConfig[] {
       return { key: String(s.key || `s${Date.now().toString(36)}`), label, ml, kind, partial: kind === 'parcial' } as SizeConfig;
     })
     .filter((s) => s.label && (s.ml > 0 || s.kind === 'parcial'));
+}
+
+function cleanPromo(p: StoreConfig['promo']): StoreConfig['promo'] {
+  const text = String(p?.text ?? '').trim().slice(0, 140);
+  if (!text) return undefined;
+  const link = String(p?.link ?? '').trim();
+  if (link && !/^(https?:\/\/|\/(?!\/))/i.test(link)) throw new UserError('El link de la promoción debe empezar con / o con https://');
+  const endsAt = String(p?.endsAt ?? '').trim();
+  if (endsAt && !/^\d{4}-\d{2}-\d{2}$/.test(endsAt)) throw new UserError('La fecha de fin de la promoción no es válida');
+  return { text, link: link || undefined, endsAt: endsAt || undefined };
 }
 
 export async function saveStoreConfigAction(input: StoreConfigInput): Promise<ActionResult> {
@@ -41,6 +51,8 @@ export async function saveStoreConfigAction(input: StoreConfigInput): Promise<Ac
       notes: String(input.notes ?? '').trim(),
       logo: input.logo ?? '',
       sizes,
+      freeShippingFrom: Math.max(0, Math.round(Number(input.freeShippingFrom) || 0)),
+      promo: cleanPromo(input.promo),
     });
     updateTag(CATALOG_TAG);
     return undefined;

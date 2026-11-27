@@ -120,6 +120,18 @@ export interface StoreConfig {
   sizes: SizeConfig[];
   /** Portada: perfume del desglose, ocasiones y fotos de Instagram (se edita en Panel → Tienda). */
   home?: HomeConfig;
+  /** Envío gratis cuando los productos suman al menos esto (0 o vacío = apagado). */
+  freeShippingFrom?: number;
+  /** Barra de promociones arriba de la tienda (vacía = no se muestra). */
+  promo?: PromoBar;
+}
+
+export interface PromoBar {
+  text: string;
+  /** A dónde lleva al tocarla (opcional) */
+  link?: string;
+  /** Fecha AAAA-MM-DD en que termina: muestra "Quedan N días" y se oculta sola después */
+  endsAt?: string;
 }
 
 /** Una tarjeta de "Un perfume para cada momento". Sin perfume = se elige solo. */

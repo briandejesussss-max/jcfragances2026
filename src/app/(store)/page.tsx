@@ -6,10 +6,13 @@ import { BrandsCarousel } from '@/views/store/home/BrandsCarousel';
 import { BuildDecant } from '@/views/store/home/BuildDecant';
 import { CuratedShelf } from '@/views/store/home/CuratedShelf';
 import { FeaturedCarousel } from '@/views/store/home/FeaturedCarousel';
+import { FinderPromo } from '@/views/store/home/FinderPromo';
 import { GradientBand } from '@/views/store/home/GradientBand';
 import { Hero } from '@/views/store/home/Hero';
 import { InstagramGallery } from '@/views/store/home/InstagramGallery';
 import { Occasions } from '@/views/store/home/Occasions';
+import { RecentlyViewed } from '@/views/store/home/RecentlyViewed';
+import { SocialProof } from '@/views/store/home/SocialProof';
 
 // Página estática regenerada en segundo plano (ISR); el panel la invalida al guardar cambios.
 export const revalidate = 600;
@@ -38,6 +41,9 @@ export default async function HomePage() {
       ) : (
         <Hero config={config} fragrances={fragrances} />
       )}
+      <SocialProof />
+      <FinderPromo />
+      <RecentlyViewed />
       <CuratedShelf />
       <BrandsCarousel />
       <Catalog />

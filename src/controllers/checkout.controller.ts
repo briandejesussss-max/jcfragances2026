@@ -67,7 +67,7 @@ export async function placeOrder(input: { customer: Partial<Customer>; lines: Ca
     if (errors.length) throw new UserError(errors.join(' · '));
 
     const subtotal = itemsSubtotal(items);
-    const shipping = shippingFor(customer.cp);
+    const shipping = shippingFor(customer.cp, subtotal, config.freeShippingFrom);
     const total = subtotal + shipping;
 
     let number: string;

@@ -1,0 +1,90 @@
+/* Cuestionario "Encuentra tu perfume": pantallas de una pregunta, como una app. */
+
+.screen {
+  min-height: calc(100svh - 9rem);
+}
+
+.seg {
+  height: 3px;
+  flex: 1;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-cream) 14%, transparent);
+  transition: background-color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.segOn {
+  background: var(--color-ember);
+}
+html:not([data-palette]) .segOn {
+  background: var(--brand-gradient);
+}
+
+.option {
+  position: relative;
+  border-radius: 1.1rem;
+  border: 1px solid var(--color-cork);
+  background: color-mix(in srgb, var(--color-umber) 85%, transparent);
+  padding: 0.9rem 1rem;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    scale 140ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+.option:disabled {
+  opacity: 0.4;
+}
+.family {
+  padding: 0.8rem 0.85rem;
+  min-height: 6.25rem;
+}
+.optionOn {
+  border-color: var(--color-ember);
+  background: color-mix(in srgb, var(--color-ember) 10%, var(--color-umber));
+}
+@media (hover: hover) and (pointer: fine) {
+  .option:not(:disabled):hover {
+    border-color: color-mix(in srgb, var(--color-cream) 40%, transparent);
+  }
+}
+
+/* "Siguiente" pegado abajo en la pregunta de aromas (por encima de la barra de pestañas) */
+.stickyNext {
+  position: sticky;
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  margin-top: 1rem;
+  padding: 0.75rem 0 0.25rem;
+  background: linear-gradient(to top, var(--color-walnut) 70%, transparent);
+}
+@media (min-width: 768px) {
+  .stickyNext {
+    bottom: 0;
+  }
+}
+
+.num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-ember) 16%, transparent);
+  color: var(--color-ember);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stepIn {
+    animation: step-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .result {
+    animation: step-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+@keyframes step-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
