@@ -126,6 +126,32 @@ export interface StoreConfig {
   promo?: PromoBar;
 }
 
+export type CouponKind = 'percent' | 'amount';
+export type CouponScope = 'all' | 'decants' | 'bottles';
+
+/** Código de descuento (tabla `coupons`, solo el propietario la ve). */
+export interface Coupon {
+  code: string;
+  kind: CouponKind;
+  value: number;
+  appliesTo: CouponScope;
+  minSubtotal: number;
+  /** AAAA-MM-DD, último día válido */
+  endsAt: string | null;
+  maxUses: number | null;
+  active: boolean;
+  /** Pedidos que ya lo usaron (sin cancelados) */
+  uses?: number;
+}
+
+/** Resultado de revisar un código contra la bolsa. */
+export interface CouponQuote {
+  ok: boolean;
+  code?: string;
+  discount?: number;
+  message: string;
+}
+
 export interface PromoBar {
   text: string;
   /** A dónde lleva al tocarla (opcional) */
@@ -214,6 +240,8 @@ export interface Order {
   total: number;
   shipping: number;
   discount: number;
+  /** Código de descuento usado */
+  coupon?: string | null;
   carrier: string | null;
   tracking: string | null;
   tracking_url: string | null;

@@ -5,6 +5,7 @@ import { createSupabasePublicClient, createSupabaseServerClient } from '@/lib/su
 import { buildOrderItems, itemsSubtotal, shippingFor, validateCustomer } from '@/models/domain/orders';
 import { sizesOf, stockIssues } from '@/models/domain/sizes';
 import { getFragrancesByIds } from '@/models/repositories/fragrance.repository';
+import { quoteCoupon } from '@/models/repositories/coupon.repository';
 import { createOrder, trackOrder } from '@/models/repositories/order.repository';
 import { getProfile, saveProfile } from '@/models/repositories/profile.repository';
 import { getStoreConfig } from '@/models/repositories/store-config.repository';
@@ -16,6 +17,9 @@ export interface PlacedOrder {
   items: OrderItem[];
   subtotal: number;
   shipping: number;
+  /** Descuento por código */
+  discount: number;
+  coupon?: string;
   total: number;
   /** El pedido quedó ligado a la cuenta del cliente */
   linkedToAccount: boolean;
@@ -42,7 +46,7 @@ function sanitizeCustomer(c: Partial<Customer>): Customer {
  * Crea el pedido. Vuelve a leer precios e inventario de la base de datos, recalcula subtotal,
  * envío y total en el servidor y solo entonces llama a `create_order`.
  */
-export async function placeOrder(input: { customer: Partial<Customer>; lines: CartLine[] }): Promise<ActionResult<PlacedOrder>> {
+export async function placeOrder(input: { customer: Partial<Customer>; lines: CartLine[]; coupon?: string }): Promise<ActionResult<PlacedOrder>> {
   return runAction(async () => {
     const customer = sanitizeCustomer(input.customer ?? {});
     const invalid = validateCustomer(customer);
@@ -67,14 +71,33 @@ export async function placeOrder(input: { customer: Partial<Customer>; lines: Ca
     if (errors.length) throw new UserError(errors.join(' · '));
 
     const subtotal = itemsSubtotal(items);
-    const shipping = shippingFor(customer.cp, subtotal, config.freeShippingFrom);
-    const total = subtotal + shipping;
+    // Código de descuento: lo valida y calcula la base de datos (y lo vuelve a aplicar al guardar)
+    const code = String(input.coupon ?? '').trim().toUpperCase().slice(0, 20);
+    let discount = 0;
+    let coupon: string | undefined;
+    if (code) {
+      const q = await quoteCoupon(createSupabasePublicClient(), code, lines);
+      if (!q.ok) throw new UserError(`Código ${code}: ${q.message}`);
+      discount = Math.min(q.discount ?? 0, subtotal);
+      coupon = q.code;
+    }
+    let shipping = shippingFor(customer.cp, subtotal - discount, config.freeShippingFrom);
+    let total = subtotal - discount + shipping;
 
     let number: string;
     try {
-      number = await createOrder(db, { customer, items, total, shipping });
+      number = await createOrder(db, { customer, items, total, shipping, coupon });
     } catch (e) {
-      throw new UserError(`No se pudo registrar el pedido (${e instanceof Error ? e.message : 'error'}). Intenta de nuevo`);
+      const msg = e instanceof Error ? e.message : 'error';
+      if (msg.startsWith('cupón:')) throw new UserError(`Código ${code}:${msg.slice(6)}`);
+      throw new UserError(`No se pudo registrar el pedido (${msg}). Intenta de nuevo`);
+    }
+    // Los montos definitivos son los que guardó la base de datos
+    const saved = await trackOrder(createSupabasePublicClient(), number, customer.email).catch(() => null);
+    if (saved) {
+      shipping = saved.shipping;
+      discount = saved.discount;
+      total = saved.total;
     }
     if (user) {
       // La dirección usada se guarda en su perfil para precargar la siguiente compra.
@@ -89,7 +112,7 @@ export async function placeOrder(input: { customer: Partial<Customer>; lines: Ca
         notifyEmail: prev?.notifyEmail ?? true,
       }).catch(() => undefined);
     }
-    return { number, items, subtotal, shipping, total, linkedToAccount: !!user };
+    return { number, items, subtotal, shipping, discount, coupon, total, linkedToAccount: !!user };
   });
 }
 

@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { requireAdminPage } from '@/lib/auth/session';
+import { listCoupons } from '@/models/repositories/coupon.repository';
 import { getAppSettings, listMovements } from '@/models/repositories/finance.repository';
 import { getFragrance, listFragranceSummaries } from '@/models/repositories/fragrance.repository';
 import { listOrders, listOrderTotals } from '@/models/repositories/order.repository';
@@ -19,6 +20,12 @@ export async function loadAdminCatalog() {
   const { db } = await requireAdminPage();
   const [config, fragrances] = await Promise.all([getStoreConfig(db), listFragranceSummaries(db)]);
   return { config, fragrances };
+}
+
+/** Códigos de descuento con cuántas veces se han usado. */
+export async function loadAdminCoupons() {
+  const { db } = await requireAdminPage();
+  return listCoupons(db);
 }
 
 export async function loadAdminFragrance(id: string) {

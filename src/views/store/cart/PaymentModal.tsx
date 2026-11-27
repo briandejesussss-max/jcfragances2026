@@ -35,7 +35,8 @@ export function PaymentModal({ order, onClose }: { order: (PlacedOrder & { email
         <div className="space-y-1 rounded-2xl border border-cork bg-bark/50 p-3 text-xs">
           <p className="text-[11px] uppercase tracking-[0.1em] text-sand">Transferencia</p>
           <p>
-            Productos: {price(order.subtotal)} · Envío: {price(order.shipping)}
+            Productos: {price(order.subtotal)}
+            {order.discount > 0 && ` · Descuento${order.coupon ? ` (${order.coupon})` : ''}: −${price(order.discount)}`} · Envío: {order.shipping > 0 ? price(order.shipping) : 'gratis'}
           </p>
           <p>
             Monto a transferir: <b>{price(order.total)}</b>

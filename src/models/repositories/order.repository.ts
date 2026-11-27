@@ -20,13 +20,14 @@ export const toOrder = (r: Record<string, unknown>): Order =>
 
 export async function createOrder(
   db: SupabaseClient,
-  input: { customer: Customer; items: OrderItem[]; total: number; shipping: number },
+  input: { customer: Customer; items: OrderItem[]; total: number; shipping: number; coupon?: string },
 ): Promise<string> {
   const { data, error } = await db.rpc('create_order', {
     p_customer: input.customer,
     p_items: input.items,
     p_total: input.total,
     p_shipping: input.shipping,
+    p_coupon: input.coupon || null,
   });
   if (error) throw new Error(error.message || error.code);
   return String(data);

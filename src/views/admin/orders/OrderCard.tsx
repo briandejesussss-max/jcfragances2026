@@ -79,7 +79,7 @@ export function OrderCard({ order: o, account }: { order: Order; account?: { not
           <p key={k}>{itemText(i)}</p>
         ))}
         <p className="text-sand">Envío: {formatMoney(o.shipping)}</p>
-        {o.discount > 0 && <p className="text-ember">Descuento: -{formatMoney(o.discount)}</p>}
+        {o.discount > 0 && <p className="text-ember">Descuento{o.coupon ? ` (código ${o.coupon})` : ''}: -{formatMoney(o.discount)}</p>}
         <p className="text-sm font-medium">Total: {formatMoney(o.total)}</p>
       </div>
 
