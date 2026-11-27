@@ -76,10 +76,10 @@ html:not([data-palette]) .segOn {
 
 @media (prefers-reduced-motion: no-preference) {
   .stepIn {
-    animation: step-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: step-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
   .result {
-    animation: step-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: step-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
 }
 @keyframes step-in {

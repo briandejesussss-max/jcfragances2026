@@ -71,7 +71,8 @@ h1 {
 /* Entrada suave de cada página al navegar. */
 @media (prefers-reduced-motion: no-preference) {
   .route-enter {
-    animation: route-enter 0.32s cubic-bezier(0.25, 1, 0.5, 1) both;
+    /* "backwards" y no "both": si el movimiento se queda aplicado, las barras fijas (position: fixed) se pegan a la página y no a la pantalla */
+    animation: route-enter 0.32s cubic-bezier(0.25, 1, 0.5, 1) backwards;
   }
 }
 @keyframes route-enter {
@@ -126,4 +127,11 @@ p {
 html:not([data-palette]) .promo-bar {
   background: var(--brand-gradient);
   color: #0b0710;
+}
+
+/* Con la barra fija de compra visible, el final de la página deja espacio para que no tape el pie */
+@media (max-width: 767px) {
+  body:has([data-buybar='on']) .tabbar-spacer {
+    height: calc(9rem + env(safe-area-inset-bottom, 0px));
+  }
 }

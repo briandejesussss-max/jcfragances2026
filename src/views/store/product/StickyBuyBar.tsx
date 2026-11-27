@@ -33,7 +33,7 @@ export function StickyBuyBar({ fragrance: f }: { fragrance: Fragrance }) {
     .find((x) => x.st.ok && !x.st.noPrice && !x.st.onDemand);
 
   return (
-    <div className={cn(styles.bar, show && styles.on)} aria-hidden={!show} data-no-swipe>
+    <div className={cn(styles.bar, show && styles.on)} aria-hidden={!show} data-no-swipe data-buybar={show ? 'on' : 'off'}>
       <div className="mx-auto flex max-w-xl items-center gap-3">
         {f.image && (
           <span className="relative size-11 shrink-0 overflow-hidden rounded-xl bg-walnut">
