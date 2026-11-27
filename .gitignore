@@ -8,3 +8,7 @@ next-env.d.ts
 .vercel
 npm-debug.log*
 .DS_Store
+
+# Impeccable: el motor binario se descarga solo; no se sube al repositorio
+.claude/skills/impeccable/scripts/bin/
+.impeccable/
