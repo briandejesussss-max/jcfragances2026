@@ -99,6 +99,25 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
 
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 
+/** Recorta el texto con "…" para que quepa en el ancho dado (medido con la fuente actual). */
+function fitWidth(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let t = text;
+  while (t.length > 1 && ctx.measureText(t + '…').width > maxWidth) t = t.slice(0, -1);
+  return t.trimEnd() + '…';
+}
+
+/** Usa la fuente más grande (de `max` a `min` px) con la que el texto cabe; si ni así, lo recorta con "…". */
+function fitFont(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, weight: number, max: number, min: number) {
+  let size = max;
+  ctx.font = `${weight} ${size}px ${FONT}`;
+  while (size > min && ctx.measureText(text).width > maxWidth) {
+    size -= 1;
+    ctx.font = `${weight} ${size}px ${FONT}`;
+  }
+  return fitWidth(ctx, text, maxWidth);
+}
+
 /** Mini tarjeta "Inspirado en": miniatura del original (o un frasco), nombre y qué tan parecido es. */
 /** Alto de la mini tarjeta "Inspirado en": los híbridos usan un poco más (miniaturas en fila y nombre en 2 renglones). */
 const inspirationCardHeight = (insp: Inspiration) => (inspirationRefs(insp).length > 1 ? 104 : 84);
@@ -283,14 +302,26 @@ export async function renderFichaImage(f: Fragrance, config: StoreConfig, sizes:
     ctx.font = `500 13px ${FONT}`;
     ctx.fillText(st.k, sx + 14, ty + 28);
     ctx.fillStyle = i === 2 ? C.ember : C.cream;
-    ctx.font = `500 20px ${FONT}`;
-    ctx.fillText(clip(String(st.v || ''), 13), sx + 14, ty + 62);
+    ctx.fillText(fitFont(ctx, String(st.v || ''), colW - 28, 500, 20, 15), sx + 14, ty + 62);
   });
 
   ty += 112;
   ctx.fillStyle = C.sand;
   ctx.font = `400 19px ${FONT}`;
-  ctx.fillText(`Clima: ${prof.clima}   •   Ocasión: ${prof.ocasion.split(',')[0]}`, rx, ty);
+  // Clima y Ocasión: en una línea si caben; si no, cada uno en la suya, siempre dentro de la ficha.
+  const clima = `Clima: ${prof.clima.trim()}`;
+  const ocasion = `Ocasión: ${prof.ocasion.trim()}`;
+  const together = `${clima}   •   ${ocasion}`;
+  if (ctx.measureText(together).width <= rw) ctx.fillText(together, rx, ty);
+  else {
+    ctx.fillText(fitWidth(ctx, clima, rw), rx, ty);
+    // La ocasión puede ocupar hasta 2 renglones; lo que sobre termina en "…"
+    const lines = wrap(ctx, ocasion, rw);
+    lines.slice(0, 2).forEach((l, i) => {
+      ty += 28;
+      ctx.fillText(i === 1 && lines.length > 2 ? fitWidth(ctx, `${l} ${lines.slice(2).join(' ')}`, rw) : fitWidth(ctx, l, rw), rx, ty);
+    });
+  }
 
   // "Inspirado en…": mini tarjeta con la miniatura del original, debajo de Clima / Ocasión
   let py = 610;
