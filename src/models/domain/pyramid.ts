@@ -183,3 +183,20 @@ export function compactNotes(text: string): CompactNotesSection[] {
   }
   return merged;
 }
+
+/** "TORONJA" / "toronja" → "Toronja" (las notas a veces se capturan en mayúsculas). */
+const niceNote = (t: string) => {
+  const s = t.trim().replace(/\s+/g, ' ');
+  const lower = s === s.toUpperCase() ? s.toLowerCase() : s;
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+};
+
+/** Notas de una etapa en una frase corta: "Toronja y bergamota", "Cedro, ámbar y 3 más". */
+export function notesPhrase(notes: { t: string }[], max = 2): string {
+  const names = [...new Set(notes.map((n) => niceNote(n.t)).filter(Boolean))];
+  if (!names.length) return '';
+  const shown = names.slice(0, max).map((n, i) => (i === 0 ? n : n.charAt(0).toLowerCase() + n.slice(1)));
+  const rest = names.length - shown.length;
+  if (rest > 0) return `${shown.join(', ')} y ${rest} más`;
+  return shown.length > 1 ? `${shown.slice(0, -1).join(', ')} y ${shown.at(-1)}` : shown[0];
+}

@@ -14,6 +14,9 @@ import { ProductSwipeNav } from './ProductNav';
 import { ProductActions } from './ProductActions';
 import { ProductPurchase } from './ProductPurchase';
 import { ProductTabs } from './ProductTabs';
+import { ScentStory } from './ScentStory';
+import { StickyBuyBar } from './StickyBuyBar';
+import { RecentlyViewed } from '../home/RecentlyViewed';
 import styles from './ProductView.module.css';
 
 const cssUrl = (u: string) => `url("${u.replace(/"/g, '%22').replace(/\)/g, '%29')}")`;
@@ -75,7 +78,16 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
         <div className="min-w-0">
           <ProductTabs
             tabs={[
-              { id: 'notas', label: 'Notas', content: <NotesPyramid fragrance={f} /> },
+              {
+                id: 'notas',
+                label: 'Notas',
+                content: (
+                  <div className="space-y-4">
+                    <ScentStory fragrance={f} />
+                    <NotesPyramid fragrance={f} />
+                  </div>
+                ),
+              },
               { id: 'veredicto', label: 'Radiografía', content: <CommunityProfile fragrance={f} /> },
               { id: 'resenas', label: summary.count ? `Reseñas (${summary.count})` : 'Reseñas', content: <CustomerReviews fragranceId={f.id} reviews={reviews} /> },
             ]}
@@ -85,6 +97,8 @@ export function ProductView({ fragrance: f, reviews }: { fragrance: Fragrance; r
           <ProductPurchase fragrance={f} />
         </div>
       </div>
+      <RecentlyViewed currentId={f.id} />
+      <StickyBuyBar fragrance={f} />
       <ProductSwipeNav id={f.id} />
     </article>
   );

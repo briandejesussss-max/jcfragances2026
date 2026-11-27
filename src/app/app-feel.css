@@ -116,3 +116,14 @@ p {
     font-size: 162.5%;
   }
 }
+
+/* Barra de promoción: color de acento de la paleta (en Degradado, el degradado de la marca) */
+.promo-bar {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  background: var(--color-ember);
+  color: var(--color-walnut);
+}
+html:not([data-palette]) .promo-bar {
+  background: var(--brand-gradient);
+  color: #0b0710;
+}

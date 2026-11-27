@@ -1,0 +1,27 @@
+feature,area,priority,original,clone,notes
+Cuestionario "Encuentra tu perfume" (6 preguntas -> 3 recomendaciones con el porqué),descubrimiento,must,Robols,no,"Estilo, aroma (hasta 2 o Sorpréndeme), uso, clima, botella/decant, urgencia. Resultados con chips de respuestas y Cambiar respuestas"
+Barra fija "Agregar al carrito" al bajar en la ficha (celular),ficha,must,Robols,no,Miniatura + tamaño + precio + botón; no se pierde el botón al leer notas
+Pirámide contada en lenguaje natural ("Abre con / Se transforma en / Y deja en tu piel"),ficha,should,Robols,parcial,JS ya tiene pirámide con fotos; falta la frase corta por etapa
+"Ideal para" (chips: día, primavera, oficina...),ficha,should,Robols,parcial,JS tiene clima y ocasión en texto; pasarlos a chips
+Explicador "¿Qué es un decant?" junto a los tamaños,ficha,should,Robols,no,Desplegable chico; reduce dudas de clientes nuevos
+Mensaje de envío y umbral de envío gratis junto al precio,ficha/carrito,must,Robols,no,"""Envío gratis desde $X"" + barra de progreso en la bolsa"
+Sellos de confianza (100% original / compra protegida / regalo / tiempo de entrega),ficha,should,Robols,parcial,JS los tiene en Ayuda; ponerlos en la ficha
+Etiqueta de descuento "Ahorra X%" y precio tachado,catálogo,could,Robols,no,Solo si manejas precio anterior
+Barra de anuncios arriba (cupones / promo con cuenta regresiva),global,could,Robols,no,Editable desde el panel
+Franja de prueba social (+N testimonios · +N envíos),inicio,should,Robols,parcial,JS tiene reseñas reales; falta el resumen global en inicio
+Páginas por familia olfativa y por nota (con contador),catálogo,should,Robols,parcial,JS filtra por texto; faltan enlaces directos tipo /familia/amaderados
+"Vistos recientemente",inicio/ficha,could,Robols,no,Guardado en el teléfono del cliente
+Colecciones: Lo más nuevo / Lo más vendido,catálogo,should,Robols,parcial,JS tiene destacados y carrusel; falta orden por más vendidos real
+Búsqueda con recientes y populares,global,could,Robols,parcial,JS tiene búsqueda en catálogo
+Tarjeta con botón rápido de bolsa,catálogo,could,Robols,si,JS ya permite agregar desde la tarjeta
+Rastreo de pedido,ayuda,must,Robols,si,JS tiene /rastreo
+Reseñas con compra verificada,ficha,must,Robols,si,JS ya lo tiene
+WhatsApp de ayuda,global,must,Robols,si,JS ya lo tiene
+Cuentas de cliente,global,should,Robols,si,JS ya lo tiene
+Pagos en línea (MSI / Mercado Pago / OXXO / PayPal),checkout,should,Robols,no,JS cobra por transferencia; requiere cuenta de pagos propia
+Preventas (pedido especial 10-12 días),catálogo,could,Robols,parcial,JS tiene "sobre pedido" por tamaño
+Grupo de WhatsApp de lanzamientos,marketing,could,Robols,no,Solo un enlace configurable
+Guías / blog,contenido,could,Robols,no,
+Catálogo de 271 perfumes nicho y su inventario,—,skip,Robols,skip,Es su inventario y sus fotos
+Fotos de producto y textos de Robols,—,skip,Robols,skip,No se copian; se usan fotos y textos propios
+Diseño visual de Silloria,diseño,—,Silloria,pendiente,Su sitio bloquea visitantes automáticos (verificación de seguridad); se necesitan capturas del dueño

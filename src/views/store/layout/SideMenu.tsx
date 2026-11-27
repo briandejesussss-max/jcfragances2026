@@ -3,15 +3,14 @@
 import Link from 'next/link';
 import { CircleHelp, Heart, KeyRound, PackageSearch, Sparkles, X } from 'lucide-react';
 import { useEffect } from 'react';
+import { FAMILIES, familyHref } from '@/models/domain/families';
 import type { Currency } from '@/models/types';
 import { Select } from '@/views/shared/Field';
-import { useCatalogFilter } from '../state/CatalogFilterContext';
 import { useStore } from '../state/StoreProvider';
 
 /** Menú lateral: armario, test olfativo, rendimiento por frasco, moneda, rastreo y acceso del propietario. */
 export function SideMenu() {
   const { menuOpen, setMenuOpen, shelf, currency, setCurrency, sizes, config } = useStore();
-  const { showInCatalog } = useCatalogFilter();
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -44,15 +43,20 @@ export function SideMenu() {
           >
             Mi armario de fragancias <span className="ml-auto rounded-full bg-bark px-2 text-[11px]">{shelf.length}</span>
           </MenuButton>
-          <MenuButton
-            icon={<Sparkles className="size-4" />}
-            onClick={() => {
-              close();
-              showInCatalog({ query: 'Vainilla' });
-            }}
-          >
-            Test de perfil olfativo
-          </MenuButton>
+          <MenuLink href="/encuentra-tu-perfume" icon={<Sparkles className="size-4" />} onClick={close}>
+            Encuentra tu perfume <span className="ml-auto rounded-full bg-ember/15 px-2 text-[11px] text-ember">Test</span>
+          </MenuLink>
+        </Section>
+
+        <Section title="Explora por aroma">
+          <div className="flex flex-wrap gap-1.5">
+            {FAMILIES.map((f) => (
+              <Link key={f.key} href={familyHref(f.key)} onClick={close} className="flex items-center gap-1.5 rounded-pill border border-cork px-2.5 py-1 text-xs text-sand hover:text-cream">
+                <span className="size-2 rounded-full" style={{ background: f.colors[0] }} aria-hidden="true" />
+                {f.label}
+              </Link>
+            ))}
+          </div>
         </Section>
 
         <Section title="Rendimiento por frasco">

@@ -70,6 +70,31 @@ export function StoreConfigForm({ config }: { config: StoreConfig }) {
         <div className="space-y-3 rounded-3xl border border-cork bg-umber p-4 sm:p-5">
           <SizesEditor value={c.sizes} onChange={(s) => set('sizes', s)} />
         </div>
+        <div className="space-y-3 rounded-3xl border border-cork bg-umber p-4 sm:p-5 lg:col-span-2">
+          <h3 className="text-sm font-semibold">Envío gratis y promociones</h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Envío gratis a partir de (MXN)" hint="Si la compra llega a este monto, el envío sale en $0. Déjalo en 0 para apagarlo.">
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                step={50}
+                value={c.freeShippingFrom ? String(c.freeShippingFrom) : ''}
+                placeholder="0 = apagado"
+                onChange={(e) => set('freeShippingFrom', Number(e.target.value) || 0)}
+              />
+            </Field>
+            <Field label="Barra de promoción (arriba de la tienda)" hint="Vacía = no se muestra. Ej.: 10% en decants con el código JS10">
+              <Input value={c.promo?.text ?? ''} maxLength={140} onChange={(e) => set('promo', { ...c.promo, text: e.target.value })} />
+            </Field>
+            <Field label="Link de la promoción (opcional)" hint="Ej.: /familia/amaderados o https://…">
+              <Input value={c.promo?.link ?? ''} onChange={(e) => set('promo', { text: c.promo?.text ?? '', ...c.promo, link: e.target.value })} />
+            </Field>
+            <Field label="Termina el (opcional)" hint="Muestra «Quedan N días» y se oculta sola al terminar">
+              <Input type="date" value={c.promo?.endsAt ?? ''} onChange={(e) => set('promo', { text: c.promo?.text ?? '', ...c.promo, endsAt: e.target.value })} />
+            </Field>
+          </div>
+        </div>
         <div className="flex flex-wrap items-center gap-3 lg:col-span-2">
           {error && <Alert className="w-full">{error}</Alert>}
           <Button type="submit" variant="cream" size="lg" disabled={pending}>

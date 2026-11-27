@@ -18,7 +18,7 @@ import { useZipLookup } from './useZipLookup';
 const EMPTY: Customer = { name: '', phone: '', email: '', street: '', numExt: '', numInt: '', cp: '', colonia: '', city: '', state: '' };
 
 /** Datos de entrega y envío del pedido. El total definitivo lo calcula el servidor. */
-export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder, email: string) => void; disabled: boolean }) {
+export function CheckoutForm({ onPlaced, disabled, coupon }: { onPlaced: (o: PlacedOrder, email: string) => void; disabled: boolean; coupon?: string }) {
   const { cart } = useStore();
   const notify = useToast();
   // Se recuerdan los datos en este dispositivo para la próxima compra.
@@ -74,7 +74,7 @@ export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder
     }
     startTransition(async () => {
       notify('Verificando disponibilidad...', 1500);
-      const res = await placeOrder({ customer: { ...c, numExt: noExt ? 'S/N' : c.numExt }, lines: cart });
+      const res = await placeOrder({ customer: { ...c, numExt: noExt ? 'S/N' : c.numExt }, lines: cart, coupon });
       if (!res.ok) {
         setError(res.error);
         return;
