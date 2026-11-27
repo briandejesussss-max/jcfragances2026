@@ -43,7 +43,7 @@ export function BuildDecant({ featuredId }: { featuredId?: string }) {
             <SmartImage key={f.id} src={f.image!} alt={`${f.brand} ${f.name}`} fill sizes="160px" className={cn(styles.pop, 'object-contain')} />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.14em] text-sand">1. Elige tu perfume</p>
+            <p className="text-[11px] uppercase tracking-[0.14em] text-sand">1. Elige tu perfume</p>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {picks.map((p, i) => (
                 <button
@@ -57,7 +57,7 @@ export function BuildDecant({ featuredId }: { featuredId?: string }) {
                 </button>
               ))}
             </div>
-            <p className="mt-3 text-[10px] uppercase tracking-[0.14em] text-sand">2. Elige el tamaño</p>
+            <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-sand">2. Elige el tamaño</p>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {states.map(({ s, st }) => (
                 <button

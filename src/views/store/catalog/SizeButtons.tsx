@@ -32,13 +32,13 @@ export function SizeButtons({ fragrance: f, large = false, showStock = false }: 
   if (f.comingSoon) {
     return (
       <div className="space-y-2 rounded-2xl border border-cork bg-bark/50 p-3 text-center">
-        <span className="block text-[10px] font-medium uppercase tracking-[0.08em] text-cream">⏳ Próximamente en catálogo</span>
+        <span className="block text-[11px] font-medium uppercase tracking-[0.08em] text-cream">⏳ Próximamente en catálogo</span>
         <p className="text-[11px] text-sand">Aún en camino. Aparta tu aviso para ser de los primeros.</p>
         <a
           href={comingSoonLink(config, f)}
           target="_blank"
           rel="noopener noreferrer"
-          className="block rounded-pill bg-cream px-3 py-2 text-[10px] font-medium uppercase tracking-[0.06em] text-walnut"
+          className="block rounded-pill bg-cream px-3 py-2 text-[11px] font-medium uppercase tracking-[0.06em] text-walnut"
         >
           📲 Avísame cuando llegue
         </a>
@@ -58,7 +58,7 @@ export function SizeButtons({ fragrance: f, large = false, showStock = false }: 
       'flex flex-col items-center justify-center rounded-xl border text-center transition',
       large ? 'gap-1 p-2.5' : 'gap-0.5 p-1.5',
     );
-    const labelCls = cn('uppercase tracking-[0.06em]', large ? 'text-[10px]' : 'text-[9px]');
+    const labelCls = cn('uppercase tracking-[0.06em]', large ? 'text-[11px]' : 'text-[11px]');
     const priceCls = cn('font-medium', large ? 'text-sm' : 'text-xs');
 
     if (st.onDemand) {
@@ -68,7 +68,8 @@ export function SizeButtons({ fragrance: f, large = false, showStock = false }: 
         <>
           <span className={labelCls}>{label}</span>
           <span className={priceCls}>{st.noPrice ? 'Cotizar' : price(st.price)}</span>
-          <span className="text-[9px] text-sand">Bajo pedido{st.eta ? ` · ${st.eta}` : ''}</span>
+          {/* En la tarjeta chica solo "Bajo pedido"; el tiempo de llegada se ve en la ficha */}
+          <span className="text-[11px] leading-tight text-sand">Bajo pedido{large && st.eta ? ` · ${st.eta}` : ''}</span>
         </>
       );
       return href ? (
@@ -103,12 +104,12 @@ export function SizeButtons({ fragrance: f, large = false, showStock = false }: 
         {buttons}
       </div>
       {notices.map((n) => (
-        <p key={n} className="mt-2 rounded-lg border border-bad/30 bg-bad/10 px-2 py-1 text-[10px] text-bad">
+        <p key={n} className="mt-2 rounded-lg border border-bad/30 bg-bad/10 px-2 py-1 text-[11px] text-bad">
           {n}
         </p>
       ))}
       {showStock && (
-        <p className="mt-1.5 font-mono text-[10px] text-drift">
+        <p className="mt-1.5 font-mono text-[11px] text-drift">
           📦 Piezas: {hasBottleStock(f as Fragrance) ? f.stock?.bottles : '—'} • 💧 {hasMlStock(f as Fragrance) ? `${formatMl(f.stock?.ml ?? 0)} ml` : '—'}
         </p>
       )}

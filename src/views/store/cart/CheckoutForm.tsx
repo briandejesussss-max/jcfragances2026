@@ -88,7 +88,7 @@ export function CheckoutForm({ onPlaced, disabled }: { onPlaced: (o: PlacedOrder
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <p className="text-[10px] uppercase tracking-[0.14em] text-sand">Datos de entrega</p>
+      <p className="text-[11px] uppercase tracking-[0.14em] text-sand">Datos de entrega</p>
       <div className="grid grid-cols-2 gap-2">
         <Field label="Nombre completo" className="col-span-2">
           <Input value={c.name} onChange={(e) => set('name', e.target.value)} autoComplete="name" required />

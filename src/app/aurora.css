@@ -58,11 +58,15 @@ html:not([data-palette]) :is(.btn-primary, .btn-cream) {
   overflow: hidden;
   isolation: isolate;
   background: var(--aurora-gradient);
-  color: #fff;
-  box-shadow: 0 10px 30px -12px rgb(255 79 154 / 0.75);
+  /* Letra oscura: el blanco sobre el naranja claro no se leía bien (contraste) */
+  color: #0b0710;
+  font-weight: 600;
+  box-shadow: 0 8px 22px -12px rgb(0 0 0 / 0.7);
 }
-html:not([data-palette]) :is(.btn-primary, .btn-cream):hover {
-  filter: brightness(1.08);
+@media (hover: hover) and (pointer: fine) {
+  html:not([data-palette]) :is(.btn-primary, .btn-cream):hover {
+    filter: brightness(1.08);
+  }
 }
 html:not([data-palette]) :is(.btn-primary, .btn-cream)::after {
   content: '';
@@ -77,13 +81,15 @@ html:not([data-palette]) :is(.btn-primary, .btn-cream)::after {
 html:not([data-palette]) .aurora-card {
   background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.02));
   border-color: rgb(255 255 255 / 0.1);
-  box-shadow: 0 20px 50px -32px rgb(155 93 255 / 0.65);
+  box-shadow: 0 18px 40px -28px rgb(0 0 0 / 0.8);
   transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, opacity 0.6s ease;
 }
-html:not([data-palette]) .aurora-card:hover {
-  border-color: rgb(255 79 154 / 0.45);
-  box-shadow: 0 24px 60px -28px rgb(255 79 154 / 0.7);
-  transform: translateY(-4px);
+@media (hover: hover) and (pointer: fine) {
+  html:not([data-palette]) .aurora-card:hover {
+    border-color: rgb(255 79 154 / 0.45);
+    box-shadow: 0 26px 50px -26px rgb(0 0 0 / 0.85);
+    transform: translateY(-4px);
+  }
 }
 html:not([data-palette]) .aurora-stage {
   background: radial-gradient(circle at 50% 64%, rgb(255 94 168 / 0.26), rgb(155 93 255 / 0.08) 45%, transparent 70%);

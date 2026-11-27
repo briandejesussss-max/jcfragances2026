@@ -102,7 +102,7 @@ export function FeaturedCarousel({ ids }: { ids: string[] }) {
 
       <div key={f.id} className={styles.slide} style={{ ['--tint' as string]: TINTS[idx % TINTS.length] }} aria-live={auto ? 'off' : 'polite'}>
         <div className={`${styles.text} relative z-10 order-2 sm:order-1`}>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-ember">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-ember">
             ✦ Destacado {idx + 1}/{list.length}
           </p>
           <p className="mt-3 text-xs uppercase tracking-[0.14em] text-sand">{f.brand}</p>

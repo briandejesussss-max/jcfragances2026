@@ -42,7 +42,7 @@ export function SideMenu() {
               document.getElementById('para-ti')?.scrollIntoView({ behavior: 'smooth' });
             }}
           >
-            Mi armario de fragancias <span className="ml-auto rounded-full bg-bark px-2 text-[10px]">{shelf.length}</span>
+            Mi armario de fragancias <span className="ml-auto rounded-full bg-bark px-2 text-[11px]">{shelf.length}</span>
           </MenuButton>
           <MenuButton
             icon={<Sparkles className="size-4" />}
@@ -103,7 +103,7 @@ export function SideMenu() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-6 space-y-2 border-t border-dashed border-cork pt-4">
-      <h3 className="text-[10px] tracking-[0.14em] text-sand">{title}</h3>
+      <h3 className="text-[11px] tracking-[0.14em] text-sand">{title}</h3>
       {children}
     </section>
   );

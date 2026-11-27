@@ -1,0 +1,137 @@
+/* Barra de pestañas inferior (solo celular y tableta chica). Material de vidrio tipo iOS. */
+.bar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--color-walnut) 72%, transparent);
+  backdrop-filter: blur(20px) saturate(170%);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  border-top: 1px solid color-mix(in srgb, var(--color-cream) 10%, transparent);
+}
+
+@media (min-width: 768px) {
+  .bar {
+    display: none;
+  }
+}
+
+.track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+/* Píldora de la pestaña activa: se desliza con una curva tipo iOS */
+.pill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 20%;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-ember) 16%, transparent);
+  transition: translate 420ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0 4px;
+  min-width: 0;
+  border-radius: 16px;
+  color: var(--color-sand);
+  transition: color 160ms ease;
+}
+
+.active {
+  color: var(--color-ember);
+}
+
+.iconWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Celulares muy angostos (plegables cerrados): barra más compacta para que quepan las 5 pestañas */
+@media (max-width: 340px) {
+  .bar {
+    padding-inline: 4px;
+  }
+  .label {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  .badge {
+    right: -6px;
+  }
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: var(--color-ember);
+  color: var(--color-walnut);
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px var(--color-walnut);
+}
+html:not([data-palette]) .badge {
+  background: var(--brand-gradient);
+  color: #0b0710;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .badge {
+    animation: bump 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+/* El número crece y regresa: avisa que algo entró a la bolsa, sin rebote elástico */
+@keyframes bump {
+  0% { scale: 0.5; }
+  45% { scale: 1.2; }
+  100% { scale: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill {
+    transition: none;
+  }
+}
+
+/* Celular acostado (pantalla baja): ícono y texto en una fila para no comerse la pantalla */
+@media (orientation: landscape) and (max-height: 500px) {
+  .bar {
+    padding-block: 3px calc(3px + env(safe-area-inset-bottom, 0px));
+    padding-inline: max(10px, env(safe-area-inset-left, 0px)) max(10px, env(safe-area-inset-right, 0px));
+  }
+  .tab {
+    flex-direction: row;
+    justify-content: center;
+    gap: 6px;
+    padding: 5px 0;
+  }
+}

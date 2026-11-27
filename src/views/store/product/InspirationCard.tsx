@@ -16,7 +16,7 @@ export function InspirationCard({ inspiration: i }: { inspiration: Inspiration }
     <div className="mt-4 flex items-center gap-3 rounded-2xl border border-cork bg-walnut/60 p-2.5 backdrop-blur-sm">
       <Thumbs refs={refs} />
       <div className="min-w-0">
-        <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.1em] text-ember">
+        <span className="flex items-center gap-1 text-[11px] uppercase tracking-[0.1em] text-ember">
           <Sparkles className="size-3" /> {hybrid ? `Híbrido · inspirado en ${refs.length}` : 'Inspirado en'}
         </span>
         <strong className="line-clamp-2 text-sm font-medium" title={refs.map((r) => refTitle(r)).join(' + ')}>

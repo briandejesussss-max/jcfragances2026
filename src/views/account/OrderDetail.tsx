@@ -24,7 +24,7 @@ export function OrderDetail({ order: o, config, reviews }: { order: Order; confi
         <ArrowLeft className="size-4" /> Mis pedidos
       </Link>
       <div className="space-y-2">
-        <p className="text-[10px] uppercase tracking-[0.14em] text-sand">Pedido · {formatDate(o.created_at)}</p>
+        <p className="text-[11px] uppercase tracking-[0.14em] text-sand">Pedido · {formatDate(o.created_at)}</p>
         <h1 className="text-4xl normal-case">{o.number}</h1>
         <OrderStatusBadge order={o} />
       </div>
@@ -67,7 +67,7 @@ export function OrderDetail({ order: o, config, reviews }: { order: Order; confi
 
       {o.status === 'pendiente_pago' && (
         <section className="space-y-1.5 rounded-3xl border border-cork bg-umber p-4 text-sm">
-          <p className="text-[10px] uppercase tracking-[0.1em] text-sand">Transferencia</p>
+          <p className="text-[11px] uppercase tracking-[0.1em] text-sand">Transferencia</p>
           <p>
             Monto: <b className="font-medium">{formatMoney(o.total)}</b>
           </p>
@@ -84,7 +84,7 @@ export function OrderDetail({ order: o, config, reviews }: { order: Order; confi
       )}
 
       <section className="space-y-2 rounded-3xl border border-dashed border-cork p-4 text-sm">
-        <p className="text-[10px] uppercase tracking-[0.1em] text-sand">Paquetería</p>
+        <p className="text-[11px] uppercase tracking-[0.1em] text-sand">Paquetería</p>
         {o.tracking ? (
           <>
             <p>
@@ -102,7 +102,7 @@ export function OrderDetail({ order: o, config, reviews }: { order: Order; confi
       </section>
 
       <section className="space-y-2 rounded-3xl border border-cork bg-umber p-4 text-sm">
-        <p className="text-[10px] uppercase tracking-[0.1em] text-sand">Productos</p>
+        <p className="text-[11px] uppercase tracking-[0.1em] text-sand">Productos</p>
         {o.items.map((i, k) => (
           <div key={k} className="flex justify-between gap-3">
             <span>{itemText(i)}</span>

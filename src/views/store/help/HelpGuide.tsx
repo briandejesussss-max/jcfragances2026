@@ -20,7 +20,7 @@ const TOC = [
 ] as const;
 
 const UI = ({ children }: { children: ReactNode }) => (
-  <span className="inline-block whitespace-nowrap rounded-md border border-cork bg-umber px-2 text-[0.85em] text-cream">{children}</span>
+  <span className="inline-block max-w-full whitespace-nowrap break-words rounded-md border max-[340px]:whitespace-normal border-cork bg-umber px-2 text-[0.85em] text-cream">{children}</span>
 );
 
 function Section({ id, eyebrow, title, intro, children }: { id: string; eyebrow?: string; title: string; intro?: ReactNode; children: ReactNode }) {
@@ -230,7 +230,7 @@ export function HelpGuide({ config }: { config: StoreConfig }) {
               <div className="pb-3.5">
                 <b className={cn('block font-medium', s.state === 'now' && 'text-ember', s.state === 'next' && 'text-sand')}>
                   {s.label}
-                  {s.onDemand && <span className="ml-1.5 rounded-pill border border-cork px-2 align-[2px] text-[10px] uppercase tracking-[0.06em] text-sand">bajo pedido</span>}
+                  {s.onDemand && <span className="ml-1.5 rounded-pill border border-cork px-2 align-[2px] text-[11px] uppercase tracking-[0.06em] text-sand">bajo pedido</span>}
                 </b>
                 <span className="text-sm text-sand">{s.detail}</span>
               </div>

@@ -18,7 +18,7 @@ export function RateItems({ items, reviews }: { items: OrderItem[]; reviews: MyR
   return (
     <section className="space-y-3 rounded-3xl border border-ember/40 bg-umber p-4">
       <div>
-        <p className="text-[10px] uppercase tracking-[0.1em] text-ember">Tu opinión ayuda a otros clientes</p>
+        <p className="text-[11px] uppercase tracking-[0.1em] text-ember">Tu opinión ayuda a otros clientes</p>
         <h2 className="mt-1 text-lg">Califica tus perfumes</h2>
       </div>
       {perfumes.map((i) => {
@@ -27,7 +27,7 @@ export function RateItems({ items, reviews }: { items: OrderItem[]; reviews: MyR
           <div key={i.fragId} className="space-y-2 border-t border-dashed border-cork pt-3 first:border-0 first:pt-0">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <span className="block text-[10px] uppercase tracking-[0.08em] text-sand">{i.brand}</span>
+                <span className="block text-[11px] uppercase tracking-[0.08em] text-sand">{i.brand}</span>
                 <Link href={`/perfume/${fragranceSlug(i)}`} className="block truncate text-sm hover:text-ember">
                   {i.name}
                 </Link>

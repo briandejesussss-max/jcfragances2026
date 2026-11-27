@@ -9,11 +9,11 @@ const dateFmt = new Intl.DateTimeFormat('es-MX', { month: 'short', year: 'numeri
 /** Etiqueta de cada reseña: "Compra verificada" (compró en la tienda) u "Opinión". */
 export function ReviewTag({ verified }: { verified: boolean }) {
   return verified ? (
-    <span className="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.06em] text-ember">
+    <span className="inline-flex items-center gap-0.5 text-[11px] uppercase tracking-[0.06em] text-ember">
       <BadgeCheck className="size-3" /> Compra verificada
     </span>
   ) : (
-    <span className="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.06em] text-sand">
+    <span className="inline-flex items-center gap-0.5 text-[11px] uppercase tracking-[0.06em] text-sand">
       <MessageSquareQuote className="size-3" /> Opinión
     </span>
   );
