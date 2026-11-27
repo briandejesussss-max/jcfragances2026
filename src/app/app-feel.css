@@ -128,3 +128,10 @@ html:not([data-palette]) .promo-bar {
   background: var(--brand-gradient);
   color: #0b0710;
 }
+
+/* Con la barra fija de compra visible, el final de la página deja espacio para que no tape el pie */
+@media (max-width: 767px) {
+  body:has([data-buybar='on']) .tabbar-spacer {
+    height: calc(9rem + env(safe-area-inset-bottom, 0px));
+  }
+}
