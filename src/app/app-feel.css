@@ -71,7 +71,8 @@ h1 {
 /* Entrada suave de cada página al navegar. */
 @media (prefers-reduced-motion: no-preference) {
   .route-enter {
-    animation: route-enter 0.32s cubic-bezier(0.25, 1, 0.5, 1) both;
+    /* "backwards" y no "both": si el movimiento se queda aplicado, las barras fijas (position: fixed) se pegan a la página y no a la pantalla */
+    animation: route-enter 0.32s cubic-bezier(0.25, 1, 0.5, 1) backwards;
   }
 }
 @keyframes route-enter {
