@@ -12,3 +12,6 @@ npm-debug.log*
 # Impeccable: el motor binario se descarga solo; no se sube al repositorio
 .claude/skills/impeccable/scripts/bin/
 .impeccable/
+
+# Taste skill: resultados de sus revisiones (capturas, reportes)
+.taste-skill/
